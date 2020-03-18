@@ -1,0 +1,42 @@
+using ICities;
+using JetBrains.Annotations;
+using System;
+using PedestrianBridge.Util;
+
+namespace PedestrianBridge {
+    public class PedestrianBridgeMod : IUserMod {
+        public static Version ModVersion => typeof(PedestrianBridgeMod).Assembly.GetName().Version;
+        public static string VersionString => ModVersion.ToString(2);
+        public string Name => "Automatic Pedestrian Bridge " + VersionString;
+        public string Description => "Builds pedestian bridges with one click";
+        
+        public void OnEnabled() {
+            if (HelpersExtensions.InGame)
+                LoadTool.Load();
+        }
+
+        public void OnDisabled() {
+            LoadTool.Release();
+        }
+    }
+
+    public static class LoadTool {
+        public static void Load() {
+            PedBridgeTool.Create();
+        }
+        public static void Release() {
+            PedBridgeTool.Remove();
+        }
+    }
+
+    public class LoadingExtention : LoadingExtensionBase {
+        public override void OnLevelLoaded(LoadMode mode) {
+            if (mode == LoadMode.LoadGame || mode == LoadMode.NewGame)
+                LoadTool.Load();
+        }
+
+        public override void OnLevelUnloading() {
+            LoadTool.Release();
+        }
+    }
+} // end namesapce
