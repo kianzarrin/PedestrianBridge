@@ -74,15 +74,13 @@ namespace KianHoverElements.Utils {
             }
 
             Vector3 position = m_controlPoints[m_controlPointCount].m_position;
-            bool flag = false;
-            bool flag2 = false;
+            bool bRaycastFailed = false;
             {
                 ControlPoint cPoint = default(ControlPoint);
                 float elevation = GetElevation(netInfo);
                 NetNode.Flags flags;
                 NetSegment.Flags ignoreSegmentFlags;
-                //if ((m_mode == Mode.Curved || m_mode == Mode.Freeform) && m_controlPointCount == 1)
-                //else
+                //if ((m_mode == Mode.Curved || m_mode == Mode.Freeform) && m_controlPointCount == 1) ... else
                 {
                     flags = NetNode.Flags.ForbidLaneConnection;
                     ignoreSegmentFlags = NetSegment.Flags.Untouchable;
@@ -99,26 +97,12 @@ namespace KianHoverElements.Utils {
                         ignoreBuildingFlags,
                         elevation,
                         out cPoint)) {
-                    Vector3 snapPos;
-
-                    // if not snapdir
-                    snapPos = cPoint.m_position;
-
-                    bool flag4 = false;
-                    bool flag5 = false;
-                    bool flag6 = true;
-                    if (cPoint.m_node == 0 && cPoint.m_segment == 0 && !cPoint.m_outside) {
-                        //if (m_snap != 0)
-                        //else
-                        flag4 = true;
-                    }
-                    bool success = false;
                     if (m_controlPointCount != 0) {
                         ControlPoint oldPoint3 = m_controlPoints[m_controlPointCount - 1];
                         cPoint.m_direction = cPoint.m_position - oldPoint3.m_position;
                         cPoint.m_direction.y = 0f;
                         cPoint.m_direction.Normalize();
-                        if (!flag5) {
+                        {
                             float minNodeDistance = netInfo.GetMinNodeDistance();
                             minNodeDistance *= minNodeDistance;
                             float num6 = minNodeDistance;
@@ -129,7 +113,7 @@ namespace KianHoverElements.Utils {
                         }
                     }
                 } else {
-                    flag = true;
+                    bRaycastFailed = true;
                 }
                 m_controlPoints[m_controlPointCount] = cPoint;
             }
@@ -162,7 +146,7 @@ namespace KianHoverElements.Utils {
                 cost = 0;
                 productionRate = 0;
             }
-            if (flag) {
+            if (bRaycastFailed) {
                 toolErrors |= ToolErrors.RaycastFailed;
             }
             while (!Monitor.TryEnter(m_cacheLock, SimulationManager.SYNCHRONIZE_TIMEOUT)) {
