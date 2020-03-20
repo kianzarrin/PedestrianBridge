@@ -338,3 +338,8 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/libs/TrafficManager.dll
+/libs/RoundaboutBuilder.dll
+/libs/FineRoadTool.dll
+/libs/CSUtil.Commons.dll
+/libs/0Harmony.dll

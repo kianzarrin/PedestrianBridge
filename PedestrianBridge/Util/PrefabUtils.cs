@@ -1,7 +1,7 @@
 namespace PedestrianBridge.Util {
     using ColossalFramework;
     using System;
-    using static Helpers;
+    using static HelpersExtensions;
 
     public static class  PrefabUtils {
         static NetTool netTool => Singleton<NetTool>.instance; //ToolsModifierControl.toolController.CurrentTool as NetTool;
@@ -40,7 +40,7 @@ namespace PedestrianBridge.Util {
 
         public static NetInfo Value {
             get {
-                Log("KIAN DEBUG POINT A");
+                Log.Info("KIAN DEBUG POINT A");
                 NetInfo prefab = netTool.m_prefab ?? defaultPrefab;
                 if (PluginUtils.FineRoadToolDetected)
                     prefab = FineRoadToolSelection(prefab);
@@ -52,7 +52,7 @@ namespace PedestrianBridge.Util {
         private static NetInfo FineRoadToolSelection(NetInfo prefab) {
             RoadAI roadAI = prefab.m_netAI as RoadAI;
             if (roadAI != null) {
-                Log($"underground:{roadAI.IsUnderground()} overground:{roadAI.IsOverground()}");
+                Log.Info($"underground:{roadAI.IsUnderground()} overground:{roadAI.IsOverground()}");
                 // If the user has manually selected underground/overground mode, we let it be
                 if (!roadAI.IsUnderground() && !roadAI.IsOverground()) {
                     switch (FineRoadTool.FineRoadTool.instance.mode) {
@@ -78,7 +78,7 @@ namespace PedestrianBridge.Util {
 
             PedestrianPathAI pedestrianAI = prefab.m_netAI as PedestrianPathAI;
             if (pedestrianAI != null) {
-                Log($"underground:{pedestrianAI.IsUnderground()} overground:{pedestrianAI.IsOverground()}");
+                Log.Info($"underground:{pedestrianAI.IsUnderground()} overground:{pedestrianAI.IsOverground()}");
                 // If the user has manually selected underground/overground mode, we let it be
                 if (!pedestrianAI.IsUnderground() && !pedestrianAI.IsOverground()) {
                     switch (FineRoadTool.FineRoadTool.instance.mode) {

@@ -28,7 +28,7 @@ namespace PedestrianBridge.Util {
                 $"startPos:{startPos.ToString(f)}, endPos:{endPos.ToString(f)},\n" +
                 $"startDir:{startDir.ToString(f)}, endDir:{endDir.ToString(f)},\n" +
                 $"end2start={end2start.ToString(f)}, end2start_normal={end2start_normal.ToString(f)}";
-            Helpers.Log(m);
+            Log.Info(m);
         }
 
         public static NetInfo GetInfo(string name) {
@@ -42,9 +42,6 @@ namespace PedestrianBridge.Util {
             throw new Exception("NetInfo not found!");
         }
 
-
-
-
         public class NetServiceException : Exception {
             public NetServiceException(string m) : base(m) { }
             public NetServiceException() : base() { }
@@ -53,7 +50,7 @@ namespace PedestrianBridge.Util {
 
         public static ushort CreateNode(Vector3 position, NetInfo info = null) {
             info = info ?? PedestrianBridgeInfo;
-            Helpers.Log($"creating node for {info.name} at position {position.ToString("000.000")}");
+            Log.Info($"creating node for {info.name} at position {position.ToString("000.000")}");
             bool res = netMan.CreateNode(node: out ushort nodeID, randomizer: ref simMan.m_randomizer,
                 info: info, position: position, buildIndex: simMan.m_currentBuildIndex);
             if (!res)
@@ -68,7 +65,7 @@ namespace PedestrianBridge.Util {
             Vector3 startDir, Vector3 endDir,
             NetInfo info = null) {
             info = info ?? startNodeID.ToNode().Info;
-            Helpers.Log($"creating segment for {info.name} between nodes {startNodeID} {endNodeID}");
+            Log.Info($"creating segment for {info.name} between nodes {startNodeID} {endNodeID}");
             var bi = simMan.m_currentBuildIndex;
             startDir.y = endDir.y = 0;
             startDir.Normalize(); endDir.Normalize();
@@ -117,63 +114,76 @@ namespace PedestrianBridge.Util {
             return point.ToPos(terrainH);
         }
 
-        public static ushort CreateL(Vector2 point1, Vector2 pointL, Vector2 point2, float h, NetInfo info){
-            //NetInfo eInfo = info.GetElevated();
-            float hBridge = 10;
+        public class NodeWrapper {
+            Vector2 point;
+            float h;
+            NetInfo info;
 
-            Vector3 pos1 = point1.ToPos(h+hBridge);
-            Vector3 pos2 = point2.ToPos(h + hBridge);
-            Vector3 posL = pointL.ToPos(h + hBridge);
-
-            ushort nodeIDL = CreateNode(posL, info);
-            ushort nodeID1 = CreateNode(pos1, info);
-            ushort nodeID2 = CreateNode(pos2, info);
-
-            lock (GroundNodes) {
-                //GroundNodes.Queue(nodeID1,50);
-                //GroundNodes.Queue(nodeID2,50);
+            public NodeWrapper(Vector2 point, float h, NetInfo info) {
+                this.point = point;
+                this.h = h;
+                this.info = info;
             }
-            CreateSegment(nodeIDL, nodeID1);
-            CreateSegment(nodeIDL, nodeID2);
+
+            public void Create() {
+                Vector3 pos = point.ToPos(h);
+                ID = CreateNode(pos, info);
+            }
+
+            public ushort ID;
+        }
+
+        public class SegmentWrapper {
+            public SegmentWrapper(NodeWrapper startNode, NodeWrapper endNode) {
+                this.startNode = startNode;
+                this.endNode = endNode;
+            }
+
+            public NodeWrapper startNode;
+            public NodeWrapper endNode;
             
-            return nodeIDL;
-        }
-
-        class NodeTime {
-            public NodeTime(ushort nodeID, float ms=1) {
-                NodeID = nodeID;
-                ticks = Stopwatch.StartNew();
-                this.ms = ms;
+            public void Create() {
+                ID = CreateSegment(startNode.ID, endNode.ID);
             }
-            public ushort NodeID;
-            public Stopwatch ticks;
-            public float ms;
-            public bool IsTime => ticks.ElapsedMilliseconds >= ms;
+
+            public ushort ID;
         }
 
-        class NodeList : List<NodeTime> {
-            public void Queue(ushort nodeID, float ms=1) => Add(new NodeTime(nodeID,ms));
-        }
-        static NodeList GroundNodes = new NodeList();
 
-        public class Threading : ThreadingExtensionBase {
-            public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
-                lock (GroundNodes) {
-                    for(int i=0;i< GroundNodes.Count;) {
-                        var item = GroundNodes[i];
-                        if (item.IsTime) {
-                            SetGroundNode(item.NodeID);
-                            GroundNodes.Remove(item);
-                        } else {
-                            i++;
-                        }
-                    }
-                }
+        public class Lwrapper {
+            public Lwrapper(Vector2 point1, Vector2 point2, Vector2 pointL, float h, NetInfo groundInfo) {
+                NetInfo eInfo = groundInfo.GetElevated();
+                nodeL = new NodeWrapper(pointL, h+10, eInfo);
+                node1 = new NodeWrapper(point1, h, eInfo);
+                node2 = new NodeWrapper(point2, h , eInfo);
+                segment1 = new SegmentWrapper(nodeL, node1);
+                segment2 = new SegmentWrapper(nodeL, node2);
             }
+
+            public NodeWrapper nodeL;
+            NodeWrapper node1;
+            NodeWrapper node2;
+
+            SegmentWrapper segment1;
+            SegmentWrapper segment2;
+
+            public void Create() {
+                simMan.AddAction(nodeL.Create);
+                simMan.AddAction(node1.Create);
+                simMan.AddAction(node2.Create);
+                simMan.AddAction(segment1.Create);
+                simMan.AddAction(segment2.Create);
+            }
+        }
+
+        public static Lwrapper CreateL(Vector2 point1, Vector2 pointL, Vector2 point2, float h, NetInfo info){
+            Lwrapper lwrapper = new Lwrapper(point1,point2,pointL,h,info);
+            lwrapper.Create();
+            return lwrapper;
         }
 
         public static ushort CopyMove(ushort segmentID) {
-            Helpers.Log("CopyMove");
+            Log.Info("CopyMove");
             Vector3 move = new Vector3(70, 0, 70);
             var segment = segmentID.ToSegment();
             var startPos = segment.m_startNode.ToNode().m_position + move;

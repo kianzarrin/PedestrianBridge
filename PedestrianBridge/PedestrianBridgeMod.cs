@@ -22,10 +22,10 @@ namespace PedestrianBridge {
 
     public static class LoadTool {
         public static void Load() {
-            PedBridgeTool.Create();
+            Tool.PedBridgeTool.Create();
         }
         public static void Release() {
-            PedBridgeTool.Remove();
+            Tool.PedBridgeTool.Remove();
         }
     }
 

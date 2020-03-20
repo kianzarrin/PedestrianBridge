@@ -8,9 +8,10 @@ using UnityEngine;
 namespace KianHoverElements.Utils {
     using static NetTool;
     public class Class1 : ToolBase {
+
         int m_elevation = 10;
-        ControlPoint[] m_controlPoints;
-        int m_controlPointCount => m_controlPoints.Length;
+        ControlPoint[] m_controlPoints = new ControlPoint[3];
+        int m_controlPointCount =0;
         NetInfo m_prefab => PrefabUtils.Value;
         ToolController m_toolController => ToolsModifierControl.toolController;
 
@@ -30,49 +31,38 @@ namespace KianHoverElements.Utils {
 
         }
 
-        public override void SimulationStep() {
-            base.SimulationStep();
-            NetInfo prefab = m_prefab;
-            if ((object)prefab != null) {
-                Vector3 mousePosition = Input.mousePosition;
-                m_mouseRay = Camera.main.ScreenPointToRay(mousePosition);
-                m_mouseRayLength = Camera.main.farClipPlane;
-                m_mouseRayValid = (!m_toolController.IsInsideUI && Cursor.visible);
-                if (m_lengthTimer > 0f) {
-                    m_lengthTimer = Mathf.Max(0f, m_lengthTimer - Time.deltaTime);
-                }
-                prefab.m_netAI.GetPlacementInfoMode(out InfoManager.InfoMode mode, out InfoManager.SubInfoMode subMode, GetElevation(prefab));
-                //ToolBase.ForceInfoMode(mode, subMode);
-                if (mode == InfoManager.InfoMode.None && (prefab.m_netAI.GetCollisionLayers() & ItemClass.Layer.MetroTunnels) != 0) {
-                    Singleton<TransportManager>.instance.TunnelsVisible = true;
-                } else {
-                    Singleton<TransportManager>.instance.TunnelsVisible = false;
-                }
-                if (prefab.m_netAI.ShowTerrainTopography()) {
-                    Singleton<TerrainManager>.instance.RenderTopography = true;
-                    Singleton<TerrainManager>.instance.RenderZones = false;
-                    Singleton<NetManager>.instance.RenderDirectionArrows = false;
-                } else {
-                    Singleton<TerrainManager>.instance.RenderTopography = false;
-                    Singleton<TerrainManager>.instance.RenderZones = true;
-                    Singleton<NetManager>.instance.RenderDirectionArrows = ((prefab.m_vehicleTypes & ~VehicleInfo.VehicleType.Bicycle) != 0);
-                }
-            }
-        }
+        //public override void SimulationStep() {
+        //    base.SimulationStep();
+        //    NetInfo prefab = m_prefab;
+        //    if ((object)prefab != null) {
+        //        Vector3 mousePosition = Input.mousePosition;
+        //        m_mouseRay = Camera.main.ScreenPointToRay(mousePosition);
+        //        m_mouseRayLength = Camera.main.farClipPlane;
+        //        m_mouseRayValid = (!m_toolController.IsInsideUI && Cursor.visible);
+        //        if (m_lengthTimer > 0f) {
+        //            m_lengthTimer = Mathf.Max(0f, m_lengthTimer - Time.deltaTime);
+        //        }
+        //        prefab.m_netAI.GetPlacementInfoMode(out InfoManager.InfoMode mode, out InfoManager.SubInfoMode subMode, GetElevation(prefab));
+        //        //ToolBase.ForceInfoMode(mode, subMode);
+        //        if (mode == InfoManager.InfoMode.None && (prefab.m_netAI.GetCollisionLayers() & ItemClass.Layer.MetroTunnels) != 0) {
+        //            Singleton<TransportManager>.instance.TunnelsVisible = true;
+        //        } else {
+        //            Singleton<TransportManager>.instance.TunnelsVisible = false;
+        //        }
+        //        if (prefab.m_netAI.ShowTerrainTopography()) {
+        //            Singleton<TerrainManager>.instance.RenderTopography = true;
+        //            Singleton<TerrainManager>.instance.RenderZones = false;
+        //            Singleton<NetManager>.instance.RenderDirectionArrows = false;
+        //        } else {
+        //            Singleton<TerrainManager>.instance.RenderTopography = false;
+        //            Singleton<TerrainManager>.instance.RenderZones = true;
+        //            Singleton<NetManager>.instance.RenderDirectionArrows = ((prefab.m_vehicleTypes & ~VehicleInfo.VehicleType.Bicycle) != 0);
+        //        }
+        //    }
+        //}
 
         public override void SimulationStep() {
             var netInfo = m_prefab;
-
-            //if (m_mode == Mode.Straight)
-            {
-                if (netInfo.m_class.m_service == ItemClass.Service.Road || netInfo.m_class.m_service == ItemClass.Service.PublicTransport || netInfo.m_class.m_service == ItemClass.Service.Beautification) {
-                    GuideController properties = Singleton<GuideManager>.instance.m_properties;
-                    if ((object)properties != null) {
-                        Singleton<NetManager>.instance.m_optionsNotUsed.Activate(properties.m_roadOptionsNotUsed, netInfo.m_class.m_service);
-                    }
-                }
-            }
-
             Vector3 position = m_controlPoints[m_controlPointCount].m_position;
             bool bRaycastFailed = false;
             {
@@ -170,7 +160,7 @@ namespace KianHoverElements.Utils {
             if (min == max) {
                 return 0f;
             }
-            return (float)Mathf.Clamp(m_elevation, min * 256, max * 256) / 256f * 12f;
+            return Mathf.Clamp(m_elevation, min * 256, max * 256) / 256f * 12f;
         }
 
         public ControlPoint MakeLonelyControlPoint() {
