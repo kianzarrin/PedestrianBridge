@@ -4,19 +4,19 @@ using System;
 using UnityEngine;
 using PedestrianBridge.Util;
 using PedestrianBridge.Shape;
+using PedestrianBridge.UI;
 
 namespace PedestrianBridge.Tool {
-    using static NetTool;
-    using static PedestrianBridge.Util.HelpersExtensions;
     public sealed class PedBridgeTool : KianToolBase {
-        ToolButton button;
+        UIPanelButton button;
+
         public PedBridgeTool() : base() {
             var uiView = UIView.GetAView();
-            button = (ToolButton)uiView.AddUIComponent(typeof(ToolButton));
-            button.eventClicked += (_, __) => {
-                ToggleTool();
-            };
+            button = (UIPanelButton)uiView.AddUIComponent(typeof(UIPanelButton));
+            button.eventClicked += OnClickHandler;
         }
+
+        void OnClickHandler(UIComponent component, UIMouseEventParameter eventParam) => ToggleTool();
 
         public static PedBridgeTool Create() {
             Log.Info("PedBridgeTool.Create()");
@@ -35,6 +35,7 @@ namespace PedestrianBridge.Tool {
 
         protected override void OnDestroy() {
             Log.Info("PedBridgeTool.OnDestroy()\n" + Environment.StackTrace);
+            button.eventClicked -= OnClickHandler;
             Destroy(button);
             base.OnDestroy();
         }

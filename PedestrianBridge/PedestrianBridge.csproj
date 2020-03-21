@@ -83,7 +83,9 @@
     <Compile Include="Shapes\SegmentWrapper.cs" />
     <Compile Include="Tool\KianToolBase.cs" />
     <Compile Include="Tool\PedBridgeTool.cs" />
-    <Compile Include="Tool\ToolButton.cs" />
+    <Compile Include="UI\ToolButton.cs" />
+    <Compile Include="UI\ResourceLoader.cs" />
+    <Compile Include="UI\UIPanelButton.cs" />
     <Compile Include="Util\HelpersExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\Log.cs" />

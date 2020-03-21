@@ -2,7 +2,7 @@ using ColossalFramework.UI;
 using UnityEngine;
 using ColossalFramework;
 
-namespace PedestrianBridge.Tool
+namespace PedestrianBridge.UI
 {
     public class ToolButton : UIButton
     {

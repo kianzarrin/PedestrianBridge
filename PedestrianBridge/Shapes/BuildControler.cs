@@ -3,34 +3,12 @@ using System;
 
 namespace PedestrianBridge.Shape {
     using Util;
+    using static Util.NetUtil;
     using Shapes;
     public static class BuildControler {
         static float HWpb => info.GetElevated().m_halfWidth;
         static NetInfo info => PrefabUtils.defaultPrefab;
 
-        public static List<ushort> GetCWSegList(ushort nodeID) {
-            NetNode node = nodeID.ToNode();
-            ushort segmentID = 0;
-            List<ushort> segList = new List<ushort>();
-            int i;
-            for (i = 0; i < 8; ++i) {
-                segmentID = node.GetSegment(i);
-                if (segmentID != 0)
-                    break;
-            }
-
-            segList.Add(segmentID);
-
-            while (true) {
-                segmentID = segmentID.ToSegment().GetLeftSegment(nodeID);
-                if (segmentID == segList[0])
-                    break;
-                else
-                    segList.Add(segmentID);
-
-            }
-            return segList;
-        }
 
 
         public static void CreateJunctionBridge(ushort nodeID) {

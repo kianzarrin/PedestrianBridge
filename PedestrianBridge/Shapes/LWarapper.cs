@@ -30,6 +30,12 @@ namespace PedestrianBridge.Shapes {
                 Vector2 dir1 = V1.normalized;
                 Vector2 dir2 = V2.normalized;
 
+                float angle = Vector2.Angle(dir1, dir2);
+                angle *= Mathf.Deg2Rad;
+                float ratio = 1f / Mathf.Sin(angle);
+                HW1 *= ratio;
+                HW2 *= ratio;
+
                 ////////////////////////////////////////////////////////////////
                 // Main calculations
                 PointL = (HW2 + HWpb + Epsilon) * dir1 + (HW1 + HWpb + Epsilon) * dir2;
@@ -42,6 +48,7 @@ namespace PedestrianBridge.Shapes {
             }
         }
 
+        // segmentID2 must be to the left of segmentID1 (when going toward the intersection)
         public LWrapper(ushort segmentID1, ushort segmentID2, NetInfo info) {
             NetInfo eInfo = info.GetElevated();
             var calc = new Calc(segmentID1, segmentID2, eInfo.m_halfWidth);
