@@ -9,9 +9,7 @@ namespace PedestrianBridge.Util {
 
     public static class HelpersExtensions
     {
-        internal static ref NetNode ToNode(this ushort id) => ref Singleton<NetManager>.instance.m_nodes.m_buffer[id];
-        internal static ref NetSegment ToSegment(this ushort id) => ref Singleton<NetManager>.instance.m_segments.m_buffer[id];
-        internal static NetLane ToLane(this int id) => Singleton<NetManager>.instance.m_lanes.m_buffer[id];
+
 
         internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
         internal static bool CheckGameMode(AppMode mode)
@@ -116,7 +114,10 @@ namespace PedestrianBridge.Util {
 
         internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
-
+        public const float Epsilon = 0.01f;
+        public static bool Equal(float a, float b) => Mathf.Abs(a - b) < Epsilon * 2f;
+        public static void AssertEqual(float a, float b, string m = "") =>
+            UnityEngine.Debug.Assert(Equal(a, b), $"Assertion failed: expected {a} == {b} | " + m);
 
     }
 }

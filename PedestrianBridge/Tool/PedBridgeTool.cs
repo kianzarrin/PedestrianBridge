@@ -3,6 +3,7 @@ using ColossalFramework.UI;
 using System;
 using UnityEngine;
 using PedestrianBridge.Util;
+using PedestrianBridge.Shape;
 
 namespace PedestrianBridge.Tool {
     using static NetTool;
@@ -61,12 +62,6 @@ namespace PedestrianBridge.Tool {
             Color color2 = GetToolColor(Input.GetMouseButton(1), false);
             if (Condition())
                 DrawNodeCircle(cameraInfo, HoveredNodeId, color1);
-            else
-                NetTool.RenderOverlay(
-                    cameraInfo,
-                    ref HoveredSegmentId.ToSegment(),
-                    color2,
-                    color2);
         }
 
         bool Condition() {
@@ -87,18 +82,12 @@ namespace PedestrianBridge.Tool {
                 Singleton<SimulationManager>.instance.AddAction(delegate () {
                     BuildControler.CreateJunctionBridge(HoveredNodeId);
                 });
-            }else {
-                Util.NetService.CopyMove(HoveredSegmentId);
             }
         }
 
         protected override void OnSecondaryMouseClicked() {
             throw new System.NotImplementedException();
         }
-
-
-
-  
 
     } //end class
 }

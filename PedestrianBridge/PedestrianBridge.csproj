@@ -76,16 +76,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuildControler.cs" />
+    <Compile Include="Shapes\BuildControler.cs" />
     <Compile Include="PedestrianBridgeMod.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="Shapes\LWarapper.cs" />
+    <Compile Include="Shapes\NodeWrapper.cs" />
+    <Compile Include="Shapes\SegmentWrapper.cs" />
     <Compile Include="Tool\KianToolBase.cs" />
     <Compile Include="Tool\PedBridgeTool.cs" />
     <Compile Include="Tool\ToolButton.cs" />
     <Compile Include="Util\HelpersExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\Log.cs" />
-    <Compile Include="Util\NetService.cs" />
+    <Compile Include="Util\NetUtil.cs" />
     <Compile Include="Util\PluginUtils.cs" />
     <Compile Include="Util\PosUtils.cs" />
     <Compile Include="Util\PrefabUtils.cs" />

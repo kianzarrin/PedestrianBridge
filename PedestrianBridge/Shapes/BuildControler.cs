@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System;
 
-namespace PedestrianBridge {
+namespace PedestrianBridge.Shape {
     using Util;
+    using Shapes;
     public static class BuildControler {
         static float HWpb => info.GetElevated().m_halfWidth;
         static NetInfo info => PrefabUtils.defaultPrefab;
@@ -31,21 +32,6 @@ namespace PedestrianBridge {
             return segList;
         }
 
-        public static NetService.NodeWrapper CreateLBridge(ushort segID1, ushort segID2) {
-            PosUtils.RLR rlr = new PosUtils.RLR {
-                HWpb = HWpb,
-                segID1 = segID1,
-                segID2 = segID2
-            };
-            rlr.Calculate();
-            ushort nodeID = segID1.ToSegment().GetSharedNode(segID2);
-            NetNode node = nodeID.ToNode();
-            float h = node.m_position.y;
-
-            //NetService.LogSegmentDetails(segID1);
-            Log.Info($"creating L from segments: {segID1} {segID2}");
-            return NetService.CreateL(rlr.Point1, rlr.PointL, rlr.Point2, h, info).nodeL;
-        }
 
         public static void CreateJunctionBridge(ushort nodeID) {
             if (nodeID.ToNode().CountSegments() != 4)
@@ -54,15 +40,18 @@ namespace PedestrianBridge {
             if (segList.Count != 4)
                 throw new Exception($"seglist count is ${segList.Count} expected 4");
             int n = segList.Count;
-            var nodeList = new List<NetService.NodeWrapper>();
+            var nodeList = new List<NodeWrapper>();
             for (int i = 0; i < n; ++i) {
-                NetService.NodeWrapper newNode = CreateLBridge(segList[i], segList[(i + 1) % n]);
-                nodeList.Add(newNode);
+                ushort segID1 = segList[i], segID2 = segList[(i + 1) % n];
+                var lwrapper = new LWrapper(segID1, segID2, PrefabUtils.defaultPrefab);
+                Log.Info($"creating L from segments: {segID1} {segID2}");
+                lwrapper.Create();
+                nodeList.Add(lwrapper.nodeL);
             }
             for (int i = 0; i < n; ++i) {
-                NetService.SegmentWrapper segment = new NetService.SegmentWrapper(
+                SegmentWrapper segment = new SegmentWrapper(
                     nodeList[i], nodeList[(i + 1) % n]);
-                SimulationManager.instance.AddAction(segment.Create);
+                segment.Create();
             } // end for
         } // end method
 
