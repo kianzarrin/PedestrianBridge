@@ -38,7 +38,8 @@ namespace PedestrianBridge.Tool {
         private void DisableTool()
         {
             Log.Info("DisableTool: called");
-            ToolsModifierControl.SetTool<DefaultTool>();
+            if(ToolsModifierControl.toolController?.CurrentTool == this)
+                ToolsModifierControl.SetTool<DefaultTool>();
         }
 
         protected override void OnToolUpdate()

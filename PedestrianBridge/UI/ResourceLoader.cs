@@ -99,7 +99,7 @@ namespace PedestrianBridge.UI
                     return atlases[i];
             }
 
-            return UIView.GetAView().defaultAtlas;
+            return null;
         }
 
         private static Texture2D loadTextureFromAssembly(string path)

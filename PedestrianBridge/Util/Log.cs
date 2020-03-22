@@ -84,7 +84,7 @@ namespace PedestrianBridge.Util
         /// <param name="message">Log entry text.</param>
         /// <param name="copyToGameLog">If <c>true</c> will copy to the main game log file.</param>
         [Conditional("DEBUG")]
-        public static void Debug(string message, bool copyToGameLog = false)
+        public static void Debug(string message, bool copyToGameLog = true )
         {
             LogToFile(message, LogLevel.Debug);
             if (copyToGameLog)

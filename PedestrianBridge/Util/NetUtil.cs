@@ -21,7 +21,6 @@ namespace PedestrianBridge.Util {
         internal static ref NetLane ToLane(this int id) => ref netMan.m_lanes.m_buffer[id];
 
 
-
         public static ushort GetFirstSegment(ushort nodeID) {
             NetNode node = nodeID.ToNode();
             ushort segmentID = 0;

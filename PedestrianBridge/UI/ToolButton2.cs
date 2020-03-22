@@ -4,13 +4,13 @@ using ColossalFramework;
 
 namespace PedestrianBridge.UI
 {
-    public class ToolButton : UIButton
+    public class ToolButton2 : UIButton
     {
         public override void Start()
         {
             base.Start();
             // Set the text to show on the
-            text = "Pedestrian Bridge";
+            text = "Click Me!";
             name = "ToolACtivateButton";
 
             // Set the button dimensions.
