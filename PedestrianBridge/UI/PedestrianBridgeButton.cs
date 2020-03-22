@@ -9,47 +9,49 @@ namespace PedestrianBridge.UI {
         public static UIPanelButton Instance;
 
         private const float BUTTON_HORIZONTAL_POSITION = 79;
+        const int SIZE = 31;
+        const string PedestrianBridgeButtonBg = "PedestrianBridgeButtonBg";
+        const string PedestrianBridgeButtonBgPressed = "PedestrianBridgeButtonBgPressed";
+        const string PedestrianBridgeButtonBgHovered = "PedestrianBridgeButtonBgHovered";
+        const string PedestrianBridgeIcon = "PedestrianBridgeIcon";
+        const string PedestrianBridgeIconPressed = "PedestrianBridgeIconPressed";
 
         public UIPanelButton() {
             Instance = this;
         }
 
         public override void Start() {
+            name = "PedestrianBridgeButton";
+            playAudioEvents = true;
+            tooltip = "Pedestrian Bridge Builder";
+
             var roadsOptionPanel = UIUtils.Instance.FindComponent<UIComponent>("RoadsOptionPanel", null, UIUtils.FindOptions.NameContains);
             var builtinTabstrip = UIUtils.Instance.FindComponent<UITabstrip>("ToolMode", roadsOptionPanel, UIUtils.FindOptions.None);
-
             UIButton uibutton = (UIButton)builtinTabstrip.tabs[0];
 
-            int num = 31;
-            int num2 = 31;
             string[] spriteNames = new string[]
             {
-                "PedestrianBridgeButtonBg",
-                "PedestrianBridgeButtonBgPressed",
-                "PedestrianBridgeButtonBgHovered",
-                "PedestrianBridgeIcon",
-                "PedestrianBridgeIconPressed"
+                PedestrianBridgeButtonBg,
+                PedestrianBridgeButtonBgPressed,
+                PedestrianBridgeButtonBgHovered,
+                PedestrianBridgeIcon,
+                PedestrianBridgeIconPressed
             };
             if (ResourceLoader.GetAtlas("PedestrianBridgeUI") == UIView.GetAView().defaultAtlas) {
-                atlas = ResourceLoader.CreateTextureAtlas("sprites.png", "PedestrianBridgeUI", uibutton.atlas.material, num, num2, spriteNames);
+                atlas = ResourceLoader.CreateTextureAtlas("sprites.png", "PedestrianBridgeUI", uibutton.atlas.material, SIZE, SIZE, spriteNames);
             } else {
                 atlas = ResourceLoader.GetAtlas("PedestrianBridgeUI");
             }
 
-            name = "PedestrianBridgeButton";
-            size = new Vector2((float)num, (float)num2);
-            normalBgSprite = "PedestrianBridgeButtonBg";
-            disabledBgSprite = "PedestrianBridgeButtonBg";
-            hoveredBgSprite = "PedestrianBridgeButtonBgHovered";
-            pressedBgSprite = "PedestrianBridgeButtonBgPressed";
-            //focusedBgSprite = "PedestrianBridgeButtonBgPressed";
-            focusedBgSprite = "PedestrianBridgeButtonBg";
-            playAudioEvents = true;
-            tooltip = "Pedestrian Bridge Builder";
-            normalFgSprite = (disabledFgSprite = (hoveredFgSprite = (focusedFgSprite = "PedestrianBridgeIcon")));
-            pressedFgSprite = "PedestrianBridgeIconPressed";
+            normalBgSprite = focusedBgSprite = disabledBgSprite = PedestrianBridgeButtonBg;
+            hoveredBgSprite  = PedestrianBridgeButtonBgHovered;
+            pressedBgSprite  = PedestrianBridgeButtonBgPressed;
+
+            normalFgSprite = disabledFgSprite = hoveredFgSprite = pressedFgSprite = PedestrianBridgeIcon;
+            focusedFgSprite = PedestrianBridgeIconPressed;
+
             relativePosition = new Vector3(BUTTON_HORIZONTAL_POSITION, 38f); //RABOUT:23,38     Crossings:94,38
-            size = new Vector2((float)num, (float)num2);
+            size = new Vector2(SIZE, SIZE);
         }
 
         //protected override void OnClick(UIMouseEventParameter p)

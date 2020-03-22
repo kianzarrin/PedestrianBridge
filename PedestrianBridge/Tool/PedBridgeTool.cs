@@ -47,12 +47,12 @@ namespace PedestrianBridge.Tool {
         protected override void OnEnable() {
             Log.Debug("PedBridgeTool.OnEnable");
             base.OnEnable();
-            //button.Focus();
+            button.Focus();
         }
 
         protected override void OnDisable() {
             Log.Debug("PedBridgeTool.OnDisable");
-            //button.Unfocus();
+            button.Unfocus();
             base.OnDisable();
         }
 
