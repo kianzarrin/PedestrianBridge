@@ -21,13 +21,14 @@ namespace PedestrianBridge.Tool {
 
         public void ToggleTool()
         {
+            Log.Debug("ToggleTool: called");
             if (!ToolEnabled)
                 EnableTool();
             else
                 DisableTool();
         }
 
-        private void EnableTool()
+        public void EnableTool()
         {
             Log.Debug("EnableTool: called");
             //WorldInfoPanel.HideAllWorldInfoPanels();
@@ -35,7 +36,7 @@ namespace PedestrianBridge.Tool {
             ToolsModifierControl.toolController.CurrentTool = this;
         }
 
-        private void DisableTool()
+        public void DisableTool()
         {
             Log.Debug("DisableTool: called");
             if(ToolsModifierControl.toolController?.CurrentTool == this)

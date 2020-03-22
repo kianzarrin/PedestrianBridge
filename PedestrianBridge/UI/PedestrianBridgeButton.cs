@@ -1,12 +1,12 @@
 using ColossalFramework.UI;
+using PedestrianBridge.Tool;
 using System;
 using UnityEngine;
 
-/* A lot of copy-pasting from Crossings mod by Spectra. The sprites are partly copied as well. */
+/* A lot of copy-pasting from Crossings mod by Spectra and Roundabout Mod by Strad. The sprites are partly copied as well. */
 
 namespace PedestrianBridge.UI {
-    public class UIPanelButton : UIButton {
-        public static UIPanelButton Instance;
+    public class PedestrianBridgeButton : UIButton {
 
         private const float BUTTON_HORIZONTAL_POSITION = 79;
         const int SIZE = 31;
@@ -15,10 +15,6 @@ namespace PedestrianBridge.UI {
         const string PedestrianBridgeButtonBgHovered = "PedestrianBridgeButtonBgHovered";
         const string PedestrianBridgeIcon = "PedestrianBridgeIcon";
         const string PedestrianBridgeIconPressed = "PedestrianBridgeIconPressed";
-
-        public UIPanelButton() {
-            Instance = this;
-        }
 
         public override void Start() {
             name = "PedestrianBridgeButton";
@@ -37,11 +33,12 @@ namespace PedestrianBridge.UI {
                 PedestrianBridgeIcon,
                 PedestrianBridgeIconPressed
             };
-            if (ResourceLoader.GetAtlas("PedestrianBridgeUI") == UIView.GetAView().defaultAtlas) {
+            var atlas = ResourceLoader.GetAtlas("PedestrianBridgeUI");
+
+            if (atlas == UIView.GetAView().defaultAtlas) {
                 atlas = ResourceLoader.CreateTextureAtlas("sprites.png", "PedestrianBridgeUI", uibutton.atlas.material, SIZE, SIZE, spriteNames);
-            } else {
-                atlas = ResourceLoader.GetAtlas("PedestrianBridgeUI");
             }
+            this.atlas = atlas;
 
             normalBgSprite = focusedBgSprite = disabledBgSprite = PedestrianBridgeButtonBg;
             hoveredBgSprite  = PedestrianBridgeButtonBgHovered;
@@ -54,48 +51,14 @@ namespace PedestrianBridge.UI {
             size = new Vector2(SIZE, SIZE);
         }
 
-        //protected override void OnClick(UIMouseEventParameter p)
-        //{
-        //    base.OnClick(p);
-        //    //Debug.Log("Clicked!!");
-        //    if (UIWindow2.instance == null)
-        //        return;
-        //    UIWindow2.instance.enabled = !UIWindow2.instance.enabled;
-        //}
-
-        /*public void FocusSprites()
-        {
-            Debug.Log("focus icon");
-            focusedBgSprite = "PedestrianBridgeButtonBgPressed";
-            normalBgSprite = "PedestrianBridgeButtonBgPressed";
-            normalFgSprite = (disabledFgSprite = (hoveredFgSprite = "PedestrianBridgeIconPressed"));
-            focusedFgSprite = "PedestrianBridgeIconPressed";
-            size = new Vector2(33, 33);
-            size = new Vector2(32, 32);
-        }
-
-        public void UnfocusSprites()
-        {
-            Debug.Log("unfocus icon");
-            focusedBgSprite = "PedestrianBridgeButtonBg";
-            normalBgSprite = "PedestrianBridgeButtonBg";
-            normalFgSprite = (disabledFgSprite = (hoveredFgSprite = "PedestrianBridgeIcon"));
-            focusedFgSprite = "PedestrianBridgeIcon";
-            size = new Vector2(33, 33);
-            size = new Vector2(32, 32);
-        }*/
-
         public static UIButton CreateButton() {
             var roadsOptionPanel = UIUtils.Instance.FindComponent<UIComponent>("RoadsOptionPanel", null, UIUtils.FindOptions.NameContains);
-            if (roadsOptionPanel && !Instance) {
-                try {
-                    return roadsOptionPanel.AddUIComponent<UIPanelButton>();
-                }
-                catch {
-                }
-            }
-            Debug.LogWarning("Failed to create UIPanelButton!");
-            return null;
+            return roadsOptionPanel?.AddUIComponent<PedestrianBridgeButton>();
+        }
+
+        protected override void OnClick(UIMouseEventParameter p) {
+            base.OnClick(p);
+            PedBridgeTool.Instance.EnableTool();
         }
     }
 

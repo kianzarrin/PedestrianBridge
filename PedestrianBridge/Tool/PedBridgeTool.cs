@@ -8,17 +8,14 @@ using PedestrianBridge.Shape;
 using JetBrains.Annotations;
 
 namespace PedestrianBridge.Tool {
-    using static NetTool;
     public sealed class PedBridgeTool : KianToolBase {
         UIButton button;
 
-        public PedBridgeTool() : base() {
+        protected override void Awake() {
             var uiView = UIView.GetAView();
             //button = uiView.AddUIComponent(typeof(ToolButton)) as UIButton;
-            button = UIPanelButton.CreateButton();
-            button.eventClicked += (_, __) => {
-                ToggleTool();
-            };
+            button = PedestrianBridgeButton.CreateButton();
+            base.Awake();
         }
 
         public static PedBridgeTool Create() {
@@ -28,10 +25,16 @@ namespace PedestrianBridge.Tool {
             return tool;
         }
 
+        public static PedBridgeTool Instance {
+            get {
+                GameObject toolModControl = ToolsModifierControl.toolController?.gameObject;
+                return toolModControl?.GetComponent<PedBridgeTool>();
+            }
+        }
+
         public static void Remove() {
             Log.Debug("PedBridgeTool.Remove()");
-            GameObject toolModControl = ToolsModifierControl.toolController?.gameObject;
-            var tool = toolModControl?.GetComponent<PedBridgeTool>();
+            var tool = Instance;
             if (tool != null)
                 Destroy(tool);
         }
@@ -54,6 +57,7 @@ namespace PedestrianBridge.Tool {
             Log.Debug("PedBridgeTool.OnDisable");
             button.Unfocus();
             base.OnDisable();
+            button.Unfocus();
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -72,7 +76,7 @@ namespace PedestrianBridge.Tool {
                 return false;
             NetNode.Flags nodeFlags = HoveredNodeId.ToNode().m_flags;
             NetNode node = HoveredNodeId.ToNode();
-            if (node.CountSegments() != 4)
+            if (node.CountSegments() < 3)
                 return false;
             return true;
         }
