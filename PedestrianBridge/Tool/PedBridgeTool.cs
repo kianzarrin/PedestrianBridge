@@ -9,7 +9,6 @@ using JetBrains.Annotations;
 
 namespace PedestrianBridge.Tool {
     using static NetTool;
-    using static PedestrianBridge.Util.HelpersExtensions;
     public sealed class PedBridgeTool : KianToolBase {
         UIButton button;
 
@@ -22,14 +21,14 @@ namespace PedestrianBridge.Tool {
         }
 
         public static PedBridgeTool Create() {
-            Log.Info("PedBridgeTool.Create()");
+            Log.Debug("PedBridgeTool.Create()");
             GameObject toolModControl = ToolsModifierControl.toolController.gameObject;
             var tool = toolModControl.GetComponent<PedBridgeTool>() ?? toolModControl.AddComponent<PedBridgeTool>();
             return tool;
         }
 
         public static void Remove() {
-            Log.Info("PedBridgeTool.Remove()");
+            Log.Debug("PedBridgeTool.Remove()");
             GameObject toolModControl = ToolsModifierControl.toolController?.gameObject;
             var tool = toolModControl?.GetComponent<PedBridgeTool>();
             if (tool != null)
@@ -37,7 +36,7 @@ namespace PedestrianBridge.Tool {
         }
 
         protected override void OnDestroy() {
-            Log.Info("PedBridgeTool.OnDestroy()\n" + Environment.StackTrace);
+            Log.Debug("PedBridgeTool.OnDestroy()\n" + Environment.StackTrace);
             Destroy(button);
             base.OnDestroy();
         }
@@ -45,13 +44,13 @@ namespace PedestrianBridge.Tool {
         //public override void EnableTool() => ToolsModifierControl.SetTool<PedBridgeTool>();
 
         protected override void OnEnable() {
-            Log.Info("PedBridgeTool.OnEnable");
+            Log.Debug("PedBridgeTool.OnEnable");
             base.OnEnable();
             button.Focus();
         }
 
         protected override void OnDisable() {
-            Log.Info("PedBridgeTool.OnDisable");
+            Log.Debug("PedBridgeTool.OnDisable");
             button.Unfocus();
             base.OnDisable();
         }
@@ -78,7 +77,7 @@ namespace PedestrianBridge.Tool {
         }
 
         protected override void OnPrimaryMouseClicked() {
-            Log.Info($"OnPrimaryMouseClicked: segment {HoveredSegmentId} node {HoveredNodeId}");
+            Log.Debug($"OnPrimaryMouseClicked: segment {HoveredSegmentId} node {HoveredNodeId}");
             if (HoveredSegmentId == 0 || HoveredNodeId == 0)
                 return;
             if (Condition()) {
