@@ -14,7 +14,8 @@ namespace PedestrianBridge.Tool {
 
         public PedBridgeTool() : base() {
             var uiView = UIView.GetAView();
-            button = (ToolButton)uiView.AddUIComponent(typeof(ToolButton));
+            //button = uiView.AddUIComponent(typeof(ToolButton)) as UIButton;
+            button = UIPanelButton.CreateButton();
             button.eventClicked += (_, __) => {
                 ToggleTool();
             };
@@ -46,12 +47,12 @@ namespace PedestrianBridge.Tool {
         protected override void OnEnable() {
             Log.Debug("PedBridgeTool.OnEnable");
             base.OnEnable();
-            button.Focus();
+            //button.Focus();
         }
 
         protected override void OnDisable() {
             Log.Debug("PedBridgeTool.OnDisable");
-            button.Unfocus();
+            //button.Unfocus();
             base.OnDisable();
         }
 
