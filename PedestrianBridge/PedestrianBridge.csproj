@@ -49,12 +49,19 @@
       <HintPath>$(MangedDLLPath)\ColossalManaged.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="CSUtil.Commons, Version=1.0.7347.7474, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\CSUtil.Commons.dll</HintPath>
+    </Reference>
     <Reference Include="FineRoadTool">
       <HintPath>..\..\AutomaticRoundaboutBuilder\dependencies\FineRoadTool.dll</HintPath>
     </Reference>
     <Reference Include="ICities">
       <HintPath>$(MangedDLLPath)\ICities.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="TrafficManager">
+      <HintPath>..\libs\TrafficManager.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(MangedDLLPath)\UnityEngine.dll</HintPath>
@@ -83,6 +90,7 @@
     <Compile Include="Shapes\SegmentWrapper.cs" />
     <Compile Include="Tool\KianToolBase.cs" />
     <Compile Include="Tool\PedBridgeTool.cs" />
+    <Compile Include="Util\TMPEUtils.cs" />
     <Compile Include="UI\ToolButton.cs" />
     <Compile Include="UI\ResourceLoader.cs" />
     <Compile Include="UI\PedestrianBridgeButton.cs" />

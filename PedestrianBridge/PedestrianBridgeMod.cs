@@ -22,6 +22,7 @@ namespace PedestrianBridge {
 
     public static class LoadTool {
         public static void Load() {
+            TMPEUtils.Active = true;
             Tool.PedBridgeTool.Create();
         }
         public static void Release() {

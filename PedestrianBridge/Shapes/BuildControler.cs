@@ -30,6 +30,7 @@ namespace PedestrianBridge.Shape {
                 SegmentWrapper segment = new SegmentWrapper(
                     nodeList[i], nodeList[(i + 1) % n]);
                 segment.Create();
+                TMPEUtils.BanPedestrianCrossings(segList[i], nodeID);
             } // end for
         } // end method
 

@@ -32,6 +32,30 @@ namespace PedestrianBridge.Util {
             }
             return segmentID;
         }
+
+        public struct NodeSegments{
+            public ushort[] segments;
+            public int count;
+            void Add(ushort segmentID) {
+                segments[count++] = segmentID;
+            }
+
+            public NodeSegments(ushort nodeID) {
+                segments = new ushort[8];
+                count = 0;
+
+                ushort segmentID = GetFirstSegment(nodeID);
+                Add(segmentID);
+                while (true) {
+                    segmentID = segmentID.ToSegment().GetLeftSegment(nodeID);
+                    if (segmentID == segments[0])
+                        break;
+                    else
+                        Add(segmentID);
+                }
+            }
+        }
+
         /// <summary>
         /// returns a clock-wise list of segments of the given node ID.
         /// </summary>

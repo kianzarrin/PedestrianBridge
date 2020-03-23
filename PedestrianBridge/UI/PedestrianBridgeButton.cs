@@ -1,5 +1,6 @@
 using ColossalFramework.UI;
 using PedestrianBridge.Tool;
+using PedestrianBridge.Util;
 using System;
 using UnityEngine;
 
@@ -49,9 +50,11 @@ namespace PedestrianBridge.UI {
 
             relativePosition = new Vector3(BUTTON_HORIZONTAL_POSITION, 38f); //RABOUT:23,38     Crossings:94,38
             size = new Vector2(SIZE, SIZE);
+            Log.Info("PedestrianBridgeButton button created sucessfully.");
         }
 
-        public static UIButton CreateButton() {
+        public static UIButton CreateButton() { 
+            Log.Info("PedestrianBridgeButton.CreateButton() called");
             var roadsOptionPanel = UIUtils.Instance.FindComponent<UIComponent>("RoadsOptionPanel", null, UIUtils.FindOptions.NameContains);
             return roadsOptionPanel?.AddUIComponent<PedestrianBridgeButton>();
         }
