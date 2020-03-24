@@ -6,6 +6,7 @@ namespace PedestrianBridge.Util {
     using System.Linq;
     using UnityEngine;
     using static NetUtil;
+    using static TMPEUtils;
 
     public class RoundaboutUtil {
         public static RoundaboutUtil Instance = new RoundaboutUtil();
@@ -43,6 +44,13 @@ namespace PedestrianBridge.Util {
             public ushort Main1;
             public ushort Main2;
             public ushort Minor;
+
+            public void BanCrossing() {
+                BanPedestrianCrossings(Main1, NodeID);
+                BanPedestrianCrossings(Main2, NodeID);
+                BanPedestrianCrossings(Minor, NodeID);
+            }
+
         }
 
         public static ushort Get3rdSegment(ushort nodeID, ushort segmentID1, ushort segmentID2) {

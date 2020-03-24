@@ -79,6 +79,7 @@ namespace PedestrianBridge.Shape {
                 slice.Create();
                 SegmentWrapper segment = new SegmentWrapper(center, slice.nodeM);
                 segment.Create();
+                junctions[i].BanCrossing();
             }
         }
 

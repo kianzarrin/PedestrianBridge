@@ -8,7 +8,8 @@ namespace PedestrianBridge {
         public static Version ModVersion => typeof(PedestrianBridgeMod).Assembly.GetName().Version;
         public static string VersionString => ModVersion.ToString(2);
         public string Name => "Automatic Pedestrian Bridge" + VersionString;
-        public string Description => "Builds pedestian bridges over junctions and roundabouts with one click";
+        public string Description => "use Ctrl+B to activate. " +
+            "Automatically Builds pedestian bridges over junctions and roundabouts with one click";
         
         public void OnEnabled() {
             if (HelpersExtensions.InGame)

@@ -20,7 +20,7 @@ namespace PedestrianBridge.UI {
         public override void Start() {
             name = "PedestrianBridgeButton";
             playAudioEvents = true;
-            tooltip = "Pedestrian Bridge Builder";
+            tooltip = "Pedestrian Bridge Builder (CTRL+B)";
 
             var roadsOptionPanel = UIUtils.Instance.FindComponent<UIComponent>("RoadsOptionPanel", null, UIUtils.FindOptions.NameContains);
             var builtinTabstrip = UIUtils.Instance.FindComponent<UITabstrip>("ToolMode", roadsOptionPanel, UIUtils.FindOptions.None);
