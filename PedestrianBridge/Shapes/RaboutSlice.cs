@@ -12,7 +12,7 @@ namespace PedestrianBridge.Shapes {
             // Output:
             internal Vector2 Point;
             internal Vector2 Dir1, Dir2;
-\           public Corner(ushort segID1, ushort segID2, float HWpath) {
+            public Corner(ushort segID1, ushort segID2, float HWpath) {
                 // Prepration:
                 ref NetSegment seg1 = ref segID1.ToSegment();
                 ref NetSegment seg2 = ref segID2.ToSegment();

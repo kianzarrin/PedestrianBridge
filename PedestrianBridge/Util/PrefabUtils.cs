@@ -4,7 +4,7 @@ namespace PedestrianBridge.Util {
     using static HelpersExtensions;
 
     public static class  PrefabUtils {
-        public static NetInfo SelectedPrefab => defaultPrefab
+        public static NetInfo SelectedPrefab => defaultPrefab;
         public static NetInfo defaultPrefab => PedestrianPathInfo;
         public static NetInfo PedestrianBridgeInfo =>
             GetInfo("Pedestrian Elevated");
