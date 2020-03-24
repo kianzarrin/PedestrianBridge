@@ -16,9 +16,7 @@ namespace PedestrianBridge.Shapes {
 
             Vector3 startPos = startNode.ID.ToNode().m_position;
             Vector3 endPos = endNode.ID.ToNode().m_position;
-            var dir = endPos - startPos;
-            this.startDir = dir;
-            this.endDir = -dir;
+            startDir = endDir = Vector3.zero;
         }
 
         public SegmentWrapper(NodeWrapper startNode, NodeWrapper endNode, Vector2 startDir, Vector2 endDir) {
@@ -32,7 +30,13 @@ namespace PedestrianBridge.Shapes {
         public void Create() =>
             simMan.AddAction(_Create);
 
-        void _Create() => ID = CreateSegment(startNode.ID, endNode.ID, startDir, endDir);
+        void _Create() {
+            if (startDir == Vector3.zero)
+                ID = CreateSegment(startNode.ID, endNode.ID);
+            else {
+                ID = CreateSegment(startNode.ID, endNode.ID, startDir, endDir);
+            }
+        }
 
         static ushort CreateSegment(
             ushort startNodeID, ushort endNodeID,

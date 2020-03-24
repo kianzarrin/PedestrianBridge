@@ -61,14 +61,15 @@ namespace PedestrianBridge.Util {
             int n = segmentList.Count;
             List<JunctionData> ret = new List<JunctionData>();
             for (int i = 0; i < n; ++i) {
+                int i2 = (i + 1) % n;
                 var nodeID = GetHeadNode(segmentList[i]);
-                var minorSegmentID = Get3rdSegment(nodeID, segmentList[i], segmentList[i + 1]);
+                var minorSegmentID = Get3rdSegment(nodeID, segmentList[i], segmentList[i2]);
                 if (minorSegmentID == 0)
                     continue;
                 JunctionData junction = new JunctionData {
                     NodeID = nodeID,
                     Main1 = segmentList[i],
-                    Main2 = segmentList[(i + 1) % n],
+                    Main2 = segmentList[i2],
                     Minor = minorSegmentID,
                 };
                 ret.Add(junction);

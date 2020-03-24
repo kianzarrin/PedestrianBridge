@@ -17,11 +17,11 @@ namespace PedestrianBridge.Shapes {
                 float HW2 = seg2.Info.m_halfWidth;
                 ushort junctionID = seg1.GetSharedNode(segID2);
                 ref NetNode junction = ref junctionID.ToNode();
-                Vector2 origin = junction.m_position.ToPoint();
+                Vector2 origin = junction.m_position.ToCS2D();
                 bool bStartNode1 = seg1.m_startNode == junctionID;
                 bool bStartNode2 = seg2.m_startNode == junctionID;
-                Vector2 V1 = (bStartNode1 ? seg1.m_startDirection : seg1.m_endDirection).ToPoint();
-                Vector2 V2 = (bStartNode2 ? seg2.m_startDirection : seg2.m_endDirection).ToPoint();
+                Vector2 V1 = (bStartNode1 ? seg1.m_startDirection : seg1.m_endDirection).ToCS2D();
+                Vector2 V2 = (bStartNode2 ? seg2.m_startDirection : seg2.m_endDirection).ToCS2D();
                 Vector2 dir1 = V1.normalized;
                 Vector2 dir2 = V2.normalized;
 

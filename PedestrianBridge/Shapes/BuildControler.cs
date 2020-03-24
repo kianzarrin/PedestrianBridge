@@ -7,8 +7,7 @@ namespace PedestrianBridge.Shape {
     using Shapes;
     using static Util.NetUtil;
     using static Util.RoundaboutUtil;
-    using ColossalFramework.Math;
-
+    using VectorUtils = Util.VectorUtils;
 
     public static class BuildControler {
         public static void CreateJunctionBridge(ushort nodeID) {
@@ -34,6 +33,23 @@ namespace PedestrianBridge.Shape {
             } // end for
         } // end method
 
+
+        public static bool CalculateCenter(JunctionData j1, JunctionData j2, out Vector2 center) {
+            var point1 = j1.NodeID.ToNode().m_position.ToCS2D();
+            var point2 = j2.NodeID.ToNode().m_position.ToCS2D();
+
+            ref NetSegment seg1 = ref j1.Main2.ToSegment();
+            ref NetSegment seg2 = ref j2.Main1.ToSegment();
+
+            bool bStartNode1 = seg1.m_startNode == j1.NodeID;
+            bool bStartNode2 = seg2.m_startNode == j2.NodeID;
+
+            Vector2 V1 = (bStartNode1 ? seg1.m_startDirection : seg1.m_endDirection).ToCS2D();
+            Vector2 V2 = (bStartNode2 ? seg2.m_startDirection : seg2.m_endDirection).ToCS2D();
+
+            return VectorUtils.Intersect(point1, V1.Rotate90CW(), point2, V2.Rotate90CW(), out center);
+        }
+
         public static void CreateRaboutBridge(ushort segmentID) {
             var util = new RoundaboutUtil();
             if (!util.TraverseLoop(segmentID, out _))
@@ -41,11 +57,18 @@ namespace PedestrianBridge.Shape {
 
             var junctions = util.GetJunctions();
             int n = junctions.Count;
-            if (n < 3)
+            if (n < 3) {
+                Log.Info("Roundabout has too few junctions.");
                 return;
+            }
 
-            NodeWrapper center = null;
+            if(!CalculateCenter(junctions[0],junctions[1], out var centerPoint)){
+                Log.Info("Failed to calculate center.");
+                return;
+            }
             NetInfo info = PrefabUtils.SelectedPrefab;
+            NodeWrapper center = new NodeWrapper(centerPoint, 10, info);
+            center.Create();
 
             for (int i = 0; i < n; ++i) {
                 var i2 = (i + 1) % n;
@@ -53,10 +76,7 @@ namespace PedestrianBridge.Shape {
                     junctions[i].Main2, junctions[i].Minor,
                     junctions[i2].Main1, junctions[i2].Minor,
                     PrefabUtils.SelectedPrefab);
-                if (i == 0)
-                    center = new NodeWrapper(slice.CalculateCenter(), 10, info);
                 slice.Create();
-                center.Create();
                 SegmentWrapper segment = new SegmentWrapper(center, slice.nodeM);
                 segment.Create();
             }

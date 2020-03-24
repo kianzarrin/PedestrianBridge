@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using PedestrianBridge.Util;
 using static PedestrianBridge.Util.PrefabUtils;
@@ -22,6 +23,8 @@ namespace PedestrianBridge.Shapes {
             simMan.AddAction(_Create);
 
         void _Create() {
+            if (ID != 0)
+                throw new Exception("Node already has been created");
             Vector3 pos = Get3DPos(point, elevation);
             ID = CreateNode(pos, info);
             ID.ToNode().m_elevation = elevation;
