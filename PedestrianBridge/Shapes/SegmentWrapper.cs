@@ -1,23 +1,38 @@
 using UnityEngine;
 using PedestrianBridge.Util;
 using static PedestrianBridge.Util.NetUtil;
+using System;
 
 namespace PedestrianBridge.Shapes {
     public class SegmentWrapper {
         NodeWrapper startNode;
         NodeWrapper endNode;
+        Vector3 startDir;
+        Vector3 endDir;
 
         public SegmentWrapper(NodeWrapper startNode, NodeWrapper endNode) {
             this.startNode = startNode;
             this.endNode = endNode;
+
+            Vector3 startPos = startNode.ID.ToNode().m_position;
+            Vector3 endPos = endNode.ID.ToNode().m_position;
+            var dir = endPos - startPos;
+            this.startDir = dir;
+            this.endDir = -dir;
         }
 
+        public SegmentWrapper(NodeWrapper startNode, NodeWrapper endNode, Vector2 startDir, Vector2 endDir) {
+            this.startNode = startNode;
+            this.endNode = endNode;
+            this.startDir = startDir.ToCS3D();
+            this.endDir = endDir.ToCS3D();
+        }
 
         public ushort ID;
         public void Create() =>
             simMan.AddAction(_Create);
 
-        void _Create() => ID = CreateSegment(startNode.ID, endNode.ID);
+        void _Create() => ID = CreateSegment(startNode.ID, endNode.ID, startDir, endDir);
 
         static ushort CreateSegment(
             ushort startNodeID, ushort endNodeID,
@@ -48,7 +63,7 @@ namespace PedestrianBridge.Shapes {
         static ushort CreateSegment(ushort startNodeID, ushort endNodeID, Vector2 middlePoint, NetInfo info = null) {
             Vector3 startPos = startNodeID.ToNode().m_position;
             Vector3 endPos = endNodeID.ToNode().m_position;
-            Vector3 middlePos = middlePoint.ToPos();
+            Vector3 middlePos = middlePoint.ToCS3D();
             Vector3 startDir = middlePos - startPos;
             Vector3 endDir = middlePos - endPos;
             return CreateSegment(startNodeID, endNodeID, startDir, endDir);

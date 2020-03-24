@@ -18,8 +18,69 @@ namespace PedestrianBridge.Util {
         public const float MPU = 8f; // meter per unit
         internal static ref NetNode ToNode(this ushort id) => ref netMan.m_nodes.m_buffer[id];
         internal static ref NetSegment ToSegment(this ushort id) => ref netMan.m_segments.m_buffer[id];
-        internal static ref NetLane ToLane(this int id) => ref netMan.m_lanes.m_buffer[id];
+        internal static ref NetLane ToLane(this uint id) => ref netMan.m_lanes.m_buffer[id];
 
+        #region copied from TMPE
+        public static bool LHT => TrafficDrivesOnLeft;
+        public static bool RHT => !LHT;
+        public static bool TrafficDrivesOnLeft =>
+            Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic
+                == SimulationMetaData.MetaBool.True;
+
+        public static bool IsStartNode(ushort segmentId, ushort nodeId) =>
+            segmentId.ToSegment().m_startNode == nodeId;
+
+        public static bool IsSegmentValid(ushort segmentId) {
+            if (segmentId != 0) {
+                return (segmentId.ToSegment().m_flags &
+                (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) ==
+                NetSegment.Flags.Created;
+            }
+            return false;
+        }
+
+        public static ushort GetHeadNode(ref NetSegment segment) {
+            // tail node>-------->head node
+            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            invert = invert ^ LHT;
+            if (invert) {
+                return segment.m_startNode;
+            } else {
+                return segment.m_endNode;
+            }
+        }
+
+        public static ushort GetHeadNode(ushort segmentId) =>
+            GetHeadNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
+
+        public static ushort GetTailNode(ref NetSegment segment) {
+            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            invert = invert ^ LHT;
+            if (!invert) {
+                return segment.m_startNode;
+            } else {
+                return segment.m_endNode;
+            }//endif
+        }
+
+        public static ushort GetTailNode(ushort segmentId) =>
+            GetTailNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
+
+        public static bool CalculateIsOneWay(ushort segmentId) {
+            int forward = 0;
+            int backward = 0;
+            segmentId.ToSegment().CountLanes(
+                segmentId,
+                NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train |
+                VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro |
+                VehicleInfo.VehicleType.Monorail,
+                ref  forward,
+                ref backward);
+            return (forward == 0) ^ (backward == 0);
+        }
+
+        #endregion
 
         public static ushort GetFirstSegment(ushort nodeID) {
             NetNode node = nodeID.ToNode();
@@ -71,7 +132,6 @@ namespace PedestrianBridge.Util {
                     break;
                 else
                     segList.Add(segmentID);
-
             }
             return segList;
         }

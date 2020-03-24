@@ -42,8 +42,8 @@ namespace PedestrianBridge.Shapes {
             return nodeID;
         }
         public static Vector3 Get3DPos(Vector2 point, byte elevation) {
-            float terrainH = terrainMan.SampleDetailHeightSmooth(point.ToPos(0));
-            return point.ToPos(terrainH + elevation);
+            float terrainH = terrainMan.SampleDetailHeightSmooth(point.ToCS3D(0));
+            return point.ToCS3D(terrainH + elevation);
         }
     }
 }
