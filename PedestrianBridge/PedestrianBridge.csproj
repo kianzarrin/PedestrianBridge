@@ -92,8 +92,9 @@
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="Tool\KianToolBase.cs" />
     <Compile Include="Tool\PedBridgeTool.cs" />
+    <Compile Include="Util\LineUtil.cs" />
     <Compile Include="Util\RoundaboutUtil.cs" />
-    <Compile Include="Util\TMPEUtils.cs" />
+    <Compile Include="Util\TMPEUtil.cs" />
     <Compile Include="UI\ToolButton.cs" />
     <Compile Include="UI\ResourceLoader.cs" />
     <Compile Include="UI\PedestrianBridgeButton.cs" />
@@ -101,8 +102,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\Log.cs" />
     <Compile Include="Util\NetUtil.cs" />
-    <Compile Include="Util\PluginUtils.cs" />
-    <Compile Include="Util\PrefabUtils.cs" />
+    <Compile Include="Util\PluginUtil.cs" />
+    <Compile Include="Util\PrefabUtil.cs" />
     <Compile Include="Util\VecetorUtils.cs" />
   </ItemGroup>
   <ItemGroup>

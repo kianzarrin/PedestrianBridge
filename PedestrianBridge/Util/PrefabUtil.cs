@@ -3,7 +3,7 @@ namespace PedestrianBridge.Util {
     using System;
     using static HelpersExtensions;
 
-    public static class  PrefabUtils {
+    public static class  PrefabUtil {
         public static NetInfo SelectedPrefab => defaultPrefab;
         public static NetInfo defaultPrefab => PedestrianPathInfo;
         public static NetInfo PedestrianBridgeInfo =>

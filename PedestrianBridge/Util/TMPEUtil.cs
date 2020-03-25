@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace PedestrianBridge.Util {
-    public static class TMPEUtils {
+    public static class TMPEUtil {
         public static bool Active = true;
 
         [MethodImpl(MethodImplOptions.NoInlining)]

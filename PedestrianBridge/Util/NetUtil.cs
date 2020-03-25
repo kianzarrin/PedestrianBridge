@@ -1,4 +1,5 @@
 using ColossalFramework;
+using ColossalFramework.Math;
 using System;
 using System.Collections.Generic;
 
@@ -19,6 +20,21 @@ namespace PedestrianBridge.Util {
         internal static ref NetNode ToNode(this ushort id) => ref netMan.m_nodes.m_buffer[id];
         internal static ref NetSegment ToSegment(this ushort id) => ref netMan.m_segments.m_buffer[id];
         internal static ref NetLane ToLane(this uint id) => ref netMan.m_lanes.m_buffer[id];
+
+
+        internal static Bezier3 CalculateSegmentBezier3(this ref NetSegment seg) {
+            Bezier3 bezier = new Bezier3 {
+                a = seg.m_startNode.ToNode().m_position,
+                d= seg.m_endNode.ToNode().m_position,
+            };
+            NetSegment.CalculateMiddlePoints(
+                bezier.a, seg.m_startDirection,
+                bezier.d, seg.m_endDirection,
+                false, false,
+                out bezier.b,
+                out bezier.c);
+            return bezier;
+        }
 
         #region copied from TMPE
         public static bool LHT => TrafficDrivesOnLeft;

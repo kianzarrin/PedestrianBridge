@@ -9,7 +9,6 @@ using UnityEngine;
 namespace PedestrianBridge.UI {
     public class PedestrianBridgeButton : UIButton {
 
-        private const float BUTTON_HORIZONTAL_POSITION = 23-31-3; //RABOUT:23,38     Crossings:94,38
         const int SIZE = 31;
         const string PedestrianBridgeButtonBg = "PedestrianBridgeButtonBg";
         const string PedestrianBridgeButtonBgPressed = "PedestrianBridgeButtonBgPressed";
@@ -48,7 +47,7 @@ namespace PedestrianBridge.UI {
             normalFgSprite = disabledFgSprite = hoveredFgSprite = pressedFgSprite = PedestrianBridgeIcon;
             focusedFgSprite = PedestrianBridgeIconPressed;
 
-            relativePosition = new Vector3(BUTTON_HORIZONTAL_POSITION, 38f); 
+            relativePosition = new Vector3(130, 38); 
             size = new Vector2(SIZE, SIZE);
             Log.Info("PedestrianBridgeButton button created sucessfully.");
         }

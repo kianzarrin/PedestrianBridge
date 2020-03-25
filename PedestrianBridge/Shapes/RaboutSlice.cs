@@ -5,100 +5,100 @@ namespace PedestrianBridge.Shapes {
     using Util;
     using static Util.HelpersExtensions;
     using static Util.NetUtil;
-    using static Util.VectorUtils;
-    using VectorUtils = Util.VectorUtils;
+    using static Util.VectorUtil;
+    using VectorUtils = Util.VectorUtil;
 
     public class RaboutSlice {
         public struct Corner {
             // Output:
             internal Vector2 Point;
-            internal Vector2 ControlPoint;
-            internal Vector2 Dir1, Dir2;
-            public Corner(ushort segID1, ushort segID2, float HWpath) {
+            internal Vector2 ControlPointA;
+
+            /// DirMain first represents the direction of the main segment at the junction.
+            /// but then it is modified to represent the direction of the pedestrian bridge
+            /// slightly away from the junction.
+            internal Vector2 DirMain, DirMinor;
+            internal float Offset => (ControlPointA - Point).magnitude;
+            //bool bLeft;
+
+            public Corner(ushort segmentMainID, ushort segmentMinorID, float HWpath) {
                 // Prepration:
-                ref NetSegment seg1 = ref segID1.ToSegment();
-                ref NetSegment seg2 = ref segID2.ToSegment();
+                ref NetSegment segmentMain = ref segmentMainID.ToSegment();
+                ref NetSegment segmentMinor = ref segmentMinorID.ToSegment();
 
-
-                // intermidiate
-                float HW1 = seg1.Info.m_halfWidth;
-                float HW2 = seg2.Info.m_halfWidth;
-                ushort junctionID = seg1.GetSharedNode(segID2);
+                ushort junctionID = segmentMain.GetSharedNode(segmentMinorID);
                 ref NetNode junction = ref junctionID.ToNode();
-                Vector2 origin = junction.m_position.ToCS2D();
-                bool bStartNode1 = seg1.m_startNode == junctionID;
-                bool bStartNode2 = seg2.m_startNode == junctionID;
-                Vector2 V1 = (bStartNode1 ? seg1.m_startDirection : seg1.m_endDirection).ToCS2D();
-                Vector2 V2 = (bStartNode2 ? seg2.m_startDirection : seg2.m_endDirection).ToCS2D();
-                Dir1 = V1.normalized;
-                Dir2 = V2.normalized;
 
-                float angle = Vector2.Angle(Dir1, Dir2);
+                Vector2 origin = junction.m_position.ToCS2D();
+
+                bool bStartNodeMain = segmentMain.m_startNode == junctionID;
+                bool bStartNodeMinor = segmentMinor.m_startNode == junctionID;
+
+                DirMain = (bStartNodeMain ? segmentMain.m_startDirection : segmentMain.m_endDirection).ToCS2D().normalized;
+                DirMinor = (bStartNodeMinor ? segmentMinor.m_startDirection : segmentMinor.m_endDirection).ToCS2D().normalized;
+
+
+                float HWMain = segmentMain.Info.m_halfWidth;
+                float HWMInor = segmentMinor.Info.m_halfWidth;
+                float angle = Vector2.Angle(DirMain, DirMinor);
                 angle *= Mathf.Deg2Rad;
                 float ratio = 1f / Mathf.Sin(angle);
-                HW1 *= ratio;
-                HW2 *= ratio;
+                HWMain *= ratio;
+                HWMInor *= ratio;
+
+
+
 
                 ////////////////////////////////////////////////////////////////
                 // Main calculations
-                Point = (HW2 + HWpath + Epsilon) * Dir1 + (HW1 + HWpath + Epsilon) * Dir2;
+                Point = (HWMInor + HWpath + Epsilon) * DirMain + (HWMain + HWpath + Epsilon) * DirMinor;
                 Point += origin;
 
-                ControlPoint = (HW1 + HWpath + Epsilon) * Dir2;
-                ControlPoint += origin;
+                ControlPointA = (HWMain + HWpath + Epsilon) * DirMinor;
+                ControlPointA += origin;
+
+                // old code:
+                //ushort otherNodeID = segmentMain.GetOtherNode(junctionID);
+                //Vector2 otherPoint = otherNodeID.ToNode().m_position.ToCS2D();
+                //Vector2 otherDir = (!bStartNodeMain ? segmentMain.m_startDirection : segmentMain.m_endDirection).ToCS2D().normalized;
+                //bLeft = segmentMinorID == segmentMain.GetLeftSegment(junctionID);
+                //Vector2 otherNormal = bLeft ? otherDir.Rotate90CCW() : otherDir.Rotate90CW();
+                //ControlPointB = (HWMain + HWpath + Epsilon) * otherNormal;
             }
         }
 
         Corner corner1, corner2;
         Vector2 MiddlePoint;
         Vector2 MDir1, MDir2;
-
-
         void CalculateMiddlePoint() {
-            Bezier3 b = new Bezier3 {
-                a = corner1.ControlPoint.ToCS3D(),
-                d = corner2.ControlPoint.ToCS3D(),
-            };
-            NetSegment.CalculateMiddlePoints(
-                b.a, corner1.Dir1.ToCS3D(),
-                b.d, corner2.Dir1.ToCS3D(),
-                true, true,
-                out b.b,
-                out b.c);
+            var b2 = LineUtil.Bezier2ByDir(
+                corner1.ControlPointA, corner1.DirMain,
+                corner2.ControlPointA, corner2.DirMain);
 
-            MiddlePoint = b.Position(0.5f).ToCS2D();
+            MiddlePoint = b2.Position(0.5f);
+            MDir2 = b2.Tangent(0.5f);
+            MDir1 = -MDir2;
 
-            //if (!VectorUtils.Intersect(
-            //    corner1.Point, corner1.Dir1,
-            //    corner2.Point, corner2.Dir1,
-            //    out MiddlePoint)) {
-            //    throw new Exception("Could not calculate middle point");
-            //}
-
-            MDir1 = corner2.Dir1 - corner1.Dir1;
-            MDir2 = -MDir1;
-            //Log.Debug(
-            //    $"corner1={corner1.Point.ToString("000.0000")} dir={corner1.Dir1.ToString("000.0000")} " +
-            //    $"corner2={corner2.Point.ToString("000.0000")} dir={corner2.Dir1.ToString("000.0000")} " +
-            //    $"MiddlePoint={MiddlePoint.ToString("000.0000")}");
+            // re-adjust offset direction.
+            corner1.DirMain = b2.Tangent(corner1.Offset / b2.ArcLength());
+            corner2.DirMain = -b2.Tangent(1f - corner2.Offset / b2.ArcLength());
         }
 
         public RaboutSlice(
             ushort segmentID1Main, ushort segmentID1Minor,
-            ushort segmentID2Main, ushort segmentID2Minor, NetInfo info) {
+            ushort segmentID2Main, ushort segmentID2Minor,
+            NodeWrapper centerNode, NetInfo info) {
             NetInfo eInfo = info.GetElevated();
-
             corner1 = new Corner(segmentID1Main, segmentID1Minor, eInfo.m_halfWidth);
             corner2 = new Corner(segmentID2Main, segmentID2Minor, eInfo.m_halfWidth);
             CalculateMiddlePoint();
 
-
-
             nodeM = new NodeWrapper(MiddlePoint, 10, eInfo);
             node1 = new NodeWrapper(corner1.Point, 0, eInfo);
             node2 = new NodeWrapper(corner2.Point, 0, eInfo);
-            segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.Dir1);
-            segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.Dir1);
+            segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.DirMain);
+            segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.DirMain);
+            segment3 = new SegmentWrapper(nodeM, centerNode);
         }
 
         public NodeWrapper nodeM;
@@ -107,6 +107,7 @@ namespace PedestrianBridge.Shapes {
 
         SegmentWrapper segment1;
         SegmentWrapper segment2;
+        SegmentWrapper segment3;
 
         public void Create() {
             nodeM.Create();
@@ -114,6 +115,7 @@ namespace PedestrianBridge.Shapes {
             node2.Create();
             segment1.Create();
             segment2.Create();
+            segment3.Create();
         }
     }
 }

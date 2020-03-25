@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
 using PedestrianBridge.Util;
-using static PedestrianBridge.Util.PrefabUtils;
+using static PedestrianBridge.Util.PrefabUtil;
 using static PedestrianBridge.Util.NetUtil;
 
 namespace PedestrianBridge.Shapes {
     public class NodeWrapper {
-        Vector2 point;
+        public Vector2 point;
         byte elevation;
         NetInfo info;
         public ushort ID;

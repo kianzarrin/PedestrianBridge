@@ -6,7 +6,8 @@ namespace PedestrianBridge.Util {
     using System.Linq;
     using UnityEngine;
     using static NetUtil;
-    using static TMPEUtils;
+    using static TMPEUtil;
+    using ColossalFramework.Math;
 
     public class RoundaboutUtil {
         public static RoundaboutUtil Instance = new RoundaboutUtil();
@@ -51,6 +52,23 @@ namespace PedestrianBridge.Util {
                 BanPedestrianCrossings(Minor, NodeID);
             }
 
+        }
+
+        public Vector2 CalculateCenter() {
+            Vector2 pointAcc = Vector3.zero;
+            float totalWieght = 0;
+            foreach(var segmentID in segmentList) {
+                Bezier2 bezier = segmentID.ToSegment().CalculateSegmentBezier3().ToCSBezier2();
+                float weitght = segmentID.ToSegment().m_averageLength;
+                Log.Debug($"segment:{segmentID} weitght={weitght}");
+                for (float t = 0; t < 1; t+=0.1f) {
+                    var pos = bezier.Position(t);
+                    pointAcc += pos * weitght;
+                    totalWieght += weitght;
+                }
+            }
+            var ret = pointAcc / totalWieght;
+            return ret;
         }
 
         public static ushort Get3rdSegment(ushort nodeID, ushort segmentID1, ushort segmentID2) {

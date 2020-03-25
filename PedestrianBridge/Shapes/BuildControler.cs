@@ -7,7 +7,7 @@ namespace PedestrianBridge.Shape {
     using Shapes;
     using static Util.NetUtil;
     using static Util.RoundaboutUtil;
-    using VectorUtils = Util.VectorUtils;
+    using VectorUtils = Util.VectorUtil;
 
     public static class BuildControler {
         public static void CreateJunctionBridge(ushort nodeID) {
@@ -20,7 +20,7 @@ namespace PedestrianBridge.Shape {
             var nodeList = new List<NodeWrapper>();
             for (int i = 0; i < n; ++i) {
                 ushort segID1 = segList[i], segID2 = segList[(i + 1) % n];
-                var lwrapper = new LWrapper(segID1, segID2, PrefabUtils.SelectedPrefab);
+                var lwrapper = new LWrapper(segID1, segID2, PrefabUtil.SelectedPrefab);
                 Log.Info($"creating L from segments: {segID1} {segID2}");
                 lwrapper.Create();
                 nodeList.Add(lwrapper.nodeL);
@@ -29,7 +29,7 @@ namespace PedestrianBridge.Shape {
                 SegmentWrapper segment = new SegmentWrapper(
                     nodeList[i], nodeList[(i + 1) % n]);
                 segment.Create();
-                TMPEUtils.BanPedestrianCrossings(segList[i], nodeID);
+                TMPEUtil.BanPedestrianCrossings(segList[i], nodeID);
             } // end for
         } // end method
 
@@ -47,26 +47,24 @@ namespace PedestrianBridge.Shape {
             Vector2 V1 = (bStartNode1 ? seg1.m_startDirection : seg1.m_endDirection).ToCS2D();
             Vector2 V2 = (bStartNode2 ? seg2.m_startDirection : seg2.m_endDirection).ToCS2D();
 
-            return VectorUtils.Intersect(point1, V1.Rotate90CW(), point2, V2.Rotate90CW(), out center);
+            return LineUtil.Intersect(point1, V1.Rotate90CW(), point2, V2.Rotate90CW(), out center);
         }
 
         public static void CreateRaboutBridge(ushort segmentID) {
-            var util = new RoundaboutUtil();
-            if (!util.TraverseLoop(segmentID, out _))
+            NetInfo info = PrefabUtil.SelectedPrefab;
+
+            var raboutCalc = new RoundaboutUtil();
+            if (!raboutCalc.TraverseLoop(segmentID, out _))
                 return;
 
-            var junctions = util.GetJunctions();
+            var junctions = raboutCalc.GetJunctions();
             int n = junctions.Count;
             if (n < 3) {
                 Log.Info("Roundabout has too few junctions.");
                 return;
             }
 
-            if(!CalculateCenter(junctions[0],junctions[1], out var centerPoint)){
-                Log.Info("Failed to calculate center.");
-                return;
-            }
-            NetInfo info = PrefabUtils.SelectedPrefab;
+            Vector2 centerPoint = raboutCalc.CalculateCenter();
             NodeWrapper center = new NodeWrapper(centerPoint, 10, info);
             center.Create();
 
@@ -75,10 +73,9 @@ namespace PedestrianBridge.Shape {
                 var slice = new RaboutSlice(
                     junctions[i].Main2, junctions[i].Minor,
                     junctions[i2].Main1, junctions[i2].Minor,
-                    PrefabUtils.SelectedPrefab);
+                    center,
+                    PrefabUtil.SelectedPrefab);
                 slice.Create();
-                SegmentWrapper segment = new SegmentWrapper(center, slice.nodeM);
-                segment.Create();
                 junctions[i].BanCrossing();
             }
         }
