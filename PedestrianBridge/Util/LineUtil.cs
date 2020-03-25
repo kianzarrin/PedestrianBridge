@@ -74,9 +74,9 @@ namespace PedestrianBridge.Util {
                 out Vector3 MiddlePoint1, out Vector3 MiddlePoint2);
             return new Bezier2 {
                 a = startPos,
-                b = endPos,
-                c = MiddlePoint1.ToCS2D(),
-                d = MiddlePoint2.ToCS2D()
+                d = endPos,
+                b = MiddlePoint1.ToCS2D(),
+                c = MiddlePoint2.ToCS2D()
             };
         }
     }
