@@ -3,6 +3,7 @@ using PedestrianBridge.Tool;
 using PedestrianBridge.Util;
 using System;
 using UnityEngine;
+using static PedestrianBridge.Util.HelpersExtensions;
 
 /* A lot of copy-pasting from Crossings mod by Spectra and Roundabout Mod by Strad. The sprites are partly copied as well. */
 
@@ -16,13 +17,22 @@ namespace PedestrianBridge.UI {
         const string PedestrianBridgeIcon = "PedestrianBridgeIcon";
         const string PedestrianBridgeIconPressed = "PedestrianBridgeIconPressed";
 
+        static UIComponent GetPanel() {
+            var ret = UIUtils.Instance.FindComponent<UIComponent>("PathsOptionPanel", null, UIUtils.FindOptions.NameContains);
+            Log.Debug("GetPanel returns " + ret);
+            return ret ?? throw new Exception("Could not find PathsOptionPanel");
+        }
+
         public override void Start() {
+            Log.Info("PedestrianBridgeButton.Start() is called.");
+
             name = "PedestrianBridgeButton";
             playAudioEvents = true;
-            tooltip = "Pedestrian Bridge Builder (CTRL+B)";
+            tooltip = "Pedestrian Bridge Builder (Ctrl+B)";
 
-            var roadsOptionPanel = UIUtils.Instance.FindComponent<UIComponent>("RoadsOptionPanel", null, UIUtils.FindOptions.NameContains);
-            var builtinTabstrip = UIUtils.Instance.FindComponent<UITabstrip>("ToolMode", roadsOptionPanel, UIUtils.FindOptions.None);
+            var builtinTabstrip = UIUtils.Instance.FindComponent<UITabstrip>("ToolMode", GetPanel(), UIUtils.FindOptions.None);
+            AssertNotNull(builtinTabstrip, "builtinTabstrip");
+
             UIButton uibutton = (UIButton)builtinTabstrip.tabs[0];
 
             string[] spriteNames = new string[]
@@ -47,15 +57,15 @@ namespace PedestrianBridge.UI {
             normalFgSprite = disabledFgSprite = hoveredFgSprite = pressedFgSprite = PedestrianBridgeIcon;
             focusedFgSprite = PedestrianBridgeIconPressed;
 
-            relativePosition = new Vector3(130, 38); 
+            relativePosition = new Vector3(33, 38); 
             size = new Vector2(SIZE, SIZE);
+            Show();
             Log.Info("PedestrianBridgeButton button created sucessfully.");
         }
 
         public static UIButton CreateButton() { 
             Log.Info("PedestrianBridgeButton.CreateButton() called");
-            var roadsOptionPanel = UIUtils.Instance.FindComponent<UIComponent>("RoadsOptionPanel", null, UIUtils.FindOptions.NameContains);
-            return roadsOptionPanel?.AddUIComponent<PedestrianBridgeButton>();
+            return GetPanel().AddUIComponent<PedestrianBridgeButton>();
         }
 
         protected override void OnClick(UIMouseEventParameter p) {

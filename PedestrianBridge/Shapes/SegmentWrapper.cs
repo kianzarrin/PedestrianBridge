@@ -70,7 +70,7 @@ namespace PedestrianBridge.Shapes {
             Vector3 middlePos = middlePoint.ToCS3D();
             Vector3 startDir = middlePos - startPos;
             Vector3 endDir = middlePos - endPos;
-            return CreateSegment(startNodeID, endNodeID, startDir, endDir);
+            return CreateSegment(startNodeID, endNodeID, startDir, endDir, info);
         }
 
         public static float GetClosestHeight(ushort segmentID, Vector3 Pos) =>

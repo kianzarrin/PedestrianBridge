@@ -41,6 +41,7 @@ namespace PedestrianBridge.Tool {
 
         protected override void OnDestroy() {
             Log.Debug("PedBridgeTool.OnDestroy()\n" + Environment.StackTrace);
+            button?.Hide();
             Destroy(button);
             base.OnDestroy();
         }
@@ -55,9 +56,9 @@ namespace PedestrianBridge.Tool {
 
         protected override void OnDisable() {
             Log.Debug("PedBridgeTool.OnDisable");
-            button.Unfocus();
+            button?.Unfocus();
             base.OnDisable();
-            button.Unfocus();
+            button?.Unfocus();
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {

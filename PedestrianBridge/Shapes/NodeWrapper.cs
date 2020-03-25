@@ -34,8 +34,7 @@ namespace PedestrianBridge.Shapes {
             }
         }
 
-        static ushort CreateNode(Vector3 position, NetInfo info = null) {
-            info = info ?? PedestrianBridgeInfo;
+        static ushort CreateNode(Vector3 position, NetInfo info) {
             Log.Info($"creating node for {info.name} at position {position.ToString("000.000")}");
             bool res = netMan.CreateNode(node: out ushort nodeID, randomizer: ref simMan.m_randomizer,
                 info: info, position: position, buildIndex: simMan.m_currentBuildIndex);

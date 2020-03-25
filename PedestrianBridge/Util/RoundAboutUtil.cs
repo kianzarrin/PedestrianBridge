@@ -60,7 +60,6 @@ namespace PedestrianBridge.Util {
             foreach(var segmentID in segmentList) {
                 Bezier2 bezier = segmentID.ToSegment().CalculateSegmentBezier3().ToCSBezier2();
                 float weitght = segmentID.ToSegment().m_averageLength;
-                Log.Debug($"segment:{segmentID} weitght={weitght}");
                 for (float t = 0; t < 1; t+=0.1f) {
                     var pos = bezier.Position(t);
                     pointAcc += pos * weitght;
