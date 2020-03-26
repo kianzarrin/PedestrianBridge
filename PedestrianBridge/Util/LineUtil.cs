@@ -16,16 +16,15 @@ namespace PedestrianBridge.Util {
             float b2 = C.x - D.x;
             float c2 = a2 * (C.x) + b2 * (C.y);
 
-            float determinant = a1 * b2 - a2 * b1;
+            float determinant = a1 * b2 - a2 * b1; // TODO VectorUtil.Determinent(A,B);
 
-            if (HelpersExtensions.Equal(determinant, 0)) {
+            if (MathUtil.EqualAprox(determinant, 0)) {
                 // The lines are parallel. This is simplified 
-                // by returning a pair of FLT_MAX 
                 center = Vector2.zero;
                 return false;
             } else {
-                center.x = (b2 * c1 - b1 * c2) / determinant;
-                center.y = (a1 * c2 - a2 * c1) / determinant;
+                center.x = (b2 * c1 - b1 * c2) / determinant; 
+                center.y = (a1 * c2 - a2 * c1) / determinant; 
                 return true;
             }
         }

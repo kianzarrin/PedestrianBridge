@@ -13,7 +13,7 @@ namespace PedestrianBridge.Shape {
         public static void CreateJunctionBridge(ushort nodeID) {
             if (nodeID.ToNode().CountSegments() < 3)
                 throw new NotImplementedException("number of segments is less than 3");
-            List<ushort> segList = GetCWSegList(nodeID);
+            List<ushort> segList = GetCCSegList(nodeID);
             if (segList.Count < 3)
                 throw new Exception($"seglist count is ${segList.Count} expected at least 3");
             int n = segList.Count;

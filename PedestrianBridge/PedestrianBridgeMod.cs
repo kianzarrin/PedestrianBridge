@@ -14,6 +14,7 @@ namespace PedestrianBridge {
         public void OnEnabled() {
             if (HelpersExtensions.InGame)
                 LoadTool.Load();
+            TestsExperiments.Run();
         }
 
         public void OnDisabled() {
@@ -41,4 +42,7 @@ namespace PedestrianBridge {
             LoadTool.Release();
         }
     }
+
+
+
 } // end namesapce

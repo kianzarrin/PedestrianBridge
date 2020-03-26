@@ -3,16 +3,16 @@ namespace PedestrianBridge.Shapes {
     using System;
     using UnityEngine;
     using Util;
-    using static Util.HelpersExtensions;
+    using static Util.MathUtil;
     using static Util.NetUtil;
     using static Util.VectorUtil;
-    using VectorUtils = Util.VectorUtil;
 
     public class RaboutSlice {
         public struct Corner {
             // Output:
             internal Vector2 Point;
             internal Vector2 ControlPointA;
+            internal bool Ignore;
 
             /// DirMain first represents the direction of the main segment at the junction.
             /// but then it is modified to represent the direction of the pedestrian bridge
@@ -47,30 +47,31 @@ namespace PedestrianBridge.Shapes {
                 HWMInor *= ratio;
 
 
-
-
                 ////////////////////////////////////////////////////////////////
                 // Main calculations
-                Point = (HWMInor + HWpath + Epsilon) * DirMain + (HWMain + HWpath + Epsilon) * DirMinor;
+                Point = (HWMInor + HWpath + SAFETY_NET) * DirMain + (HWMain + HWpath + SAFETY_NET) * DirMinor;
                 Point += origin;
 
-                ControlPointA = (HWMain + HWpath + Epsilon) * DirMinor;
+                ControlPointA = (HWMain + HWpath + SAFETY_NET) * DirMinor;
                 ControlPointA += origin;
 
-                // old code:
-                //ushort otherNodeID = segmentMain.GetOtherNode(junctionID);
-                //Vector2 otherPoint = otherNodeID.ToNode().m_position.ToCS2D();
-                //Vector2 otherDir = (!bStartNodeMain ? segmentMain.m_startDirection : segmentMain.m_endDirection).ToCS2D().normalized;
-                //bLeft = segmentMinorID == segmentMain.GetLeftSegment(junctionID);
-                //Vector2 otherNormal = bLeft ? otherDir.Rotate90CCW() : otherDir.Rotate90CW();
-                //ControlPointB = (HWMain + HWpath + Epsilon) * otherNormal;
+                Ignore = false; //!segmentMinor.Info.m_hasPedestrianLanes;
             }
         }
 
         Corner corner1, corner2;
         Vector2 MiddlePoint;
         Vector2 MDir1, MDir2;
-        void CalculateMiddlePoint() {
+        bool CalculateMiddlePoint() {
+            Vector2 v21 = corner2.Point - corner1.Point;
+            float angle1 = VectorUtil.UnsignedAngleRad(v21, corner1.DirMain); // expected Accute
+            float angle2 = VectorUtil.UnsignedAngleRad(-v21, corner2.DirMain); // expected Accute
+            float c = Mathf.PI * .5f - Epsilon;
+            if (angle1>=c || angle2>= c) {
+                Log.Info("Roundabout angle >= 180");
+                return false;
+            }
+
             var b2 = LineUtil.Bezier2ByDir(
                 corner1.ControlPointA, corner1.DirMain,
                 corner2.ControlPointA, corner2.DirMain);
@@ -82,22 +83,47 @@ namespace PedestrianBridge.Shapes {
             // re-adjust offset direction.
             corner1.DirMain = b2.Tangent(corner1.Offset / b2.ArcLength());
             corner2.DirMain = -b2.Tangent(1f - corner2.Offset / b2.ArcLength());
+            return true;
+        }
+
+        bool IsSplit(ushort segmentID1Minor, ushort segmentID2Minor) {
+            bool oneway1 = CalculateIsOneWay(segmentID1Minor);
+            bool oneway2 = CalculateIsOneWay(segmentID2Minor);
+            bool b1 = GetHeadNode(segmentID1Minor) == GetTailNode(segmentID2Minor);
+            bool b2 = GetHeadNode(segmentID2Minor) == GetTailNode(segmentID1Minor);
+            bool ret = oneway1 & oneway2 & (b1 | b2);
+            return ret;
         }
 
         public RaboutSlice(
             ushort segmentID1Main, ushort segmentID1Minor,
             ushort segmentID2Main, ushort segmentID2Minor,
             NodeWrapper centerNode, NetInfo info) {
+            Log.Info($"RaboutSlice: main1:{segmentID1Main}, minor1:{segmentID1Minor}, " +
+                $"main2:{segmentID2Main}, minor2:{segmentID2Minor},");
+
+            bool ignoreAll = IsSplit(segmentID1Minor, segmentID2Minor);
+            if (ignoreAll) {
+                Log.Info("RaboutSlice: Ignoring Split");
+                return;
+            }
+
             NetInfo eInfo = info.GetElevated();
             corner1 = new Corner(segmentID1Main, segmentID1Minor, eInfo.m_halfWidth);
             corner2 = new Corner(segmentID2Main, segmentID2Minor, eInfo.m_halfWidth);
-            CalculateMiddlePoint();
+
+            ignoreAll = corner1.Ignore & corner2.Ignore;
+            ignoreAll = ignoreAll || !CalculateMiddlePoint();
+            if (ignoreAll) {
+                Log.Info($"RaboutSlice: returns silently - {corner1.Ignore}  {corner2.Ignore} ");
+                return;
+            }
 
             nodeM = new NodeWrapper(MiddlePoint, 10, eInfo);
-            node1 = new NodeWrapper(corner1.Point, 0, eInfo);
-            node2 = new NodeWrapper(corner2.Point, 0, eInfo);
-            segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.DirMain);
-            segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.DirMain);
+            node1 = corner1.Ignore ? null: new NodeWrapper(corner1.Point, 0, eInfo);
+            node2 = corner2.Ignore ? null : new NodeWrapper(corner2.Point, 0, eInfo);
+            segment1 = corner1.Ignore ? null : new SegmentWrapper(nodeM, node1, MDir1, corner1.DirMain);
+            segment2 = corner2.Ignore ? null : new SegmentWrapper(nodeM, node2, MDir2, corner2.DirMain);
             segment3 = new SegmentWrapper(nodeM, centerNode);
         }
 
@@ -110,12 +136,12 @@ namespace PedestrianBridge.Shapes {
         SegmentWrapper segment3;
 
         public void Create() {
-            nodeM.Create();
-            node1.Create();
-            node2.Create();
-            segment1.Create();
-            segment2.Create();
-            segment3.Create();
+            nodeM?.Create();
+            node1?.Create();
+            node2?.Create();
+            segment1?.Create();
+            segment2?.Create();
+            segment3?.Create();
         }
     }
 }

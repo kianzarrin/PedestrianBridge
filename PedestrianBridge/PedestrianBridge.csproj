@@ -89,10 +89,12 @@
     <Compile Include="Shapes\NodeWrapper.cs" />
     <Compile Include="Shapes\RaboutSlice.cs" />
     <Compile Include="Shapes\SegmentWrapper.cs" />
+    <Compile Include="TestsExperiments.cs" />
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="Tool\KianToolBase.cs" />
     <Compile Include="Tool\PedBridgeTool.cs" />
     <Compile Include="Util\LineUtil.cs" />
+    <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\RoundaboutUtil.cs" />
     <Compile Include="Util\TMPEUtil.cs" />
     <Compile Include="UI\ToolButton.cs" />

@@ -1,7 +1,8 @@
 namespace PedestrianBridge.Shapes {
+    using System;
     using UnityEngine;
     using Util;
-    using static Util.HelpersExtensions;
+    using static Util.MathUtil;
     using static Util.NetUtil;
 
     public class LWrapper {
@@ -9,7 +10,10 @@ namespace PedestrianBridge.Shapes {
             // Output:
             internal Vector2 Point1, PointL, Point2;
 
+
+            // segID2 is positioned CCW WRT segID1
             internal Calc(ushort segID1, ushort segID2, float HWpb) {
+                Log.Debug($"LWrapper.Calc: {segID1}, {segID2}");
                 // Prepration:
                 ref NetSegment seg1 = ref segID1.ToSegment();
                 ref NetSegment  seg2 = ref segID2.ToSegment();
@@ -25,15 +29,27 @@ namespace PedestrianBridge.Shapes {
                 Vector2 dir1 = V1.normalized;
                 Vector2 dir2 = V2.normalized;
 
-                float angle = Vector2.Angle(dir1, dir2);
-                angle *= Mathf.Deg2Rad;
+                float angle = VectorUtil.SignedAngleRadCCW(dir1, dir2);
                 float ratio = 1f / Mathf.Sin(angle);
-                HW1 *= ratio;
-                HW2 *= ratio;
+                bool parallel = VectorUtil.AreApprox180(dir1, dir2);
+                Log.Debug($"parallel={parallel} angle={angle} ratio={ratio}");
+
 
                 ////////////////////////////////////////////////////////////////
                 // Main calculations
-                PointL = (HW2 + HWpb + Epsilon) * dir1 + (HW1 + HWpb + Epsilon) * dir2;
+
+                if (!parallel) {
+                    HW1 *= ratio;
+                    HW2 *= ratio;
+                    HWpb *= ratio;
+
+                    PointL = (HW2 + HWpb + SAFETY_NET) * dir1 + (HW1 + HWpb + SAFETY_NET) * dir2;
+                } else {
+                    Vector2 normal = dir1.Rotate90CCW();
+                    float HW = Mathf.Max(HW1, HW2);
+                    PointL = (HW + HWpb + SAFETY_NET) * normal;
+                }
+
                 Point1 = PointL + 3 * MPU * dir1;
                 Point2 = PointL + 3 * MPU * dir2;
 
@@ -43,7 +59,7 @@ namespace PedestrianBridge.Shapes {
             }
         }
 
-        // segmentID2 must be to the left of segmentID1 (when going toward the intersection)
+        // segmentID2 is postioned CCW WRT segmentID1.
         public LWrapper(ushort segmentID1, ushort segmentID2, NetInfo info) {
             NetInfo eInfo = info.GetElevated();
             var calc = new Calc(segmentID1, segmentID2, eInfo.m_halfWidth);

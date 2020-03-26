@@ -11,6 +11,8 @@ namespace PedestrianBridge.Util {
     }
 
     public static class NetUtil {
+        public const float SAFETY_NET = 0.02f;
+
         public static NetManager netMan => Singleton<NetManager>.instance;
         public static NetTool netTool => Singleton<NetTool>.instance;
         public static SimulationManager simMan => Singleton<SimulationManager>.instance;
@@ -131,6 +133,25 @@ namespace PedestrianBridge.Util {
                         Add(segmentID);
                 }
             }
+        }
+
+        /// <summary>
+        /// returns a counter-clockwise list of segments of the given node ID.
+        /// </summary>
+        public static List<ushort> GetCCSegList(ushort nodeID) {
+            ushort segmentID = GetFirstSegment(nodeID);
+            List<ushort> segList = new List<ushort>();
+            segList.Add(segmentID);
+
+            // add the rest of the segments.
+            while (true) {
+                segmentID = segmentID.ToSegment().GetRightSegment(nodeID);
+                if (segmentID == segList[0])
+                    break;
+                else
+                    segList.Add(segmentID);
+            }
+            return segList;
         }
 
         /// <summary>

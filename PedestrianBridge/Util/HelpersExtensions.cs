@@ -9,8 +9,6 @@ namespace PedestrianBridge.Util {
 
     public static class HelpersExtensions
     {
-
-
         internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
         internal static bool CheckGameMode(AppMode mode)
         {
@@ -104,14 +102,11 @@ namespace PedestrianBridge.Util {
 
         internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
-        public const float Epsilon = 0.01f;
-        public static bool Equal(float a, float b) => Mathf.Abs(a - b) < Epsilon * 2f;
-
         public static void AssertNotNull(object obj, string m = "") =>
             Assert(obj != null, " unexpected null " + m);
 
         public static void AssertEqual(float a, float b, string m = "") =>
-            Assert(Equal(a, b), "expected {a} == {b} | " + m);
+            Assert(MathUtil.EqualAprox(a, b), "expected {a} == {b} | " + m);
 
         internal static void Assert(bool con, string m = "") {
             if (!con) {
