@@ -19,7 +19,6 @@ namespace PedestrianBridge.Shapes {
             /// slightly away from the junction.
             internal Vector2 DirMain, DirMinor;
             internal float Offset => (ControlPointA - Point).magnitude;
-            //bool bLeft;
 
             public Corner(ushort segmentMainID, ushort segmentMinorID, float HWpath) {
                 // Prepration:
@@ -34,26 +33,40 @@ namespace PedestrianBridge.Shapes {
                 bool bStartNodeMain = segmentMain.m_startNode == junctionID;
                 bool bStartNodeMinor = segmentMinor.m_startNode == junctionID;
 
-                DirMain = (bStartNodeMain ? segmentMain.m_startDirection : segmentMain.m_endDirection).ToCS2D().normalized;
-                DirMinor = (bStartNodeMinor ? segmentMinor.m_startDirection : segmentMinor.m_endDirection).ToCS2D().normalized;
+                DirMain = (bStartNodeMain ? segmentMain.m_startDirection : segmentMain.m_endDirection)
+                    .ToCS2D().normalized;
+                DirMinor = (bStartNodeMinor ? segmentMinor.m_startDirection : segmentMinor.m_endDirection)
+                    .ToCS2D().normalized;
 
 
                 float HWMain = segmentMain.Info.m_halfWidth;
-                float HWMInor = segmentMinor.Info.m_halfWidth;
-                float angle = Vector2.Angle(DirMain, DirMinor);
-                angle *= Mathf.Deg2Rad;
+                float HWMinor = segmentMinor.Info.m_halfWidth;
+                float angle = VectorUtil.UnsignedAngleRad(DirMain, DirMinor);
                 float ratio = 1f / Mathf.Sin(angle);
-                HWMain *= ratio;
-                HWMInor *= ratio;
 
+                bool bLeft = segmentMain.GetLeftSegment(junctionID) == segmentMinorID;
+                Vector2 normal = bLeft ? DirMain.Rotate90CW() : DirMain.Rotate90CCW();
+                float c = Mathf.PI * .5f;
+                bool accute = angle < c;
 
                 ////////////////////////////////////////////////////////////////
                 // Main calculations
-                Point = (HWMInor + HWpath + SAFETY_NET) * DirMain + (HWMain + HWpath + SAFETY_NET) * DirMinor;
+                ControlPointA = (HWMain + HWpath + SAFETY_NET) * normal;
+                ControlPointA += origin;
+
+                if (accute) {
+                    Log.Debug($"angle={angle} ratio={ratio} DirMinor.magnitude={DirMinor.magnitude} " +
+                        $"normal={normal} DirMinor={DirMinor} DirMain={DirMain} " +
+                        $"HWpath={HWpath} HWMain={HWMain} HWMinor={HWMinor}");
+                }
+
+                HWpath *= ratio;
+                HWMain *= ratio;
+                HWMinor *= ratio;
+
+                Point = (HWMinor + HWpath + SAFETY_NET) * DirMain + (HWMain + HWpath + SAFETY_NET) * DirMinor;
                 Point += origin;
 
-                ControlPointA = (HWMain + HWpath + SAFETY_NET) * DirMinor;
-                ControlPointA += origin;
 
                 Ignore = false; //!segmentMinor.Info.m_hasPedestrianLanes;
             }
@@ -95,6 +108,41 @@ namespace PedestrianBridge.Shapes {
             return ret;
         }
 
+        bool IsBetweenInOut(
+            ushort segmentID1Main, ushort segmentID1Minor,
+            ushort segmentID2Main, ushort segmentID2Minor) {
+            Util.HelpersExtensions.AssertStack();
+            Log.Debug("IsBetweenInOut() called.");
+            const float maxLen = 7 * MPU;
+            bool bShort = (corner1.Point - corner2.Point).sqrMagnitude <= maxLen * maxLen;
+            if (!bShort) {
+                return false; // fast exit
+            }
+
+            bool bOneWay = CalculateIsOneWay(segmentID1Minor) && CalculateIsOneWay(segmentID2Minor);
+
+            float angle1 = VectorUtil.UnsignedAngleRad(corner1.DirMinor, corner1.DirMain);
+            float angle2 = VectorUtil.UnsignedAngleRad(corner2.DirMinor, corner2.DirMain);
+            bool bAccute1 = angle1 < Mathf.PI * .5f + Epsilon;
+            bool bAccute2 = angle2 < Mathf.PI * .5f + Epsilon;
+            bool bAccute = bAccute1 && bAccute2;
+
+
+            bool flag1 =
+                GetHeadNode(segmentID1Minor) == GetHeadNode(segmentID1Main) &&
+                GetTailNode(segmentID2Main) == GetTailNode(segmentID2Minor);
+            bool flag2 =
+                GetHeadNode(segmentID2Minor) == GetHeadNode(segmentID2Main) &&
+                GetTailNode(segmentID1Main) == GetTailNode(segmentID1Minor);
+            bool flag = flag1 || flag2;
+
+            bool ret = bOneWay && bAccute && flag;
+            if (ret) {
+                Log.Debug("IsBeweenInout() returns true");
+            }
+            return ret;
+        }
+
         public RaboutSlice(
             ushort segmentID1Main, ushort segmentID1Minor,
             ushort segmentID2Main, ushort segmentID2Minor,
@@ -111,9 +159,9 @@ namespace PedestrianBridge.Shapes {
             NetInfo eInfo = info.GetElevated();
             corner1 = new Corner(segmentID1Main, segmentID1Minor, eInfo.m_halfWidth);
             corner2 = new Corner(segmentID2Main, segmentID2Minor, eInfo.m_halfWidth);
-
             ignoreAll = corner1.Ignore & corner2.Ignore;
             ignoreAll = ignoreAll || !CalculateMiddlePoint();
+            ignoreAll = ignoreAll || IsBetweenInOut(segmentID1Main, segmentID1Minor, segmentID2Main, segmentID2Minor);
             if (ignoreAll) {
                 Log.Info($"RaboutSlice: returns silently - {corner1.Ignore}  {corner2.Ignore} ");
                 return;

@@ -102,10 +102,10 @@ namespace PedestrianBridge.Util {
 
         internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
-        public static void AssertNotNull(object obj, string m = "") =>
+        internal static void AssertNotNull(object obj, string m = "") =>
             Assert(obj != null, " unexpected null " + m);
 
-        public static void AssertEqual(float a, float b, string m = "") =>
+        internal static void AssertEqual(float a, float b, string m = "") =>
             Assert(MathUtil.EqualAprox(a, b), "expected {a} == {b} | " + m);
 
         internal static void Assert(bool con, string m = "") {
@@ -113,6 +113,16 @@ namespace PedestrianBridge.Util {
                 m = "Assertion failed: " + m;
                 Log.Error(m);
                 throw new System.Exception(m);
+            }
+        }
+
+        internal static void AssertStack() {
+            var frames = new StackTrace().FrameCount;
+            //Log.Debug("frames=" + frames);
+            if (frames > 100) {
+                Exception e = new StackOverflowException("frames=" + frames);
+                Log.Error(e.ToString());
+                throw e;
             }
         }
 

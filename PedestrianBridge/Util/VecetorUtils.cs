@@ -27,18 +27,10 @@ namespace PedestrianBridge.Util {
                 );
         }
 
-        /// <summary>
-        /// result is between -pi to +pi. angle is CCW with respect to Vector2.right
-        /// Assuming v is normalized
-        /// </summary>
-        private static float _SignedAngleRadCCW_Normalized(this Vector2 v) {
-            return Mathf.Acos(v.x) * Mathf.Sign(v.y);
-        }
-
         /// result is between -pi to +pi. angle is CCW with respect to Vector2.right
         public static float SignedAngleRadCCW(this Vector2 v) {
             v.Normalize();
-            return v._SignedAngleRadCCW_Normalized();
+            return Mathf.Acos(v.x) * Mathf.Sign(v.y);
         }
 
         public static float Determinent(Vector2 v1, Vector2 v2) =>

@@ -69,7 +69,7 @@ namespace PedestrianBridge.Util {
         }
 
         public static ushort GetHeadNode(ushort segmentId) =>
-            GetHeadNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
+            GetHeadNode(ref segmentId.ToSegment());
 
         public static ushort GetTailNode(ref NetSegment segment) {
             bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
@@ -82,7 +82,7 @@ namespace PedestrianBridge.Util {
         }
 
         public static ushort GetTailNode(ushort segmentId) =>
-            GetTailNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
+            GetTailNode(ref segmentId.ToSegment());
 
         public static bool CalculateIsOneWay(ushort segmentId) {
             int forward = 0;

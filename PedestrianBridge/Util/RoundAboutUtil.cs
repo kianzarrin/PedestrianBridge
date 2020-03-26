@@ -127,6 +127,9 @@ namespace PedestrianBridge.Util {
         }
 
         private bool TraverseAroundRecursive(ushort segmentId) {
+            Util.HelpersExtensions.AssertStack();
+            Log.Debug($"TraverseAroundRecursive({segmentId}) called.\n" +
+                $"segmentList="+ segmentList.ToSTR() + "\n" + Environment.StackTrace);
             if (segmentList.Count > 20) {
                 return false; // too long. prune
             }
@@ -167,10 +170,9 @@ namespace PedestrianBridge.Util {
         /// <param name="headNodeId">head node for prevSegmentId</param>
         /// <returns></returns>
         private static bool IsPartofRoundabout(ushort nextSegmentId, ushort prevSegmentId) {
-            ushort headNodeId = GetHeadNode(prevSegmentId);
-            bool ret = nextSegmentId != 0 && nextSegmentId != prevSegmentId;
-            ret &= CalculateIsOneWay(nextSegmentId);
-            ret &= headNodeId == GetTailNode(nextSegmentId);
+            bool ret = (nextSegmentId != 0) & (nextSegmentId != prevSegmentId);
+            ret = ret & CalculateIsOneWay(nextSegmentId);
+            ret = ret && GetHeadNode(prevSegmentId) == GetTailNode(nextSegmentId);
             return ret;
         }
 
