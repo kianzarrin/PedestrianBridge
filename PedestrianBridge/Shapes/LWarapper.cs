@@ -1,4 +1,5 @@
 namespace PedestrianBridge.Shapes {
+    using ColossalFramework;
     using ColossalFramework.Math;
     using System;
     using UnityEngine;
@@ -35,13 +36,16 @@ namespace PedestrianBridge.Shapes {
                 bool parallel = VectorUtil.AreApprox180(StartDir1, StartDir2);
                 Log.Debug($"parallel={parallel} angle={angle} ratio={ratio}");
 
-
                 ////////////////////////////////////////////////////////////////
                 // Main calculations
-
+                float offset1 = 0;
+                float offset2 = 0;
                 if (!parallel) {
-                    PointL = (HW2 + HWpb + SAFETY_NET) * ratio * StartDir1 +
-                             (HW1 + HWpb + SAFETY_NET) * ratio * StartDir2;
+                    float d1 = (HW2 + HWpb) * ratio + SAFETY_NET;
+                    float d2 = (HW1 + HWpb) * ratio + SAFETY_NET;
+                    PointL = d1 * StartDir1 + d2 * StartDir2;
+                    offset1 = d1 + d2 * Vector2.Dot(StartDir1, StartDir2);
+                    offset2 = d2 + d1 * Vector2.Dot(StartDir1, StartDir2);
                 } else {
                     Vector2 normal = StartDir1.Rotate90CCW();
                     float HW = Mathf.Max(HW1, HW2);
@@ -49,31 +53,73 @@ namespace PedestrianBridge.Shapes {
                 }
                 PointL += origin;
 
-                Point1 = Point2 = default;
-                EndDir1 = EndDir2 = default;
+                Point1 = Point2 = EndDir1 = EndDir2 = default;
 
-                Travel(ref seg1, bStartNode1, 3 * MPU + HW2 + HWpb + SAFETY_NET, out Point1, out Vector2 tangent1);
-                var normal1 = tangent1.Rotate90CCW();
-                Point1 += (HW1 + HWpb + SAFETY_NET) * normal1;
-                EndDir1 = -tangent1;
-                Log.Debug($"Point1-PointL={Point1 - PointL} StartDir1={StartDir1} tangent1={tangent1}");
+                float targetLength = 4 * MPU;
+                float weight = 0.3f; // reduce weigth for the results to converge.
+                float distance = targetLength + offset1;
+                for (int counter = 0; counter < 10; ++counter) {
+                    bool res = Travel(segID1, junctionID, distance, out Point1, out Vector2 tangent1);
+                    var normal1 = tangent1.Rotate90CCW();
+                    Point1 += (HW1 + HWpb + SAFETY_NET) * normal1;
+                    EndDir1 = -tangent1;
 
-                Travel(ref seg2, bStartNode2, 3 * MPU + HW1 + HWpb + SAFETY_NET, out Point2, out Vector2 tangent2);
-                var normal2 = tangent2.Rotate90CW();
-                Point2 += (HW2 + HWpb + SAFETY_NET) * normal2;
-                EndDir2 = -tangent2;
+                    float length = LineUtil.Bezier2ByDir(PointL, StartDir1, Point1, EndDir1).ArcLength();
+                    distance = (1-weight) * distance + weight * distance * targetLength / length;
+                    float diff = length - targetLength;
+                    if(!res || Mathf.Abs(diff) < 0.5 * MPU) 
+                        break;
+                    
+                }
+
+                distance = targetLength + offset2;
+                for (int counter = 0; counter < 10; ++counter) {
+                    bool res = Travel(segID2, junctionID, distance, out Point2, out Vector2 tangent2);
+                    var normal2 = tangent2.Rotate90CW();
+                    Point2 += (HW2 + HWpb + SAFETY_NET) * normal2;
+                    EndDir2 = -tangent2;
+
+                    float length = LineUtil.Bezier2ByDir(PointL, StartDir2, Point2, EndDir2).ArcLength();
+                    distance = (1 - weight) * distance + weight * distance * targetLength / length;
+                    float diff = length - targetLength;
+                    if (!res || Mathf.Abs(diff) < 0.5 * MPU)
+                        break;
+                }
+
             }
 
-            void Travel(ref NetSegment seg, bool startNode, float distance, out Vector2 point, out Vector2 tangent) {
-                Bezier2 bezier = seg.CalculateSegmentBezier2(startNode);
-                float t = distance / seg.m_averageLength;
+            static bool Travel(ushort segmentId, ushort nodeId, float distance, out Vector2 point, out Vector2 tangent) {
+                Bezier2 bezier = CalculateSegmentBezier2(segmentId, nodeId);
+                float length = bezier.ArcLength();
+                if (distance > length) {
+                    ushort otherNodeId = segmentId.ToSegment().GetOtherNode(nodeId);
+                    ushort nextSegmentId = ContinueToNextSegment(segmentId, otherNodeId);
+                    if (nextSegmentId != 0) {
+                        return Travel(nextSegmentId, otherNodeId, distance-length, out point, out tangent);
+                    }
+                    Log.Debug("distance > length but could not find next segment");
+                }
+                    
+                float t = distance < length ? distance / length : 1f;
                 point = bezier.Position(t);
                 tangent = bezier.Tangent(t).normalized;
-                Log.Debug($"distance={distance} segLen={seg.m_averageLength} t={t} " +
-                    $"point={point} tangent={tangent}");
-
+                return t < 1f-Epsilon;
             }
 
+            static ushort ContinueToNextSegment(ushort segmentId, ushort nodeId) {
+                ref NetSegment seg = ref segmentId.ToSegment();
+                ref NetNode node = ref nodeId.ToNode();
+
+                if (node.CountSegments()!=2) {
+                    return 0;
+                }
+                for(int i=0; i<8; ++i) {
+                    ushort nextSegmentID = node.GetSegment(i);
+                    if (nextSegmentID != 0 && nextSegmentID != segmentId)
+                        return nextSegmentID;
+                }
+                throw new Exception("Unreachable code");
+            }
 
         }
 

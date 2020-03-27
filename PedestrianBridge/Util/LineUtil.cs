@@ -45,9 +45,8 @@ namespace PedestrianBridge.Util {
             return ret;
         }
 
-        public static float ArcLength(this Bezier2 beizer) {
+        public static float ArcLength(this Bezier2 beizer, float step = 0.1f) {
             float ret = 0;
-            float step = 0.1f;
             for (float t = step; t <= 1f; t += step) {
                 float len = (beizer.Position(t) - beizer.Position(t - step)).magnitude;
                 ret += len;

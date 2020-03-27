@@ -38,8 +38,9 @@ namespace PedestrianBridge.Util {
             return bezier;
         }
 
-        internal static Bezier2 CalculateSegmentBezier2(this ref NetSegment seg, bool startNode) {
-            Bezier3 bezier3 = seg.CalculateSegmentBezier3();
+        internal static Bezier2 CalculateSegmentBezier2(ushort segmentId, ushort nodeId) {
+            bool startNode = IsStartNode(segmentId, nodeId);
+            Bezier3 bezier3 = segmentId.ToSegment().CalculateSegmentBezier3();
             Bezier2 bezier2 = bezier3.ToCSBezier2();
             if (startNode)
                 return bezier2;
