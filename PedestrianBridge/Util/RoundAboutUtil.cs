@@ -34,7 +34,7 @@ namespace PedestrianBridge.Util {
         public bool TraverseLoop(ushort segmentId, out List<ushort> segList) {
             if(segmentId == CachedSegmentID) {
                 segList = SegmentList;
-                return SegmentList != null;
+                return SegmentList != null && SegmentList.Count != 0;
             }
             CachedSegmentID = segmentId;
             this.SegmentList.Clear();

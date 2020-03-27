@@ -38,6 +38,15 @@ namespace PedestrianBridge.Util {
             return bezier;
         }
 
+        internal static Bezier2 CalculateSegmentBezier2(this ref NetSegment seg, bool startNode) {
+            Bezier3 bezier3 = seg.CalculateSegmentBezier3();
+            Bezier2 bezier2 = bezier3.ToCSBezier2();
+            if (startNode)
+                return bezier2;
+            else
+                return bezier2.Invert();
+        }
+
         #region copied from TMPE
         public static bool LHT => TrafficDrivesOnLeft;
         public static bool RHT => !LHT;

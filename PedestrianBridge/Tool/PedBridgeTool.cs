@@ -76,16 +76,7 @@ namespace PedestrianBridge.Tool {
             }
         }
 
-        bool IsSuitableJunction() {
-            if (HoveredNodeId == 0)
-                return false;
-            NetNode node = HoveredNodeId.ToNode();
-            if (node.CountSegments() < 3)
-                return false;
-            return true;
-        }
-
-            protected override void OnPrimaryMouseClicked() {
+        protected override void OnPrimaryMouseClicked() {
             Log.Debug($"OnPrimaryMouseClicked: segment {HoveredSegmentId} node {HoveredNodeId}");
             if(RoundaboutUtil.Instance_Click.TraverseLoop(HoveredSegmentId,out var segList)) {
                 BuildControler.CreateRaboutBridge(RoundaboutUtil.Instance_Click);
@@ -98,6 +89,15 @@ namespace PedestrianBridge.Tool {
 
         protected override void OnSecondaryMouseClicked() {
             throw new System.NotImplementedException();
+        }
+
+        bool IsSuitableJunction() {
+            if (HoveredNodeId == 0)
+                return false;
+            NetNode node = HoveredNodeId.ToNode();
+            if (node.CountSegments() < 3)
+                return false;
+            return true;
         }
 
     } //end class
