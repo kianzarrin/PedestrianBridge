@@ -93,6 +93,7 @@
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="Tool\KianToolBase.cs" />
     <Compile Include="Tool\PedBridgeTool.cs" />
+    <Compile Include="Util\RoadEndPathUtil.cs" />
     <Compile Include="Util\LineUtil.cs" />
     <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\RoundaboutUtil.cs" />

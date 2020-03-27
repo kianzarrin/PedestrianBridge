@@ -9,81 +9,36 @@ namespace PedestrianBridge.Shapes {
 
     public class RaboutSlice {
         public struct Corner {
+            internal LWrapper.Calc L;
             // Output:
-            internal Vector2 Point;
-            internal Vector2 ControlPointA;
+            internal Vector2 ControlPoint => L.ControlPoint1;
+            internal Vector2 Point => L.PointL;
+            internal Vector2 AltPoint => L.Point2;
             internal bool Ignore;
 
             /// DirMain first represents the direction of the main segment at the junction.
             /// but then it is modified to represent the direction of the pedestrian bridge
             /// slightly away from the junction.
-            internal Vector2 DirMain, DirMinor;
-            internal float Offset => (ControlPointA - Point).magnitude;
+            internal Vector2 DirMain;
+
+
+            internal Vector2 DirMinor => L.StartDir2;
+            internal Vector2 EndDirMinor => L.EndDir2;
+            internal float Offset => (ControlPoint - Point).magnitude;
 
             public Corner(ushort segmentMainID, ushort segmentMinorID, float HWpath) {
-                // Prepration:
-                ref NetSegment segmentMain = ref segmentMainID.ToSegment();
-                ref NetSegment segmentMinor = ref segmentMinorID.ToSegment();
-
-                ushort junctionID = segmentMain.GetSharedNode(segmentMinorID);
-                ref NetNode junction = ref junctionID.ToNode();
-
-                Vector2 origin = junction.m_position.ToCS2D();
-
-                bool bStartNodeMain = segmentMain.m_startNode == junctionID;
-                bool bStartNodeMinor = segmentMinor.m_startNode == junctionID;
-
-                DirMain = (bStartNodeMain ? segmentMain.m_startDirection : segmentMain.m_endDirection)
-                    .ToCS2D().normalized;
-                DirMinor = (bStartNodeMinor ? segmentMinor.m_startDirection : segmentMinor.m_endDirection)
-                    .ToCS2D().normalized;
-
-
-                float HWMain = segmentMain.Info.m_halfWidth;
-                float HWMinor = segmentMinor.Info.m_halfWidth;
-                float angle = VectorUtil.UnsignedAngleRad(DirMain, DirMinor);
-                float ratio = 1f / Mathf.Sin(angle);
-
-                bool bLeft = segmentMain.GetLeftSegment(junctionID) == segmentMinorID;
-                Vector2 normal = bLeft ? DirMain.Rotate90CW() : DirMain.Rotate90CCW();
-
-                ////////////////////////////////////////////////////////////////
-                // Main calculations
-                ControlPointA = (HWMain + HWpath + SAFETY_NET) * normal;
-                ControlPointA += origin;
-
-
-                HWpath *= ratio;
-                HWMain *= ratio;
-                HWMinor *= ratio;
-
-
-                Point = (HWMinor + HWpath + SAFETY_NET) * DirMain + (HWMain + HWpath + SAFETY_NET) * DirMinor;
-#if DEBUG
-                if (angle < 1.5 || angle > 1.6) {
-                    //Log.Debug($" KIAN DEBUG ****************\n" +
-                    //    $"main:{segmentMainID} minor:{segmentMinorID} " +
-                    //    $"angle={angle} ratio={ratio} DirMinor.magnitude={DirMinor.magnitude} " +
-                    //    $"normal={normal} DirMinor={DirMinor.ToString("00.0000")} DirMain={DirMain.ToString("00.0000")} " +
-                    //    $"HWpath={HWpath} HWMain={HWMain} HWMinor={HWMinor}\n"+
-                    //    $"POINTS: \n" +
-                    //    $"(HWMain + HWpath + SAFETY_NET)={(HWMain + HWpath + SAFETY_NET)} " +
-                    //    $"(HWMain + HWpath + SAFETY_NET) * DirMinor = {(HWMain + HWpath + SAFETY_NET) * DirMinor} \n" +
-                    //    $"(HWMinor + HWpath + SAFETY_NET)={(HWMinor + HWpath + SAFETY_NET)} " +
-                    //    $"(HWMinor + HWpath + SAFETY_NET) * DirMain={(HWMinor + HWpath + SAFETY_NET) * DirMain}\n" +
-                    //    $"POINT={Point}");
-                }
-#endif
-                Point += origin;
-
-
-                Ignore = false; //!segmentMinor.Info.m_hasPedestrianLanes;
+                L = new LWrapper.Calc(segmentMainID, segmentMinorID, HWpath);
+                DirMain = L.StartDir1;
+            Ignore = false; //!segmentMinor.Info.m_hasPedestrianLanes;
             }
         }
 
         Corner corner1, corner2;
         Vector2 MiddlePoint;
         Vector2 MDir1, MDir2;
+        float Len1 => (MiddlePoint - corner1.Point).magnitude;
+        float Len2 => (MiddlePoint - corner2.Point).magnitude;
+
         bool CalculateMiddlePoint() {
             Vector2 v21 = corner2.Point - corner1.Point;
             float angle1 = VectorUtil.UnsignedAngleRad(v21, corner1.DirMain); // expected Accute
@@ -95,8 +50,8 @@ namespace PedestrianBridge.Shapes {
             }
 
             var b2 = LineUtil.Bezier2ByDir(
-                corner1.ControlPointA, corner1.DirMain,
-                corner2.ControlPointA, corner2.DirMain);
+                corner1.ControlPoint, corner1.DirMain,
+                corner2.ControlPoint, corner2.DirMain);
 
             MiddlePoint = b2.Position(0.5f);
             MDir2 = b2.Tangent(0.5f);
@@ -135,7 +90,6 @@ namespace PedestrianBridge.Shapes {
             bool bAccute1 = angle1 < Mathf.PI * .5f + Epsilon;
             bool bAccute2 = angle2 < Mathf.PI * .5f + Epsilon;
             bool bAccute = bAccute1 && bAccute2;
-
 
             bool flag1 =
                 GetHeadNode(segmentID1Minor) == GetHeadNode(segmentID1Main) &&
@@ -177,10 +131,33 @@ namespace PedestrianBridge.Shapes {
             }
 
             nodeM = new NodeWrapper(MiddlePoint, 10, eInfo);
-            node1 = corner1.Ignore ? null: new NodeWrapper(corner1.Point, 0, eInfo);
-            node2 = corner2.Ignore ? null : new NodeWrapper(corner2.Point, 0, eInfo);
-            segment1 = corner1.Ignore ? null : new SegmentWrapper(nodeM, node1, MDir1, corner1.DirMain);
-            segment2 = corner2.Ignore ? null : new SegmentWrapper(nodeM, node2, MDir2, corner2.DirMain);
+            if (corner1.Ignore) {
+                node1 = null;
+                segment1 = null;
+            } else if (Len1 > 2.5f * MPU) {
+                node1 = new NodeWrapper(corner1.Point, 0, eInfo);
+                segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.DirMain);
+            } else if (Len1 > 1f * MPU) {
+                node1 = new NodeWrapper(corner1.AltPoint, 0, eInfo);
+                segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.EndDirMinor);
+            } else {
+                node1 = new NodeWrapper(corner1.AltPoint, 0, eInfo);
+                segment1 = new SegmentWrapper(nodeM, node1);
+            }
+
+            if (corner2.Ignore) {
+                node2 = null;
+                segment2 = null;
+            } else if (Len2 > 2.5f * MPU) {
+                node2 = new NodeWrapper(corner2.Point, 0, eInfo);
+                segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.DirMain);
+            } else if (Len2 > 1f * MPU) {
+                node2 = new NodeWrapper(corner2.AltPoint, 0, eInfo);
+                segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.EndDirMinor);
+            } else {
+                node2 = new NodeWrapper(corner2.AltPoint, 0, eInfo);
+                segment2 = new SegmentWrapper(nodeM, node2);
+            }
             segment3 = new SegmentWrapper(nodeM, centerNode);
         }
 

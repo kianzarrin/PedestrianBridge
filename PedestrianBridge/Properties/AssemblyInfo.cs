@@ -29,4 +29,4 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.6.0.*")] // curved roads
+[assembly: AssemblyVersion("1.7.0.*")] // Roundabout space
