@@ -58,12 +58,6 @@ namespace PedestrianBridge.Tool {
             }
         }
 
-        public override void SimulationStep()
-        {
-            base.SimulationStep();
-            DetermineHoveredElements();
-        }
-
         public ushort HoveredNodeId { get; private set; } = 0;
         public ushort HoveredSegmentId { get; private set; } = 0;
 

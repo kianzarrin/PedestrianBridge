@@ -67,7 +67,7 @@ namespace PedestrianBridge.Tool {
                 return;
 
             Color color1 = GetToolColor(Input.GetMouseButton(0), false);
-            if (RoundaboutUtil.Instance.TraverseLoop(HoveredSegmentId, out var segList)) {
+            if (RoundaboutUtil.Instance_render.TraverseLoop(HoveredSegmentId, out var segList)) {
                 foreach (var segmentID in segList) {
                     NetTool.RenderOverlay(cameraInfo, ref segmentID.ToSegment(), color1, color1);
                 }
@@ -85,10 +85,10 @@ namespace PedestrianBridge.Tool {
             return true;
         }
 
-        protected override void OnPrimaryMouseClicked() {
+            protected override void OnPrimaryMouseClicked() {
             Log.Debug($"OnPrimaryMouseClicked: segment {HoveredSegmentId} node {HoveredNodeId}");
-            if(RoundaboutUtil.Instance.TraverseLoop(HoveredSegmentId,out var segList)) {
-                BuildControler.CreateRaboutBridge(HoveredSegmentId);
+            if(RoundaboutUtil.Instance_Click.TraverseLoop(HoveredSegmentId,out var segList)) {
+                BuildControler.CreateRaboutBridge(RoundaboutUtil.Instance_Click);
             } else if (IsSuitableJunction()) {
                 Singleton<SimulationManager>.instance.AddAction(delegate () {
                     BuildControler.CreateJunctionBridge(HoveredNodeId);

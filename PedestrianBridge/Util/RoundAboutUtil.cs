@@ -10,12 +10,15 @@ namespace PedestrianBridge.Util {
     using ColossalFramework.Math;
 
     public class RoundaboutUtil {
-        public static RoundaboutUtil Instance = new RoundaboutUtil();
+        public static RoundaboutUtil Instance_render = new RoundaboutUtil();
+        public static RoundaboutUtil Instance_Click = new RoundaboutUtil();
+
         public RoundaboutUtil() {
-            segmentList = new List<ushort>();
+            SegmentList = new List<ushort>();
         }
 
-        private List<ushort> segmentList = null;
+        public List<ushort> SegmentList { get; private set; }
+        public ushort CachedSegmentID { get; private set; } = 0;
 
         /// <summary>
         /// Traverses around a roundabout. At each
@@ -29,14 +32,20 @@ namespace PedestrianBridge.Util {
         /// </param>
         /// <returns>true if its a roundabout</returns>
         public bool TraverseLoop(ushort segmentId, out List<ushort> segList) {
-            this.segmentList.Clear();
+            if(segmentId == CachedSegmentID) {
+                segList = SegmentList;
+                return SegmentList != null;
+            }
+            CachedSegmentID = segmentId;
+            this.SegmentList.Clear();
             bool ret;
             if (segmentId == 0 || !CalculateIsOneWay(segmentId)) {
                 ret = false;
             } else {
                 ret = TraverseAroundRecursive(segmentId);
             }
-            segList = this.segmentList;
+            segList = this.SegmentList;//.Clone0()
+
             return ret;
         }
 
@@ -57,7 +66,7 @@ namespace PedestrianBridge.Util {
         public Vector2 CalculateCenter() {
             Vector2 pointAcc = Vector3.zero;
             float totalWieght = 0;
-            foreach(var segmentID in segmentList) {
+            foreach(var segmentID in SegmentList) {
                 Bezier2 bezier = segmentID.ToSegment().CalculateSegmentBezier3().ToCSBezier2();
                 float weitght = segmentID.ToSegment().m_averageLength;
                 for (float t = 0; t < 1; t+=0.1f) {
@@ -83,18 +92,18 @@ namespace PedestrianBridge.Util {
             return 0;
         }
         public List<JunctionData> GetJunctions() {
-            int n = segmentList.Count;
+            int n = SegmentList.Count;
             List<JunctionData> ret = new List<JunctionData>();
             for (int i = 0; i < n; ++i) {
                 int i2 = (i + 1) % n;
-                var nodeID = GetHeadNode(segmentList[i]);
-                var minorSegmentID = Get3rdSegment(nodeID, segmentList[i], segmentList[i2]);
+                var nodeID = GetHeadNode(SegmentList[i]);
+                var minorSegmentID = Get3rdSegment(nodeID, SegmentList[i], SegmentList[i2]);
                 if (minorSegmentID == 0)
                     continue;
                 JunctionData junction = new JunctionData {
                     NodeID = nodeID,
-                    Main1 = segmentList[i],
-                    Main2 = segmentList[i2],
+                    Main1 = SegmentList[i],
+                    Main2 = SegmentList[i2],
                     Minor = minorSegmentID,
                 };
                 ret.Add(junction);
@@ -127,18 +136,16 @@ namespace PedestrianBridge.Util {
         }
 
         private bool TraverseAroundRecursive(ushort segmentId) {
-            Util.HelpersExtensions.AssertStack();
-            Log.Debug($"TraverseAroundRecursive({segmentId}) called.\n" +
-                $"segmentList="+ segmentList.ToSTR() + "\n" + Environment.StackTrace);
-            if (segmentList.Count > 20) {
+            //Util.HelpersExtensions.AssertStack();
+            if (SegmentList.Count > 20) {
                 return false; // too long. prune
             }
-            segmentList.Add(segmentId);
+            SegmentList.Add(segmentId);
             var nextSegmentId = GetNextSegment(segmentId);
 
-            if(nextSegmentId !=0) {
+            if (nextSegmentId !=0) {
                 bool isRoundabout;
-                if (nextSegmentId == segmentList[0]) {
+                if (nextSegmentId == SegmentList[0]) {
                     isRoundabout = true;
                 } else if (Contains(nextSegmentId)) {
                     isRoundabout = false;
@@ -149,7 +156,7 @@ namespace PedestrianBridge.Util {
                     return true;
                 } //end if
             }// end if
-            segmentList.Remove(segmentId);
+            SegmentList.Remove(segmentId);
             return false;
         }
 
@@ -182,7 +189,7 @@ namespace PedestrianBridge.Util {
         /// </summary>
         private bool Contains(ushort segmentId) {
             ushort nodeId = GetHeadNode(segmentId);
-            foreach (ushort segId in segmentList) {
+            foreach (ushort segId in SegmentList) {
                 if (GetHeadNode(segId) == nodeId) {
                     return true;
                 }

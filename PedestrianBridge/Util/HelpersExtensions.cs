@@ -47,11 +47,17 @@ namespace PedestrianBridge.Util {
 
 
         /// <summary>
-        /// returns a new calling Clone() on all items.
+        /// returns a new List calling Clone() on all items.
         /// </summary>
-        /// <typeparam name="T">item time must be IClonable</typeparam>
-        internal static IList<T> Clone<T>(this IList<T> listToClone) where T : ICloneable =>
+        internal static List<T> Clone1<T>(this IList<T> listToClone) where T : ICloneable =>
             listToClone.Select(item => (T)item.Clone()).ToList();
+
+        /// <summary>
+        /// returns a new List copying all item
+        /// </summary>
+        internal static List<T> Clone0<T>(this IList<T> listToClone) =>
+            listToClone.Select(item=>item).ToList();
+
 
         /// <summary>
         /// useful for easily debuggin inline functions
@@ -118,7 +124,7 @@ namespace PedestrianBridge.Util {
 
         internal static void AssertStack() {
             var frames = new StackTrace().FrameCount;
-            //Log.Debug("frames=" + frames);
+            Log.Debug("frames=" + frames);
             if (frames > 100) {
                 Exception e = new StackOverflowException("frames=" + frames);
                 Log.Error(e.ToString());

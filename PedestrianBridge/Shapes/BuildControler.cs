@@ -5,23 +5,26 @@ namespace PedestrianBridge.Shape {
     using UnityEngine;
     using Util;
     using Shapes;
+    using System.Linq;
     using static Util.NetUtil;
     using static Util.RoundaboutUtil;
     using VectorUtils = Util.VectorUtil;
 
     public static class BuildControler {
+
         public static void CreateJunctionBridge(ushort nodeID) {
             if (nodeID.ToNode().CountSegments() < 3)
                 throw new NotImplementedException("number of segments is less than 3");
-            List<ushort> segList = GetCCSegList(nodeID);
-            if (segList.Count < 3)
-                throw new Exception($"seglist count is ${segList.Count} expected at least 3");
+            List<ushort> segList = GetCCSegList(nodeID).ToList();
             int n = segList.Count;
+            if (n < 3)
+                throw new Exception($"seglist count is ${segList.Count} expected at least 3");
+
             var nodeList = new List<NodeWrapper>();
             for (int i = 0; i < n; ++i) {
                 ushort segID1 = segList[i], segID2 = segList[(i + 1) % n];
                 var lwrapper = new LWrapper(segID1, segID2, PrefabUtil.SelectedPrefab);
-                Log.Info($"creating L from segments: {segID1} {segID2}");
+                //Log.Info($"creating L from segments: {segID1} {segID2}");
                 lwrapper.Create();
                 nodeList.Add(lwrapper.nodeL);
             }
@@ -33,29 +36,8 @@ namespace PedestrianBridge.Shape {
             } // end for
         } // end method
 
-
-        public static bool CalculateCenter(JunctionData j1, JunctionData j2, out Vector2 center) {
-            var point1 = j1.NodeID.ToNode().m_position.ToCS2D();
-            var point2 = j2.NodeID.ToNode().m_position.ToCS2D();
-
-            ref NetSegment seg1 = ref j1.Main2.ToSegment();
-            ref NetSegment seg2 = ref j2.Main1.ToSegment();
-
-            bool bStartNode1 = seg1.m_startNode == j1.NodeID;
-            bool bStartNode2 = seg2.m_startNode == j2.NodeID;
-
-            Vector2 V1 = (bStartNode1 ? seg1.m_startDirection : seg1.m_endDirection).ToCS2D();
-            Vector2 V2 = (bStartNode2 ? seg2.m_startDirection : seg2.m_endDirection).ToCS2D();
-
-            return LineUtil.Intersect(point1, V1.Rotate90CW(), point2, V2.Rotate90CW(), out center);
-        }
-
-        public static void CreateRaboutBridge(ushort segmentID) {
+        public static void CreateRaboutBridge(RoundaboutUtil raboutCalc) {
             NetInfo info = PrefabUtil.SelectedPrefab;
-
-            var raboutCalc = new RoundaboutUtil();
-            if (!raboutCalc.TraverseLoop(segmentID, out _))
-                return;
 
             var junctions = raboutCalc.GetJunctions();
             int n = junctions.Count;

@@ -46,25 +46,34 @@ namespace PedestrianBridge.Shapes {
 
                 bool bLeft = segmentMain.GetLeftSegment(junctionID) == segmentMinorID;
                 Vector2 normal = bLeft ? DirMain.Rotate90CW() : DirMain.Rotate90CCW();
-                float c = Mathf.PI * .5f;
-                bool accute = angle < c;
 
                 ////////////////////////////////////////////////////////////////
                 // Main calculations
                 ControlPointA = (HWMain + HWpath + SAFETY_NET) * normal;
                 ControlPointA += origin;
 
-                if (accute) {
-                    Log.Debug($"angle={angle} ratio={ratio} DirMinor.magnitude={DirMinor.magnitude} " +
-                        $"normal={normal} DirMinor={DirMinor} DirMain={DirMain} " +
-                        $"HWpath={HWpath} HWMain={HWMain} HWMinor={HWMinor}");
-                }
 
                 HWpath *= ratio;
                 HWMain *= ratio;
                 HWMinor *= ratio;
 
+
                 Point = (HWMinor + HWpath + SAFETY_NET) * DirMain + (HWMain + HWpath + SAFETY_NET) * DirMinor;
+#if DEBUG
+                if (angle < 1.5 || angle > 1.6) {
+                    //Log.Debug($" KIAN DEBUG ****************\n" +
+                    //    $"main:{segmentMainID} minor:{segmentMinorID} " +
+                    //    $"angle={angle} ratio={ratio} DirMinor.magnitude={DirMinor.magnitude} " +
+                    //    $"normal={normal} DirMinor={DirMinor.ToString("00.0000")} DirMain={DirMain.ToString("00.0000")} " +
+                    //    $"HWpath={HWpath} HWMain={HWMain} HWMinor={HWMinor}\n"+
+                    //    $"POINTS: \n" +
+                    //    $"(HWMain + HWpath + SAFETY_NET)={(HWMain + HWpath + SAFETY_NET)} " +
+                    //    $"(HWMain + HWpath + SAFETY_NET) * DirMinor = {(HWMain + HWpath + SAFETY_NET) * DirMinor} \n" +
+                    //    $"(HWMinor + HWpath + SAFETY_NET)={(HWMinor + HWpath + SAFETY_NET)} " +
+                    //    $"(HWMinor + HWpath + SAFETY_NET) * DirMain={(HWMinor + HWpath + SAFETY_NET) * DirMain}\n" +
+                    //    $"POINT={Point}");
+                }
+#endif
                 Point += origin;
 
 
@@ -81,7 +90,7 @@ namespace PedestrianBridge.Shapes {
             float angle2 = VectorUtil.UnsignedAngleRad(-v21, corner2.DirMain); // expected Accute
             float c = Mathf.PI * .5f - Epsilon;
             if (angle1>=c || angle2>= c) {
-                Log.Info("Roundabout angle >= 180");
+                //Log.Debug("Roundabout angle >= 180");
                 return false;
             }
 
@@ -112,7 +121,7 @@ namespace PedestrianBridge.Shapes {
             ushort segmentID1Main, ushort segmentID1Minor,
             ushort segmentID2Main, ushort segmentID2Minor) {
             Util.HelpersExtensions.AssertStack();
-            Log.Debug("IsBetweenInOut() called.");
+            //Log.Debug("IsBetweenInOut() called.");
             const float maxLen = 7 * MPU;
             bool bShort = (corner1.Point - corner2.Point).sqrMagnitude <= maxLen * maxLen;
             if (!bShort) {
@@ -138,7 +147,7 @@ namespace PedestrianBridge.Shapes {
 
             bool ret = bOneWay && bAccute && flag;
             if (ret) {
-                Log.Debug("IsBeweenInout() returns true");
+                //Log.Debug("IsBeweenInout() returns true");
             }
             return ret;
         }
@@ -147,12 +156,12 @@ namespace PedestrianBridge.Shapes {
             ushort segmentID1Main, ushort segmentID1Minor,
             ushort segmentID2Main, ushort segmentID2Minor,
             NodeWrapper centerNode, NetInfo info) {
-            Log.Info($"RaboutSlice: main1:{segmentID1Main}, minor1:{segmentID1Minor}, " +
-                $"main2:{segmentID2Main}, minor2:{segmentID2Minor},");
+            //Log.Debug($"RaboutSlice: main1:{segmentID1Main}, minor1:{segmentID1Minor}, " +
+            //    $"main2:{segmentID2Main}, minor2:{segmentID2Minor},");
 
             bool ignoreAll = IsSplit(segmentID1Minor, segmentID2Minor);
             if (ignoreAll) {
-                Log.Info("RaboutSlice: Ignoring Split");
+                //Log.Debug("RaboutSlice: Ignoring Split");
                 return;
             }
 
@@ -163,7 +172,7 @@ namespace PedestrianBridge.Shapes {
             ignoreAll = ignoreAll || !CalculateMiddlePoint();
             ignoreAll = ignoreAll || IsBetweenInOut(segmentID1Main, segmentID1Minor, segmentID2Main, segmentID2Minor);
             if (ignoreAll) {
-                Log.Info($"RaboutSlice: returns silently - {corner1.Ignore}  {corner2.Ignore} ");
+                //Log.Debug($"RaboutSlice: returns silently - {corner1.Ignore}  {corner2.Ignore} ");
                 return;
             }
 

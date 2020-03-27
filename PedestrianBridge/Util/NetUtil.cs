@@ -138,39 +138,39 @@ namespace PedestrianBridge.Util {
         /// <summary>
         /// returns a counter-clockwise list of segments of the given node ID.
         /// </summary>
-        public static List<ushort> GetCCSegList(ushort nodeID) {
-            ushort segmentID = GetFirstSegment(nodeID);
-            List<ushort> segList = new List<ushort>();
-            segList.Add(segmentID);
+        public static IEnumerable<ushort> GetCCSegList(ushort nodeID) {
+            ushort segmentID0 = GetFirstSegment(nodeID);
+            HelpersExtensions.Assert(segmentID0 != 0, "GetFirstSegment!=0");
+            yield return segmentID0;
+            ushort segmentID = segmentID0;
 
             // add the rest of the segments.
             while (true) {
                 segmentID = segmentID.ToSegment().GetRightSegment(nodeID);
-                if (segmentID == segList[0])
-                    break;
+                if ((segmentID == 0) | (segmentID == segmentID0))
+                    yield break;
                 else
-                    segList.Add(segmentID);
+                    yield return segmentID;
             }
-            return segList;
         }
 
         /// <summary>
         /// returns a clock-wise list of segments of the given node ID.
         /// </summary>
-        public static List<ushort> GetCWSegList(ushort nodeID) {
-            ushort segmentID = GetFirstSegment(nodeID);
-            List<ushort> segList = new List<ushort>();
-            segList.Add(segmentID);
+        public static IEnumerable<ushort> GetCWSegList(ushort nodeID) {
+            ushort segmentID0 = GetFirstSegment(nodeID);
+            HelpersExtensions.Assert(segmentID0!=0, "GetFirstSegment!=0");
+            yield return segmentID0;
+            ushort segmentID = segmentID0;
 
             // add the rest of the segments.
             while (true) {
                 segmentID = segmentID.ToSegment().GetLeftSegment(nodeID);
-                if (segmentID == segList[0])
-                    break;
+                if ((segmentID == 0) | (segmentID == segmentID0))
+                    yield break;
                 else
-                    segList.Add(segmentID);
+                    yield return segmentID;
             }
-            return segList;
         }
     }
 }
