@@ -2,6 +2,7 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace PedestrianBridge.Util {
     public class NetServiceException : Exception {
@@ -22,6 +23,9 @@ namespace PedestrianBridge.Util {
         internal static ref NetNode ToNode(this ushort id) => ref netMan.m_nodes.m_buffer[id];
         internal static ref NetSegment ToSegment(this ushort id) => ref netMan.m_segments.m_buffer[id];
         internal static ref NetLane ToLane(this uint id) => ref netMan.m_lanes.m_buffer[id];
+
+
+
 
 
         internal static Bezier3 CalculateSegmentBezier3(this ref NetSegment seg) {
@@ -57,6 +61,9 @@ namespace PedestrianBridge.Util {
 
         public static bool IsStartNode(ushort segmentId, ushort nodeId) =>
             segmentId.ToSegment().m_startNode == nodeId;
+
+        public static bool HasNode(ushort segmentId, ushort nodeId) =>
+            segmentId.ToSegment().m_startNode == nodeId || segmentId.ToSegment().m_endNode == nodeId;
 
         public static bool IsSegmentValid(ushort segmentId) {
             if (segmentId != 0) {
@@ -120,6 +127,12 @@ namespace PedestrianBridge.Util {
                     break;
             }
             return segmentID;
+        }
+
+        public static Vector3 GetSegmentDir(ushort segmentID, ushort nodeID) {
+            bool startNode = IsStartNode(segmentID, nodeID);
+            ref NetSegment segment = ref segmentID.ToSegment();
+            return startNode ? segment.m_startDirection : segment.m_endDirection;
         }
 
         public struct NodeSegments{

@@ -72,7 +72,13 @@ namespace PedestrianBridge.Tool {
                     NetTool.RenderOverlay(cameraInfo, ref segmentID.ToSegment(), color1, color1);
                 }
             } else if (IsSuitableJunction()) {
-                DrawNodeCircle(cameraInfo, HoveredNodeId, color1);
+                foreach (var segmentID in NetUtil.GetCCSegList(HoveredNodeId)) {
+                    NetTool.RenderOverlay(cameraInfo, ref segmentID.ToSegment(), color1, color1);
+                }
+            } else {
+                var path = new Shapes.PathConnectWrapper(HoveredNodeId);
+                if(path.segment!=null)
+                    path.RenderOverlay(cameraInfo, color1);
             }
         }
 
@@ -84,11 +90,15 @@ namespace PedestrianBridge.Tool {
                 Singleton<SimulationManager>.instance.AddAction(delegate () {
                     BuildControler.CreateJunctionBridge(HoveredNodeId);
                 });
+            } else {
+                var path = new Shapes.PathConnectWrapper(HoveredNodeId);
+                if (path.segment != null)
+                    path.Create();
             }
         }
 
         protected override void OnSecondaryMouseClicked() {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
 
         bool IsSuitableJunction() {
@@ -97,6 +107,10 @@ namespace PedestrianBridge.Tool {
             NetNode node = HoveredNodeId.ToNode();
             if (node.CountSegments() < 3)
                 return false;
+
+            if (!node.m_flags.IsFlagSet(NetNode.Flags.OnGround))
+                return false;
+
             return true;
         }
 
