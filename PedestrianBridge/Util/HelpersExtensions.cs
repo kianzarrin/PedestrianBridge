@@ -6,9 +6,24 @@ namespace PedestrianBridge.Util {
     using UnityEngine;
     using ICities;
     using System.Diagnostics;
+    using CSUtil.Commons;
 
     public static class HelpersExtensions
     {
+        private static void CheckEnumWithFlags<T>() {
+            if (!typeof(T).IsEnum) {
+                throw new ArgumentException(string.Format("Type '{0}' is not an enum", typeof(T).FullName));
+            }
+            if (!Attribute.IsDefined(typeof(T), typeof(FlagsAttribute))) {
+                throw new ArgumentException(string.Format("Type '{0}' doesn't have the 'Flags' attribute", typeof(T).FullName));
+            }
+        }
+
+        public static bool CheckFlags(this NetNode.Flags value, NetNode.Flags required, NetNode.Flags forbidden) {
+            return (value & (required|forbidden)) == required;
+        }
+
+
         internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
         internal static bool CheckGameMode(AppMode mode)
         {

@@ -63,7 +63,7 @@ namespace PedestrianBridge.Util {
         public static IEnumerable<ushort> ScanDirSegment(Vector2 start, Vector2 dir, float dist) {
             foreach (GridVector grid in ScaDir(start, dir, dist)) {
                 int index = grid.Index;
-                Log.Debug($"point={grid}");
+                //Log.Debug($"grid={grid}");
                 ushort segmentID = netMan.m_segmentGrid[index];
                 while (segmentID != 0) {
                     yield return segmentID;
@@ -74,7 +74,6 @@ namespace PedestrianBridge.Util {
 
         public static IEnumerable<GridVector> ScaDir(Vector2 start, Vector2 dir, float dist) {
             GridVector startGrid = new GridVector(start);
-            Log.Debug($"startGrid={startGrid} dir={dir}");
             if (Mathf.Abs(dir.x) >= Mathf.Abs(dir.y)) {
                 foreach (GridVector point in scanX(startGrid, dir, dist)) 
                     yield return point;

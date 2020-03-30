@@ -4,9 +4,8 @@ using System;
 using UnityEngine;
 using PedestrianBridge.Util;
 using PedestrianBridge.UI;
-using PedestrianBridge.Shape;
+using PedestrianBridge.Shapes;
 using JetBrains.Annotations;
-
 namespace PedestrianBridge.Tool {
     public sealed class PedBridgeTool : KianToolBase {
         UIButton button;
@@ -50,8 +49,10 @@ namespace PedestrianBridge.Tool {
 
         protected override void OnEnable() {
             Log.Debug("PedBridgeTool.OnEnable");
+            button.Focus();
             base.OnEnable();
             button.Focus();
+            button.Invalidate();
         }
 
         protected override void OnDisable() {
@@ -59,14 +60,17 @@ namespace PedestrianBridge.Tool {
             button?.Unfocus();
             base.OnDisable();
             button?.Unfocus();
+            button?.Invalidate();
+
         }
 
+        PathConnectWrapper? _cachedPathConnectWrapper;
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             base.RenderOverlay(cameraInfo);
             if (HoveredSegmentId == 0 || HoveredNodeId == 0)
                 return;
 
-            Color color1 = GetToolColor(Input.GetMouseButton(0), false);
+            Color color1 = Color.yellow;//  GetToolColor(Input.GetMouseButton(0), false);
             if (RoundaboutUtil.Instance_render.TraverseLoop(HoveredSegmentId, out var segList)) {
                 foreach (var segmentID in segList) {
                     NetTool.RenderOverlay(cameraInfo, ref segmentID.ToSegment(), color1, color1);
@@ -76,9 +80,14 @@ namespace PedestrianBridge.Tool {
                     NetTool.RenderOverlay(cameraInfo, ref segmentID.ToSegment(), color1, color1);
                 }
             } else {
-                var path = new Shapes.PathConnectWrapper(HoveredNodeId);
-                if(path.segment!=null)
-                    path.RenderOverlay(cameraInfo, color1);
+                bool cached =
+                  _cachedPathConnectWrapper != null &&
+                  _cachedPathConnectWrapper?.endSegmentID == HoveredSegmentId &&
+                  _cachedPathConnectWrapper?.endNodeID == HoveredNodeId;
+                _cachedPathConnectWrapper = cached ?
+                    _cachedPathConnectWrapper :
+                    new PathConnectWrapper(HoveredNodeId, HoveredSegmentId);
+                _cachedPathConnectWrapper?.RenderOverlay(cameraInfo);
             }
         }
 
@@ -91,7 +100,7 @@ namespace PedestrianBridge.Tool {
                     BuildControler.CreateJunctionBridge(HoveredNodeId);
                 });
             } else {
-                var path = new Shapes.PathConnectWrapper(HoveredNodeId);
+                var path = new PathConnectWrapper(HoveredNodeId, HoveredSegmentId);
                 if (path.segment != null)
                     path.Create();
             }

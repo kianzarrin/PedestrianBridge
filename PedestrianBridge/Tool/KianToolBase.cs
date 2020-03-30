@@ -5,6 +5,7 @@ using System;
 
 using static PedestrianBridge.Util.HelpersExtensions;
 using PedestrianBridge.Util;
+using ColossalFramework.Math;
 
 namespace PedestrianBridge.Tool {
     public abstract class KianToolBase : DefaultTool
@@ -176,30 +177,6 @@ namespace PedestrianBridge.Tool {
             return minSegId;
         }
 
-        public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
-                           ushort nodeId,
-                           Color color,
-                           bool alpha = false) {
-            float r = 8;
-            Vector3 pos = nodeId.ToNode().m_position;
-            DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha);
-        }
-
-        private void DrawOverlayCircle(RenderManager.CameraInfo cameraInfo,
-                               Color color,
-                               Vector3 position,
-                               float width,
-                               bool alpha) {
-            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
-            Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(
-                cameraInfo,
-                color,
-                position,
-                width,
-                position.y - 100f,
-                position.y + 100f,
-                false,
-                alpha);
-        }
+ 
     }
 }

@@ -1,5 +1,5 @@
 
-namespace PedestrianBridge.Shape {
+namespace PedestrianBridge.Shapes {
     using System.Collections.Generic;
     using System;
     using UnityEngine;

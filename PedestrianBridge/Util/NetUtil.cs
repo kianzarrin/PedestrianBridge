@@ -65,6 +65,9 @@ namespace PedestrianBridge.Util {
         public static bool HasNode(ushort segmentId, ushort nodeId) =>
             segmentId.ToSegment().m_startNode == nodeId || segmentId.ToSegment().m_endNode == nodeId;
 
+        public static ushort GetSharedNode(ushort segmentID1, ushort segmentID2) =>
+            segmentID1.ToSegment().GetSharedNode(segmentID2);
+
         public static bool IsSegmentValid(ushort segmentId) {
             if (segmentId != 0) {
                 return (segmentId.ToSegment().m_flags &

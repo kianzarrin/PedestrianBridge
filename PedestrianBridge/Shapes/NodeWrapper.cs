@@ -7,8 +7,8 @@ using static PedestrianBridge.Util.NetUtil;
 namespace PedestrianBridge.Shapes {
     public class NodeWrapper {
         public Vector2 point;
-        byte elevation;
-        NetInfo info;
+        public byte elevation;
+        public  NetInfo info;
         public ushort ID;
 
         public NodeWrapper(Vector2 point, byte elevation, NetInfo info) {

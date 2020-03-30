@@ -94,6 +94,7 @@
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="Tool\KianToolBase.cs" />
     <Compile Include="Tool\PedBridgeTool.cs" />
+    <Compile Include="Util\RenderUtil.cs" />
     <Compile Include="Util\GridUtil.cs" />
     <Compile Include="Util\LineUtil.cs" />
     <Compile Include="Util\MathUtil.cs" />
