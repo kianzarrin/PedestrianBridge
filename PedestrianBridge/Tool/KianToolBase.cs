@@ -10,7 +10,7 @@ using ColossalFramework.Math;
 namespace PedestrianBridge.Tool {
     public abstract class KianToolBase : DefaultTool
     {
-        public bool ToolEnabled => ToolsModifierControl.toolController.CurrentTool == this;
+        public bool ToolEnabled => ToolsModifierControl.toolController?.CurrentTool == this;
 
         protected override void OnDestroy() {
             DisableTool();
@@ -62,15 +62,18 @@ namespace PedestrianBridge.Tool {
         public ushort HoveredNodeId { get; private set; } = 0;
         public ushort HoveredSegmentId { get; private set; } = 0;
 
+
+        protected bool IsMouseRayValid => !UIView.IsInsideUI() && Cursor.visible && m_mouseRayValid;
+        protected bool HoverValid => IsMouseRayValid && (HoveredSegmentId != 0 || HoveredNodeId != 0);
+
         private bool DetermineHoveredElements()
         {
-            if (UIView.IsInsideUI() || !Cursor.visible)
+            HoveredSegmentId = 0;
+            HoveredNodeId = 0;
+            if (!IsMouseRayValid)
             {
                 return false;
             }
-
-            HoveredSegmentId = 0;
-            HoveredNodeId = 0;
 
             // find currently hovered node
             RaycastInput nodeInput = new RaycastInput(m_mouseRay, m_mouseRayLength)

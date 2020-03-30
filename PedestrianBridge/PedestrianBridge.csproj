@@ -100,7 +100,6 @@
     <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\RoundaboutUtil.cs" />
     <Compile Include="Util\TMPEUtil.cs" />
-    <Compile Include="UI\ToolButton.cs" />
     <Compile Include="UI\ResourceLoader.cs" />
     <Compile Include="UI\PedestrianBridgeButton.cs" />
     <Compile Include="Util\HelpersExtensions.cs" />

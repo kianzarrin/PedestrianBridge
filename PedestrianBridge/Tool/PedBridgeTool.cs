@@ -64,10 +64,15 @@ namespace PedestrianBridge.Tool {
 
         }
 
+        protected override void OnToolUpdate() {
+            base.OnToolUpdate();
+            ToolCursor = HoverValid ? NetUtil.netTool.m_upgradeCursor : null;
+        }
+
         PathConnectWrapper? _cachedPathConnectWrapper;
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             base.RenderOverlay(cameraInfo);
-            if (HoveredSegmentId == 0 || HoveredNodeId == 0)
+            if (!HoverValid)
                 return;
 
             Color color1 = Color.yellow;//  GetToolColor(Input.GetMouseButton(0), false);
@@ -92,7 +97,10 @@ namespace PedestrianBridge.Tool {
         }
 
         protected override void OnPrimaryMouseClicked() {
+            if (!HoverValid)
+                return;
             Log.Debug($"OnPrimaryMouseClicked: segment {HoveredSegmentId} node {HoveredNodeId}");
+
             if(RoundaboutUtil.Instance_Click.TraverseLoop(HoveredSegmentId,out var segList)) {
                 BuildControler.CreateRaboutBridge(RoundaboutUtil.Instance_Click);
             } else if (IsSuitableJunction()) {
@@ -105,6 +113,7 @@ namespace PedestrianBridge.Tool {
                     path.Create();
             }
         }
+
 
         protected override void OnSecondaryMouseClicked() {
             //throw new System.NotImplementedException();

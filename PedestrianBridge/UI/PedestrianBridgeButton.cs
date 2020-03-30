@@ -70,10 +70,9 @@ namespace PedestrianBridge.UI {
 
         protected override void OnClick(UIMouseEventParameter p) {
             base.OnClick(p);
-            PedBridgeTool.Instance.EnableTool();
+            PedBridgeTool.Instance.ToggleTool();
         }
     }
-
 
     public class UIUtils {
         // Token: 0x17000006 RID: 6

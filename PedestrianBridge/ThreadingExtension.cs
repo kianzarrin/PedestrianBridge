@@ -10,7 +10,7 @@ namespace PedestrianBridge {
         public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
             if (ControlIsPressed && Input.GetKeyDown(KeyCode.B)) {
                 SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(
-                    ()=> PedBridgeTool.Instance.EnableTool());
+                    ()=> PedBridgeTool.Instance.ToggleTool());
             }   
 
         }
