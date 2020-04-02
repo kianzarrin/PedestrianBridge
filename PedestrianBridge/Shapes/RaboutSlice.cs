@@ -1,5 +1,6 @@
 namespace PedestrianBridge.Shapes {
     using ColossalFramework.Math;
+    using ColossalFramework;
     using System;
     using UnityEngine;
     using Util;
@@ -14,22 +15,23 @@ namespace PedestrianBridge.Shapes {
             internal Vector2 ControlPoint => L.ControlPoint1;
             internal Vector2 Point => L.PointL;
             internal Vector2 AltPoint => L.Point2;
-            internal bool Ignore;
 
             /// DirMain first represents the direction of the main segment at the junction.
             /// but then it is modified to represent the direction of the pedestrian bridge
             /// slightly away from the junction.
             internal Vector2 DirMain;
 
-
             internal Vector2 DirMinor => L.StartDir2;
             internal Vector2 EndDirMinor => L.EndDir2;
             internal float Offset => (ControlPoint - Point).magnitude;
 
+            internal bool CanConnectPathAtJunction => L.CanConnectPathAtJunction2;
+            internal bool CanConnectPathAtFinalNode => L.CanConnectPathAtFinalNode2;
+            internal ushort FinalNodeID => L.FinalNodeID2;
+
             public Corner(ushort segmentMainID, ushort segmentMinorID, float HWpath) {
                 L = new LWrapper.Calc(segmentMainID, segmentMinorID, HWpath);
                 DirMain = L.StartDir1;
-            Ignore = false; //!segmentMinor.Info.m_hasPedestrianLanes;
             }
         }
 
@@ -39,6 +41,7 @@ namespace PedestrianBridge.Shapes {
         float Len1 => (MiddlePoint - corner1.Point).magnitude;
         float Len2 => (MiddlePoint - corner2.Point).magnitude;
 
+        // returns false if angle>180
         bool CalculateMiddlePoint() {
             Vector2 v21 = corner2.Point - corner1.Point;
             float angle1 = VectorUtil.UnsignedAngleRad(v21, corner1.DirMain); // expected Accute
@@ -63,15 +66,23 @@ namespace PedestrianBridge.Shapes {
             return true;
         }
 
-        bool IsSplit(ushort segmentID1Minor, ushort segmentID2Minor) {
-            bool oneway1 = CalculateIsOneWay(segmentID1Minor);
-            bool oneway2 = CalculateIsOneWay(segmentID2Minor);
-            bool b1 = GetHeadNode(segmentID1Minor) == GetTailNode(segmentID2Minor);
-            bool b2 = GetHeadNode(segmentID2Minor) == GetTailNode(segmentID1Minor);
-            bool ret = oneway1 & oneway2 & (b1 | b2);
-            return ret;
-        }
+        //bool IsSplit(ushort segmentID1Minor, ushort segmentID2Minor) {
+        //    //bool oneway1 = CalculateIsOneWay(segmentID1Minor);
+        //    //bool oneway2 = CalculateIsOneWay(segmentID2Minor);
+        //    //bool b1 = GetHeadNode(segmentID1Minor) == GetTailNode(segmentID2Minor);
+        //    //bool b2 = GetHeadNode(segmentID2Minor) == GetTailNode(segmentID1Minor);
+        //    //bool ret = oneway1 & oneway2 & (b1 | b2);
+        //    //return ret;
+        //}
 
+        bool IsSplit => (corner1.FinalNodeID == corner2.FinalNodeID).
+            LogRet($"DEBUG 3> {corner1.FinalNodeID} == {corner2.FinalNodeID} : "); 
+
+        static bool IsIntersectionOnGround(ushort segmentID1, ushort segmentID2) =>
+            GetSharedNode(segmentID1, segmentID2).ToNode().
+            m_flags.IsFlagSet(NetNode.Flags.OnGround);
+
+        // typicall in highway connections 
         bool IsBetweenInOut(
             ushort segmentID1Main, ushort segmentID1Minor,
             ushort segmentID2Main, ushort segmentID2Minor) {
@@ -106,59 +117,90 @@ namespace PedestrianBridge.Shapes {
             return ret;
         }
 
+        public const float MIN_LEN = 2.5f;
+        public const float DESIRED_LEN = 3.2f;
         public RaboutSlice(
             ushort segmentID1Main, ushort segmentID1Minor,
             ushort segmentID2Main, ushort segmentID2Minor,
             NodeWrapper centerNode, NetInfo info) {
-            //Log.Debug($"RaboutSlice: main1:{segmentID1Main}, minor1:{segmentID1Minor}, " +
-            //    $"main2:{segmentID2Main}, minor2:{segmentID2Minor},");
+            Log.Debug($"RaboutSlice: main1:{segmentID1Main}, minor1:{segmentID1Minor}, " +
+                $"main2:{segmentID2Main}, minor2:{segmentID2Minor},");
 
-            bool ignoreAll = IsSplit(segmentID1Minor, segmentID2Minor);
-            if (ignoreAll) {
-                //Log.Debug("RaboutSlice: Ignoring Split");
+            bool onGround =
+                IsIntersectionOnGround(segmentID1Main, segmentID1Minor) &
+                IsIntersectionOnGround(segmentID2Main, segmentID2Minor);
+            if (!onGround)
                 return;
-            }
 
             NetInfo eInfo = info.GetElevated();
             corner1 = new Corner(segmentID1Main, segmentID1Minor, eInfo.m_halfWidth);
             corner2 = new Corner(segmentID2Main, segmentID2Minor, eInfo.m_halfWidth);
-            ignoreAll = corner1.Ignore & corner2.Ignore;
-            ignoreAll = ignoreAll || !CalculateMiddlePoint();
-            ignoreAll = ignoreAll || IsBetweenInOut(segmentID1Main, segmentID1Minor, segmentID2Main, segmentID2Minor);
+            Log.Debug($"IsSplit={IsSplit} onGround={onGround}");
+            if (IsSplit)
+                return;
+            bool angleTooWide = !CalculateMiddlePoint();
+            bool ignoreAll = angleTooWide || IsBetweenInOut(segmentID1Main, segmentID1Minor, segmentID2Main, segmentID2Minor);
             if (ignoreAll) {
-                //Log.Debug($"RaboutSlice: returns silently - {corner1.Ignore}  {corner2.Ignore} ");
+                //Log.Debug($"this RaboutSlice is ignored. because angleTooWide or IsBetweenInOut() ");
                 return;
             }
 
             nodeM = new NodeWrapper(MiddlePoint, 10, eInfo);
-            if (corner1.Ignore) {
-                node1 = null;
-                segment1 = null;
-            } else if (Len1 > 2.5f * MPU) {
+
+            float len1 = Len1;
+            Log.Debug($"len1={len1} corner1.CanConnectPathAtJunction={corner1.CanConnectPathAtJunction}");
+            if ((len1 > MIN_LEN * MPU) && corner1.CanConnectPathAtJunction) {
+                Log.Debug("POINT A");
                 node1 = new NodeWrapper(corner1.Point, 0, eInfo);
                 segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.DirMain);
-            } else if (Len1 > 1f * MPU) {
-                node1 = new NodeWrapper(corner1.AltPoint, 0, eInfo);
-                segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.EndDirMinor);
-            } else {
-                node1 = new NodeWrapper(corner1.AltPoint, 0, eInfo);
-                segment1 = new SegmentWrapper(nodeM, node1);
+            } else if (corner1.CanConnectPathAtFinalNode) {
+                if (len1 > 1f * MPU) {
+                    node1 = new NodeWrapper(corner1.AltPoint, 0, eInfo);
+                    segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.EndDirMinor);
+                } else {
+                    node1 = new NodeWrapper(corner1.AltPoint, 0, eInfo);
+                    segment1 = new SegmentWrapper(nodeM, node1);
+                }
             }
 
-            if (corner2.Ignore) {
-                node2 = null;
-                segment2 = null;
-            } else if (Len2 > 2.5f * MPU) {
+            float len2 = Len2;
+            Log.Debug($"len2={len2} corner2.CanConnectPathAtJunction={corner2.CanConnectPathAtJunction}");
+            if ((len2 > MIN_LEN * MPU) && corner2.CanConnectPathAtJunction) {
+                Log.Debug("POINT B");
                 node2 = new NodeWrapper(corner2.Point, 0, eInfo);
                 segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.DirMain);
-            } else if (Len2 > 1f * MPU) {
-                node2 = new NodeWrapper(corner2.AltPoint, 0, eInfo);
-                segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.EndDirMinor);
-            } else {
-                node2 = new NodeWrapper(corner2.AltPoint, 0, eInfo);
-                segment2 = new SegmentWrapper(nodeM, node2);
+            } else if (corner2.CanConnectPathAtFinalNode) {
+                if (len2 > 1f * MPU) {
+                    node2 = new NodeWrapper(corner2.AltPoint, 0, eInfo);
+                    segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.EndDirMinor);
+                } else {
+                    node2 = new NodeWrapper(corner2.AltPoint, 0, eInfo);
+                    segment2 = new SegmentWrapper(nodeM, node2);
+                }
             }
-            segment3 = new SegmentWrapper(nodeM, centerNode);
+
+            if (segment1 == null && segment2 == null) {
+                nodeM = null;
+            } else if (segment1 == null && len2 < DESIRED_LEN && len2*2 >= DESIRED_LEN)  {
+                // if space is tight and segment1 is null then
+                // make space by moving nodeM to node1 if that would be enough.
+                nodeM.point = corner1.Point;
+                node2.point = corner2.Point;
+                segment2.startDir = corner1.DirMain;
+                segment2.endDir = corner2.DirMain;
+            } else if (segment2 == null && len1 < DESIRED_LEN && len1 * 2 >= DESIRED_LEN) {
+                // if space is tight and segment2 is null then
+                // make space by moving nodeM to node1 if that would be enough.
+                nodeM.point = corner2.Point;
+                node1.point = corner1.Point;
+                segment1.startDir = corner2.DirMain;
+                segment1.endDir = corner1.DirMain;
+            }
+
+            if (nodeM != null) {
+                segment3 = new SegmentWrapper(nodeM, centerNode);
+            }
+
         }
 
         public NodeWrapper nodeM;
@@ -170,6 +212,7 @@ namespace PedestrianBridge.Shapes {
         SegmentWrapper segment3;
 
         public void Create() {
+            Log.Debug($"{nodeM != null} {node1 != null} {node2 != null} {segment1 != null} {segment2 != null} {segment3 != null}");
             nodeM?.Create();
             node1?.Create();
             node2?.Create();

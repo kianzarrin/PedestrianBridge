@@ -14,7 +14,7 @@ namespace PedestrianBridge.Util {
     public static class NetUtil {
         public const float SAFETY_NET = 0.02f;
 
-        public static NetManager netMan => Singleton<NetManager>.instance;
+        public static NetManager netMan => NetManager.instance;
         public static NetTool netTool => Singleton<NetTool>.instance;
         public static SimulationManager simMan => Singleton<SimulationManager>.instance;
         public static TerrainManager terrainMan => TerrainManager.instance;
@@ -25,8 +25,21 @@ namespace PedestrianBridge.Util {
         internal static ref NetLane ToLane(this uint id) => ref netMan.m_lanes.m_buffer[id];
 
 
-
-
+        /// <param name="bLeft2">if other segment isto the left side of segmentID.</param>
+        internal static void CalculateCorner(
+            ushort segmentID, ushort nodeID, bool bLeft2,
+            out Vector2 cornerPoint, out Vector2 cornerDir) {
+            segmentID.ToSegment().CalculateCorner(
+                segmentID,
+                true,
+                IsStartNode(segmentID, nodeID),
+                !bLeft2, // leftSide = if this segment is to the left of the other segment = !bLeft2
+                out Vector3 cornerPos,
+                out Vector3 cornerDirection,
+                out bool smooth);
+            cornerPoint = cornerPos.ToCS2D();
+            cornerDir = cornerDirection.ToCS2D().normalized;
+        }
 
         internal static Bezier3 CalculateSegmentBezier3(this ref NetSegment seg) {
             Bezier3 bezier = new Bezier3 {
@@ -196,6 +209,15 @@ namespace PedestrianBridge.Util {
                     yield break;
                 else
                     yield return segmentID;
+            }
+        }
+
+        public static IEnumerable<ushort> GetSegmentsCoroutine(ushort nodeID) {
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentID = nodeID.ToNode().GetSegment(i);
+                if (segmentID != 0) {
+                    yield return segmentID;
+                }
             }
         }
     }

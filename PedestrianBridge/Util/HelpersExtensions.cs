@@ -139,9 +139,9 @@ namespace PedestrianBridge.Util {
 
         internal static void AssertStack() {
             var frames = new StackTrace().FrameCount;
-            Log.Debug("frames=" + frames);
+            //Log.Debug("stack frames=" + frames);
             if (frames > 100) {
-                Exception e = new StackOverflowException("frames=" + frames);
+                Exception e = new StackOverflowException("stack frames=" + frames);
                 Log.Error(e.ToString());
                 throw e;
             }

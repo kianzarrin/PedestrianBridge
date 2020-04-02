@@ -5,10 +5,10 @@ using System;
 
 namespace PedestrianBridge.Shapes {
     public class SegmentWrapper {
-        NodeWrapper startNode;
-        NodeWrapper endNode;
-        Vector3 startDir;
-        Vector3 endDir;
+        public NodeWrapper startNode;
+        public NodeWrapper endNode;
+        public Vector3 startDir;
+        public Vector3 endDir;
 
         public SegmentWrapper(NodeWrapper startNode, NodeWrapper endNode) {
             this.startNode = startNode;

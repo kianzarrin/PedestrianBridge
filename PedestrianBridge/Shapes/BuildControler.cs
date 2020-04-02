@@ -29,10 +29,14 @@ namespace PedestrianBridge.Shapes {
                 nodeList.Add(lwrapper.nodeL);
             }
             for (int i = 0; i < n; ++i) {
-                SegmentWrapper segment = new SegmentWrapper(
-                    nodeList[i], nodeList[(i + 1) % n]);
-                segment.Create();
-                TMPEUtil.BanPedestrianCrossings(segList[i], nodeID);
+                var startNode = nodeList[i];
+                var endNode = nodeList[(i + 1) % n];
+                if (startNode != null && endNode != null) {
+                    SegmentWrapper segment = new SegmentWrapper(
+                        startNode, endNode);
+                    segment.Create();
+                    TMPEUtil.BanPedestrianCrossings(segList[(i + 1) % n], nodeID);
+                }
             } // end for
         } // end method
 
