@@ -63,8 +63,9 @@ namespace PedestrianBridge.Util {
         public static IEnumerable<ushort> ScanDirSegment(Vector2 start, Vector2 dir, float dist) {
             foreach (GridVector grid in ScaDir(start, dir, dist)) {
                 int index = grid.Index;
+                //Log.Debug($"grid={grid} dist={dist}");
                 ushort segmentID = 0;
-                if (index < netMan.m_segmentGrid.Length)
+                if (index >= 0 && index < netMan.m_segmentGrid.Length) 
                     segmentID = netMan.m_segmentGrid[index];
                 while (segmentID != 0) {
                     yield return segmentID;
@@ -86,6 +87,7 @@ namespace PedestrianBridge.Util {
 
         static IEnumerable<GridVector> scanX(GridVector start, Vector2 dir, float dist) {
             float ratioYX = Mathf.Abs(dir.y / dir.x);
+            dist /= GRID_SIZE;
             int distx =  Mathf.CeilToInt(dist / Mathf.Sqrt(1 + ratioYX * ratioYX)); // dist = sqrt(distx^2 + (distx*ratioYX)^2)
             int signx = (int)Mathf.Sign(dir.x);
             int signy = (int)Mathf.Sign(dir.y);
@@ -102,6 +104,7 @@ namespace PedestrianBridge.Util {
 
         static IEnumerable<GridVector> scanY(GridVector start, Vector2 dir, float dist) {
             float ratioXY = Mathf.Abs(dir.x / dir.y);
+            dist /= GRID_SIZE;
             int disty = Mathf.CeilToInt(dist / Mathf.Sqrt(1 + ratioXY * ratioXY));
             int signx = (int)Mathf.Sign(dir.x);
             int signy = (int)Mathf.Sign(dir.y);

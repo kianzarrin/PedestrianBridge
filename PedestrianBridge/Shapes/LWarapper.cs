@@ -155,13 +155,13 @@ namespace PedestrianBridge.Shapes {
                     }
 
                     float length = LineUtil.Bezier2ByDir(PointL, CornerDir1, Point1, EndDir1).ArcLength();
-                    Log.Debug($"1: distance={distance} length={length}");
+                    //Log.Debug($"1: distance={distance} length={length}");
                     if (forcedEnd)
                         break;
 
                     float diff = length - targetLength;
                     float distance_next;
-                    Log.Debug($"diff={diff}");
+                    //Log.Debug($"diff={diff}");
                     if (counter == 0) {
                         distance_next = distance -  diff;
                     } else if (diff * diff_prev < 0) {
@@ -227,14 +227,14 @@ namespace PedestrianBridge.Shapes {
 
 
                     float length = LineUtil.Bezier2ByDir(PointL, CornerDir2, Point2, EndDir2).ArcLength();
-                    Log.Debug($"length2={length}");
+                    //Log.Debug($"length2={length}");
                     if (forcedEnd)
                         break;
 
 
                     float diff = length - targetLength;
                     float distance_next;
-                    Log.Debug($"diff={diff}");
+                    //Log.Debug($"diff={diff}");
                     if (counter == 0) {
                         distance_next = distance - diff;
                     } else if (diff * diff_prev < 0) {
@@ -310,7 +310,7 @@ namespace PedestrianBridge.Shapes {
                 if (overFlow || forceEnd) {
                     ushort nextSegmentId = ContinueToNextSegment(segmentId, otherNodeId);
                     if (nextSegmentId != 0) {
-                        Log.Debug("ContinueToNextSegment");
+                        //Log.Debug("ContinueToNextSegment");
                         Travel(
                             nextSegmentId,
                             otherNodeId,
@@ -324,7 +324,7 @@ namespace PedestrianBridge.Shapes {
                             level-1);
                         return;
                     }
-                    Log.Debug("distance > length || forceEnd but could not find next segment");
+                    //Log.Debug("distance > length || forceEnd but could not find next segment");
                 }
 
                 forcedEnd = !hasPedestrianLanes;
