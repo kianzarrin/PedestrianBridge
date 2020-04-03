@@ -25,7 +25,9 @@ namespace PedestrianBridge.Util {
         internal static ref NetLane ToLane(this uint id) => ref netMan.m_lanes.m_buffer[id];
 
 
-        /// <param name="bLeft2">if other segment isto the left side of segmentID.</param>
+        /// <param name="bLeft2">if other segment is to the left side of segmentID.</param>
+        /// <param name="cornerPoint">is normalized</param>
+        /// <param name="cornerDir">is normalized</param>
         internal static void CalculateCorner(
             ushort segmentID, ushort nodeID, bool bLeft2,
             out Vector2 cornerPoint, out Vector2 cornerDir) {
@@ -40,6 +42,18 @@ namespace PedestrianBridge.Util {
             cornerPoint = cornerPos.ToCS2D();
             cornerDir = cornerDirection.ToCS2D().normalized;
         }
+
+        /// <param name="bLeft2">if other segment is to the left side of segmentID.</param>
+        internal static void CalculateOtherCorner(
+            ushort segmentID, ushort nodeID, bool bLeft2,
+            out Vector2 cornerPoint, out Vector2 cornerDir) {
+            ushort otherSegmentID = bLeft2 ?
+                segmentID.ToSegment().GetLeftSegment(nodeID) :
+                segmentID.ToSegment().GetRightSegment(nodeID);
+            CalculateCorner(otherSegmentID, nodeID, !bLeft2,
+                            out cornerPoint, out cornerDir);
+        }
+
 
         internal static Bezier3 CalculateSegmentBezier3(this ref NetSegment seg) {
             Bezier3 bezier = new Bezier3 {

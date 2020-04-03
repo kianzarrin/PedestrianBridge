@@ -4,8 +4,8 @@ namespace PedestrianBridge.Util {
     using static HelpersExtensions;
 
     public static class  PrefabUtil {
-        
-        public static NetInfo SelectedPrefab => GetSelectedPath().LogRet("SelectedPrefab retunrs ");
+
+        public static NetInfo SelectedPrefab => GetSelectedPath();
         public static NetInfo defaultPrefab => PedestrianPathInfo;
         public static NetInfo PedestrianBridgeInfo =>
             GetInfo("Pedestrian Elevated");
@@ -13,10 +13,12 @@ namespace PedestrianBridge.Util {
             GetInfo("Pedestrian Pavement");
 
         static NetInfo GetSelectedPath() {
-            NetInfo info = Singleton<NetTool>.instance.m_prefab;
-            Log.Debug("selected Info is "+ info);
+            NetInfo info = NetUtil.netTool?.m_prefab;
+            if (info == null)
+                return default;
+            //Log.Debug("selected Info is "+ info);
             try {
-                Log.Debug("info.GetElevated().m_netAI is " + info.GetElevated().m_netAI);
+                //Log.Debug("info.GetElevated().m_netAI is " + info.GetElevated().m_netAI);
                 if (info.GetElevated().m_netAI is PedestrianBridgeAI)
                     return info;
             }
@@ -24,7 +26,7 @@ namespace PedestrianBridge.Util {
                 Log.Error(e.Message);
             }
 
-            Log.Debug("no pedestrian path is selected. GetSelectedPath() returns default prefab");
+            //Log.Debug("no pedestrian path is selected. GetSelectedPath() returns default prefab");
             return defaultPrefab;
         }
 

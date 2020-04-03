@@ -37,7 +37,8 @@ namespace PedestrianBridge.Shapes {
             var pathInfo = PrefabUtil.SelectedPrefab;
             var nodeInfo = endNodeID.ToNode().Info;
             var segmentInfo = HitSegmentID.ToSegment().Info;
-            Vector2 startPoint = start + (pathInfo.m_halfWidth + nodeInfo.m_halfWidth + SAFETY_NET) * dir;
+            const float endWidth = 8;//meters
+            Vector2 startPoint = start + (pathInfo.m_halfWidth + endWidth + SAFETY_NET) * dir;
             Vector2 endPoint = HitPoint - (pathInfo.m_halfWidth + segmentInfo.m_halfWidth + SAFETY_NET) * dir;
 
             node1 = new NodeWrapper(startPoint, 0, pathInfo);

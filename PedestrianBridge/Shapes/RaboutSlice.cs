@@ -10,20 +10,18 @@ namespace PedestrianBridge.Shapes {
 
     public class RaboutSlice {
         public struct Corner {
-            internal LWrapper.Calc L;
+            internal LWrapper.Calc L { get; private set; }
             // Output:
-            internal Vector2 ControlPoint => L.ControlPoint1;
             internal Vector2 Point => L.PointL;
             internal Vector2 AltPoint => L.Point2;
 
             /// DirMain first represents the direction of the main segment at the junction.
             /// but then it is modified to represent the direction of the pedestrian bridge
             /// slightly away from the junction.
-            internal Vector2 DirMain;
+            internal Vector2 DirMain => L.CornerDir1;
 
-            internal Vector2 DirMinor => L.StartDir2;
+            internal Vector2 DirMinor => L.CornerDir2;
             internal Vector2 EndDirMinor => L.EndDir2;
-            internal float Offset => (ControlPoint - Point).magnitude;
 
             internal bool CanConnectPathAtJunction => L.CanConnectPathAtJunction2;
             internal bool CanConnectPathAtFinalNode => L.CanConnectPathAtFinalNode2;
@@ -31,7 +29,6 @@ namespace PedestrianBridge.Shapes {
 
             public Corner(ushort segmentMainID, ushort segmentMinorID, float HWpath) {
                 L = new LWrapper.Calc(segmentMainID, segmentMinorID, HWpath);
-                DirMain = L.StartDir1;
             }
         }
 
@@ -53,30 +50,17 @@ namespace PedestrianBridge.Shapes {
             }
 
             var b2 = LineUtil.Bezier2ByDir(
-                corner1.ControlPoint, corner1.DirMain,
-                corner2.ControlPoint, corner2.DirMain);
+                corner1.Point, corner1.DirMain,
+                corner2.Point, corner2.DirMain);
 
             MiddlePoint = b2.Position(0.5f);
             MDir2 = b2.Tangent(0.5f);
             MDir1 = -MDir2;
 
-            // re-adjust offset direction.
-            corner1.DirMain = b2.Tangent(corner1.Offset / b2.ArcLength());
-            corner2.DirMain = -b2.Tangent(1f - corner2.Offset / b2.ArcLength());
             return true;
         }
 
-        //bool IsSplit(ushort segmentID1Minor, ushort segmentID2Minor) {
-        //    //bool oneway1 = CalculateIsOneWay(segmentID1Minor);
-        //    //bool oneway2 = CalculateIsOneWay(segmentID2Minor);
-        //    //bool b1 = GetHeadNode(segmentID1Minor) == GetTailNode(segmentID2Minor);
-        //    //bool b2 = GetHeadNode(segmentID2Minor) == GetTailNode(segmentID1Minor);
-        //    //bool ret = oneway1 & oneway2 & (b1 | b2);
-        //    //return ret;
-        //}
-
-        bool IsSplit => (corner1.FinalNodeID == corner2.FinalNodeID).
-            LogRet($"DEBUG 3> {corner1.FinalNodeID} == {corner2.FinalNodeID} : "); 
+        bool IsSplit => corner1.FinalNodeID == corner2.FinalNodeID;
 
         static bool IsIntersectionOnGround(ushort segmentID1, ushort segmentID2) =>
             GetSharedNode(segmentID1, segmentID2).ToNode().
@@ -87,7 +71,6 @@ namespace PedestrianBridge.Shapes {
             ushort segmentID1Main, ushort segmentID1Minor,
             ushort segmentID2Main, ushort segmentID2Minor) {
             Util.HelpersExtensions.AssertStack();
-            //Log.Debug("IsBetweenInOut() called.");
             const float maxLen = 7 * MPU;
             bool bShort = (corner1.Point - corner2.Point).sqrMagnitude <= maxLen * maxLen;
             if (!bShort) {
@@ -135,7 +118,6 @@ namespace PedestrianBridge.Shapes {
             NetInfo eInfo = info.GetElevated();
             corner1 = new Corner(segmentID1Main, segmentID1Minor, eInfo.m_halfWidth);
             corner2 = new Corner(segmentID2Main, segmentID2Minor, eInfo.m_halfWidth);
-            Log.Debug($"IsSplit={IsSplit} onGround={onGround}");
             if (IsSplit)
                 return;
             bool angleTooWide = !CalculateMiddlePoint();
@@ -150,7 +132,6 @@ namespace PedestrianBridge.Shapes {
             float len1 = Len1;
             Log.Debug($"len1={len1} corner1.CanConnectPathAtJunction={corner1.CanConnectPathAtJunction}");
             if ((len1 > MIN_LEN * MPU) && corner1.CanConnectPathAtJunction) {
-                Log.Debug("POINT A");
                 node1 = new NodeWrapper(corner1.Point, 0, eInfo);
                 segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.DirMain);
             } else if (corner1.CanConnectPathAtFinalNode) {
@@ -166,7 +147,6 @@ namespace PedestrianBridge.Shapes {
             float len2 = Len2;
             Log.Debug($"len2={len2} corner2.CanConnectPathAtJunction={corner2.CanConnectPathAtJunction}");
             if ((len2 > MIN_LEN * MPU) && corner2.CanConnectPathAtJunction) {
-                Log.Debug("POINT B");
                 node2 = new NodeWrapper(corner2.Point, 0, eInfo);
                 segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.DirMain);
             } else if (corner2.CanConnectPathAtFinalNode) {
@@ -212,7 +192,7 @@ namespace PedestrianBridge.Shapes {
         SegmentWrapper segment3;
 
         public void Create() {
-            Log.Debug($"{nodeM != null} {node1 != null} {node2 != null} {segment1 != null} {segment2 != null} {segment3 != null}");
+            //Log.Debug($"{nodeM != null} {node1 != null} {node2 != null} {segment1 != null} {segment2 != null} {segment3 != null}");
             nodeM?.Create();
             node1?.Create();
             node2?.Create();

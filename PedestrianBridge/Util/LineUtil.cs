@@ -35,20 +35,59 @@ namespace PedestrianBridge.Util {
                 out center);
         }
 
-        public static float ArcLength(this Bezier3 beizer) {
+        public static float ArcLength(this Bezier3 beizer, float step=0.1f) {
             float ret = 0;
-            float step = 0.1f;
-            for (float t = step; t <= 1f; t += step) {
+            float t;
+            for (t = step; t < 1f; t += step) {
                 float len = (beizer.Position(t) - beizer.Position(t - step)).magnitude;
+                ret += len;
+            }
+            {
+                float len = (beizer.d - beizer.Position(t - step)).magnitude;
                 ret += len;
             }
             return ret;
         }
 
+            /// <summary>
+            /// Travels some distance on beizer and calculates the point and tangent at that distance.
+            /// </summary>
+            /// <param name="distance">distance to travel on the arc in meteres</param>
+            /// <param name="tangent">normalized tangent on the curve toward the end of the beizer.</param>
+            /// <returns>point on the curve at the given distance.</returns>
+            public static Vector2 Travel(this Bezier2 beizer, float distance, out Vector2 tangent) {
+            if (beizer.IsStraight()) {
+                tangent = (beizer.d - beizer.a).normalized;
+                return beizer.TravelStraight(distance);
+            }
+            float t = beizer.Travel(0, distance);
+            tangent = beizer.Tangent(t).normalized; // TODO is normalization necessary?
+            return beizer.Position(t);
+        }
+
+        static Vector2 TravelStraight(this Bezier2 beizer, float length) {
+            float r = length / beizer.ArcLength();
+            return beizer.a + r * (beizer.d - beizer.a);
+        }
+
+
+        public static bool IsStraight(this Bezier2 beizer) {
+            var startDir = beizer.a - beizer.b;
+            var endDir = beizer.d - beizer.c;
+            return MathUtil.EqualAprox((startDir+endDir).magnitude, 0f);
+        }
         public static float ArcLength(this Bezier2 beizer, float step = 0.1f) {
+            if (beizer.IsStraight()) {
+                return (beizer.d - beizer.a).magnitude;
+            }
             float ret = 0;
-            for (float t = step; t <= 1f; t += step) {
+            float t;
+            for (t = step; t < 1f; t += step) {
                 float len = (beizer.Position(t) - beizer.Position(t - step)).magnitude;
+                ret += len;
+            }
+            {
+                float len = (beizer.d - beizer.Position(t-step)).magnitude;
                 ret += len;
             }
             return ret;
