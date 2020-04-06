@@ -29,4 +29,4 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.8.3.*")] // Roundabout path
+[assembly: AssemblyVersion("1.9.1.*")] // more precise paths.

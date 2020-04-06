@@ -1,4 +1,3 @@
-
 namespace PedestrianBridge.Shapes {
     using System.Collections.Generic;
     using System;
@@ -13,31 +12,10 @@ namespace PedestrianBridge.Shapes {
     public static class BuildControler {
 
         public static void CreateJunctionBridge(ushort nodeID) {
-            if (nodeID.ToNode().CountSegments() < 3)
-                throw new NotImplementedException("number of segments is less than 3");
-            List<ushort> segList = GetCCSegList(nodeID).ToList();
-            int n = segList.Count;
-            if (n < 3)
-                throw new Exception($"seglist count is ${segList.Count} expected at least 3");
-
-            var nodeList = new List<NodeWrapper>();
-            for (int i = 0; i < n; ++i) {
-                ushort segID1 = segList[i], segID2 = segList[(i + 1) % n];
-                var lwrapper = new LWrapper(segID1, segID2, PrefabUtil.SelectedPrefab);
-                //Log.Info($"creating L from segments: {segID1} {segID2}");
-                lwrapper.Create();
-                nodeList.Add(lwrapper.nodeL);
+            var junction = new JunctionWrapper(nodeID);
+            if (junction.Valid) {
+                junction.Create();
             }
-            for (int i = 0; i < n; ++i) {
-                var startNode = nodeList[i];
-                var endNode = nodeList[(i + 1) % n];
-                if (startNode != null && endNode != null) {
-                    SegmentWrapper segment = new SegmentWrapper(
-                        startNode, endNode);
-                    segment.Create();
-                    TMPEUtil.BanPedestrianCrossings(segList[(i + 1) % n], nodeID);
-                }
-            } // end for
         } // end method
 
         public static void CreateRaboutBridge(RoundaboutUtil raboutCalc) {
@@ -52,8 +30,9 @@ namespace PedestrianBridge.Shapes {
 
             Vector2 centerPoint = raboutCalc.CalculateCenter();
             NodeWrapper center = new NodeWrapper(centerPoint, 10, info);
-            center.Create();
 
+            var slices = new List<RaboutSlice>(n);
+            bool bCreate = false;
             for (int i = 0; i < n; ++i) {
                 var i2 = (i + 1) % n;
                 var slice = new RaboutSlice(
@@ -61,9 +40,20 @@ namespace PedestrianBridge.Shapes {
                     junctions[i2].Main1, junctions[i2].Minor,
                     center,
                     PrefabUtil.SelectedPrefab);
-                slice.Create();
+                slices.Add(slice);
+                bCreate |= slice.nodeM != null;
+            }
+            if (!bCreate) {
+                Log.Info("Could not create roundabout");
+                return;
+            }
+
+            center.Create(); // this must be created before any slice.
+            for (int i = 0; i < n; ++i) {
+                slices[i].Create();
                 junctions[i].BanCrossing();
             }
+
         }
 
     } // end calss

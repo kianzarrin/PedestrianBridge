@@ -45,7 +45,7 @@ namespace PedestrianBridge.Shapes {
             float angle2 = VectorUtil.UnsignedAngleRad(-v21, corner2.DirMain); // expected Accute
             float c = Mathf.PI * .5f - Epsilon;
             if (angle1>=c || angle2>= c) {
-                //Log.Debug("Roundabout angle >= 180");
+                Log.Debug("Roundabout angle >= 180");
                 return false;
             }
 
@@ -53,8 +53,7 @@ namespace PedestrianBridge.Shapes {
                 corner1.Point, corner1.DirMain,
                 corner2.Point, corner2.DirMain);
 
-            MiddlePoint = b2.Position(0.5f);
-            MDir2 = b2.Tangent(0.5f);
+            MiddlePoint = b2.Travel(b2.ArcLength() * .5f, out MDir2);
             MDir1 = -MDir2;
 
             return true;
@@ -112,8 +111,10 @@ namespace PedestrianBridge.Shapes {
             bool onGround =
                 IsIntersectionOnGround(segmentID1Main, segmentID1Minor) &
                 IsIntersectionOnGround(segmentID2Main, segmentID2Minor);
-            if (!onGround)
+            if (!onGround) {
+                Log.Debug($"this RaboutSlice is ignored because its not on the ground.");
                 return;
+            }
 
             NetInfo eInfo = info.GetElevated();
             corner1 = new Corner(segmentID1Main, segmentID1Minor, eInfo.m_halfWidth);
@@ -123,7 +124,7 @@ namespace PedestrianBridge.Shapes {
             bool angleTooWide = !CalculateMiddlePoint();
             bool ignoreAll = angleTooWide || IsBetweenInOut(segmentID1Main, segmentID1Minor, segmentID2Main, segmentID2Minor);
             if (ignoreAll) {
-                //Log.Debug($"this RaboutSlice is ignored. because angleTooWide or IsBetweenInOut() ");
+                Log.Debug($"this RaboutSlice is ignored. angleTooWide={angleTooWide} ");
                 return;
             }
 
@@ -180,6 +181,8 @@ namespace PedestrianBridge.Shapes {
             if (nodeM != null) {
                 segment3 = new SegmentWrapper(nodeM, centerNode);
             }
+
+
 
         }
 
