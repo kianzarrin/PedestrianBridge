@@ -61,9 +61,11 @@ namespace PedestrianBridge.Shapes {
 
         bool IsSplit => corner1.FinalNodeID == corner2.FinalNodeID;
 
-        static bool IsIntersectionOnGround(ushort segmentID1, ushort segmentID2) =>
-            GetSharedNode(segmentID1, segmentID2).ToNode().
-            m_flags.IsFlagSet(NetNode.Flags.OnGround);
+        static bool IsIntersectionOnGround(ushort segmentID1, ushort segmentID2) {
+            ref NetNode node = ref GetSharedNode(segmentID1, segmentID2).ToNode();
+            //return node.m_flags.IsFlagSet(NetNode.Flags.OnGround);
+            return node.Info.m_netAI is RoadAI; // fix Roundabout builder.
+        }
 
         // typicall in highway connections 
         bool IsBetweenInOut(
