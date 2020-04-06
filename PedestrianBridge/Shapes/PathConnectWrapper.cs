@@ -18,8 +18,9 @@ namespace PedestrianBridge.Shapes {
         public NodeWrapper node1;
         public NodeWrapper node2;
         public SegmentWrapper segment;
+        public bool IsValid => segment != null;
 
-        public PathConnectWrapper(ushort endNodeID, ushort endSegmentID) {
+        public PathConnectWrapper(ushort endNodeID, ushort endSegmentID, NetInfo pathInfo) {
             this.endSegmentID = endSegmentID;
             this.endNodeID = endNodeID;
 
@@ -34,7 +35,6 @@ namespace PedestrianBridge.Shapes {
             Vector2 start = endNodeID.ToNode().m_position.ToCS2D();
             Vector2 dir = (HitPoint - start).normalized;
 
-            var pathInfo = PrefabUtil.SelectedPrefab;
             var nodeInfo = endNodeID.ToNode().Info;
             var segmentInfo = HitSegmentID.ToSegment().Info;
             const float endWidth = 8;//meters
@@ -44,6 +44,12 @@ namespace PedestrianBridge.Shapes {
             node1 = new NodeWrapper(startPoint, 0, pathInfo);
             node2 = new NodeWrapper(endPoint , 0, pathInfo);
             segment = new SegmentWrapper(node1, node2);
+        }
+
+        public static void Create(ushort segmentID, ushort nodeID) {
+            var path = new PathConnectWrapper(segmentID, nodeID, PrefabUtil.SelectedPrefab);
+            if (path.IsValid)
+                path.Create();
         }
 
         public void Create() {

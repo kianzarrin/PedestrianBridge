@@ -9,7 +9,8 @@ namespace PedestrianBridge.Shapes {
         public Vector2 point;
         public byte elevation;
         public  NetInfo info;
-        public ushort ID;
+        public ushort ID { get; private set; }
+        public bool IsCreated => ID != 0;
 
         public NodeWrapper(Vector2 point, byte elevation, NetInfo info) {
             this.point = point;
@@ -23,7 +24,7 @@ namespace PedestrianBridge.Shapes {
             simMan.AddAction(_Create);
 
         void _Create() {
-            if (ID != 0)
+            if (IsCreated)
                 throw new Exception("Node already has been created");
             Vector3 pos = Get3DPos(point, elevation);
             ID = CreateNode(pos, info);

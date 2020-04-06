@@ -182,15 +182,15 @@ namespace PedestrianBridge.Shapes {
 
             if (nodeM != null) {
                 segment3 = new SegmentWrapper(nodeM, centerNode);
+                this.centerNode = centerNode;
             }
-
-
-
         }
 
+        public bool IsValid => nodeM != null;
         public NodeWrapper nodeM;
         NodeWrapper node1;
         NodeWrapper node2;
+        NodeWrapper centerNode;
 
         SegmentWrapper segment1;
         SegmentWrapper segment2;
@@ -198,6 +198,8 @@ namespace PedestrianBridge.Shapes {
 
         public void Create() {
             //Log.Debug($"{nodeM != null} {node1 != null} {node2 != null} {segment1 != null} {segment2 != null} {segment3 != null}");
+            if (centerNode != null && !centerNode.IsCreated)
+                centerNode.Create();
             nodeM?.Create();
             node1?.Create();
             node2?.Create();

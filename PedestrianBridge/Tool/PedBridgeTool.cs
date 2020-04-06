@@ -91,7 +91,7 @@ namespace PedestrianBridge.Tool {
                   _cachedPathConnectWrapper?.endNodeID == HoveredNodeId;
                 _cachedPathConnectWrapper = cached ?
                     _cachedPathConnectWrapper :
-                    new PathConnectWrapper(HoveredNodeId, HoveredSegmentId);
+                    new PathConnectWrapper(HoveredNodeId, HoveredSegmentId, PrefabUtil.SelectedPrefab);
                 _cachedPathConnectWrapper?.RenderOverlay(cameraInfo);
             }
         }
@@ -100,19 +100,21 @@ namespace PedestrianBridge.Tool {
             if (!HoverValid)
                 return;
             Log.Debug($"OnPrimaryMouseClicked: segment {HoveredSegmentId} node {HoveredNodeId}");
-
             if(RoundaboutUtil.Instance_Click.TraverseLoop(HoveredSegmentId,out var segList)) {
-                BuildControler.CreateRaboutBridge(RoundaboutUtil.Instance_Click);
+                Singleton<SimulationManager>.instance.AddAction(delegate () {
+                    RoundAboutWrapper.Create(RoundaboutUtil.Instance_Click);
+                });
             } else if (IsSuitableJunction()) {
                 Singleton<SimulationManager>.instance.AddAction(delegate () {
-                    BuildControler.CreateJunctionBridge(HoveredNodeId);
+                    JunctionWrapper.Create(HoveredNodeId);
                 });
             } else {
-                var path = new PathConnectWrapper(HoveredNodeId, HoveredSegmentId);
-                if (path.segment != null)
-                    path.Create();
+                Singleton<SimulationManager>.instance.AddAction(delegate () {
+                    PathConnectWrapper.Create(HoveredNodeId, HoveredSegmentId);
+                });
             }
         }
+
 
 
         protected override void OnSecondaryMouseClicked() {

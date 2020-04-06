@@ -11,13 +11,13 @@ namespace PedestrianBridge.Shapes {
 
     public class JunctionWrapper {
         public ushort NodeID { get; private set; } = 0;
-        public bool Valid { get; private set; } = false;
+        public bool IsValid { get; private set; } = false;
 
         private int _count;
         private List<LWrapper> _corners;
         private List<ushort> _segList;
 
-        public JunctionWrapper(ushort nodeID) {
+        public JunctionWrapper(ushort nodeID, NetInfo pathInfo) {
             NodeID = nodeID;
             _segList = GetCCSegList(nodeID).ToList();
             _count = _segList.Count;
@@ -27,13 +27,19 @@ namespace PedestrianBridge.Shapes {
 
             for (int i = 0; i < _count; ++i) {
                 ushort segID1 = _segList[i], segID2 = _segList[(i + 1) % _count];
-                var corner = new LWrapper(segID1, segID2, PrefabUtil.SelectedPrefab);
+                var corner = new LWrapper(segID1, segID2, pathInfo);
                 //Log.Info($"created L from segments: {segID1} {segID2}");
                 if (corner.Valid) {
                     _corners.Add(corner);
-                    this.Valid = true;
+                    this.IsValid = true;
                 }
             }
+        }
+
+        public static void Create(ushort nodeID) {
+            var junction = new JunctionWrapper(nodeID, PrefabUtil.SelectedPrefab);
+            if (junction.IsValid != null)
+                junction.Create();
         }
 
         public void Create() {

@@ -83,8 +83,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Shapes\BuildControler.cs" />
     <Compile Include="PedestrianBridgeMod.cs" />
+    <Compile Include="Shapes\RoundAboutWrapper.cs" />
     <Compile Include="Shapes\JunctionWrapper.cs" />
     <Compile Include="Shapes\LWarapper.cs" />
     <Compile Include="Shapes\NodeWrapper.cs" />
