@@ -29,4 +29,4 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.9.1.*")] // more precise paths.
+[assembly: AssemblyVersion("1.9.2.*")] // junction node count = 2 

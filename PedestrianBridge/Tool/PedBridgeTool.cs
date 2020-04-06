@@ -125,7 +125,7 @@ namespace PedestrianBridge.Tool {
             if (HoveredNodeId == 0)
                 return false;
             NetNode node = HoveredNodeId.ToNode();
-            if (node.CountSegments() < 3)
+            if (node.CountSegments() < JunctionWrapper.MIN_SEGMENT_COUNT)
                 return false;
 
             if (!node.m_flags.IsFlagSet(NetNode.Flags.OnGround))

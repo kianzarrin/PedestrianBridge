@@ -10,6 +10,7 @@ namespace PedestrianBridge.Shapes {
     using VectorUtils = Util.VectorUtil;
 
     public class JunctionWrapper {
+        public const int MIN_SEGMENT_COUNT = 2;
         public ushort NodeID { get; private set; } = 0;
         public bool IsValid { get; private set; } = false;
 
@@ -22,8 +23,10 @@ namespace PedestrianBridge.Shapes {
             _segList = GetCCSegList(nodeID).ToList();
             _count = _segList.Count;
             _corners = new List<LWrapper>(_count);
-            if (_count < 3)
-                throw new NotImplementedException("number of segments is less than 3");
+            if (_count < MIN_SEGMENT_COUNT) {
+                Log.Debug("number of segments is less than " + MIN_SEGMENT_COUNT);
+                return;
+            }
 
             for (int i = 0; i < _count; ++i) {
                 ushort segID1 = _segList[i], segID2 = _segList[(i + 1) % _count];
@@ -52,7 +55,8 @@ namespace PedestrianBridge.Shapes {
                 if (startNode != null && endNode != null) {
                     SegmentWrapper segment = new SegmentWrapper(
                         startNode, endNode);
-                    segment.Create();
+                    if (!(_count == 2 && i == 1)) 
+                        segment.Create();
                     TMPEUtil.BanPedestrianCrossings(_segList[(i + 1) % _count], NodeID);
                 }
             } // end for

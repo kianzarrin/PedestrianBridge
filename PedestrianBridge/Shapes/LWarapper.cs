@@ -36,6 +36,8 @@ namespace PedestrianBridge.Shapes {
 
             internal ushort FinalNodeID1, FinalNodeID2;
 
+            public const float DEFAULT_LENGTH = 3 * MPU;
+
             internal Calc(ushort segID1, ushort segID2, float HWpb) {
                 //Log.Debug($"LWrapper.Calc: {segID1}, {segID2}");
                 // Prepration:
@@ -55,9 +57,10 @@ namespace PedestrianBridge.Shapes {
 
                 // the code is written for seg2 CCW WRT seg1.
                 // if CW, some values need inversion.
-                bool isCCW = seg1.GetRightSegment(JunctionID) == segID2;
                 bool isCW = seg2.GetRightSegment(JunctionID) == segID1;
-                Assert(isCCW ^ isCW, $"isCCW ^ isCW: {isCCW} ^ {isCW}");
+                //bool isCCW = seg1.GetRightSegment(JunctionID) == segID2;
+                bool isCCW = !isCW; // 
+                //Assert(isCCW ^ isCW, $"isCCW ^ isCW: {isCCW} ^ {isCW}"); // if there are only two segments, this assertion will fail.
 
                 float angle = VectorUtil.SignedAngleRadCCW(CornerDir1, CornerDir2);
                 if (isCW) angle = -angle;
@@ -117,9 +120,10 @@ namespace PedestrianBridge.Shapes {
                 float distance_prev = 0, diff_prev = 0;
 
                 #region point1
-                float targetLength = 4 * MPU;
-                if (angle < 0) targetLength += extend0;
+                float targetLength = DEFAULT_LENGTH;
+                if (!parallel && angle < Epsilon) targetLength += extend0;
                 float distance = targetLength + offset1;
+                Log.Debug($"1: targetLength={targetLength} distance={distance}");
                 for (int counter = 0; counter < 10; ++counter) {
                     Travel(
                         segID1,
@@ -155,7 +159,7 @@ namespace PedestrianBridge.Shapes {
                     }
 
                     float length = LineUtil.Bezier2ByDir(PointL, CornerDir1, Point1, EndDir1).ArcLength();
-                    //Log.Debug($"1: distance={distance} length={length}");
+                    Log.Debug($"1: distance={distance} length={length}");
                     if (forcedEnd)
                         break;
 
@@ -186,8 +190,8 @@ namespace PedestrianBridge.Shapes {
                 #endregion
 
                 #region point2
-                targetLength = 4 * MPU;
-                if (angle < 0) targetLength += extend0;
+                targetLength = DEFAULT_LENGTH;
+                if (!parallel && angle < 0) targetLength += extend0;
 
                 distance = targetLength + offset2;
                 for (int counter = 0; counter < 10; ++counter) {
