@@ -70,19 +70,25 @@ namespace PedestrianBridge.Tool {
         }
 
         PathConnectWrapper? _cachedPathConnectWrapper;
+        Vector3 _cachedHitPos;
+
+
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+            //Log.Debug($"HoveredSegmentId={HoveredSegmentId} HoveredNodeId={HoveredNodeId} HitPos={HitPos}");
             base.RenderOverlay(cameraInfo);
             if (!HoverValid)
                 return;
 
-            Color color1 = Color.yellow;//  GetToolColor(Input.GetMouseButton(0), false);
+            Color color = Color.yellow;//  GetToolColor(Input.GetMouseButton(0), false);
             if (RoundaboutUtil.Instance_render.TraverseLoop(HoveredSegmentId, out var segList)) {
                 foreach (var segmentID in segList) {
-                    NetTool.RenderOverlay(cameraInfo, ref segmentID.ToSegment(), color1, color1);
+                    NetTool.RenderOverlay(cameraInfo, ref segmentID.ToSegment(), color, color);
                 }
+            } else if (IsSuitableRoadForRoadBridge()) {
+                RoadBridgeWrapper.RenderOverlay(cameraInfo, color, HoveredSegmentId, HitPos);
             } else if (IsSuitableJunction()) {
                 foreach (var segmentID in NetUtil.GetCCSegList(HoveredNodeId)) {
-                    NetTool.RenderOverlay(cameraInfo, ref segmentID.ToSegment(), color1, color1);
+                    NetTool.RenderOverlay(cameraInfo, ref segmentID.ToSegment(), color, color);
                 }
             } else {
                 bool cached =
@@ -99,10 +105,14 @@ namespace PedestrianBridge.Tool {
         protected override void OnPrimaryMouseClicked() {
             if (!HoverValid)
                 return;
-            Log.Debug($"OnPrimaryMouseClicked: segment {HoveredSegmentId} node {HoveredNodeId}");
+            Log.Info($"OnPrimaryMouseClicked: segment {HoveredSegmentId} node {HoveredNodeId}");
             if(RoundaboutUtil.Instance_Click.TraverseLoop(HoveredSegmentId,out var segList)) {
                 Singleton<SimulationManager>.instance.AddAction(delegate () {
                     RoundAboutWrapper.Create(RoundaboutUtil.Instance_Click);
+                });
+            } else if (IsSuitableRoadForRoadBridge()) {
+                Singleton<SimulationManager>.instance.AddAction(delegate () {
+                    RoadBridgeWrapper.Create(HoveredSegmentId,HitPos);
                 });
             } else if (IsSuitableJunction()) {
                 Singleton<SimulationManager>.instance.AddAction(delegate () {
@@ -115,20 +125,26 @@ namespace PedestrianBridge.Tool {
             }
         }
 
-
-
         protected override void OnSecondaryMouseClicked() {
             //throw new System.NotImplementedException();
+        }
+
+        bool IsSuitableRoadForRoadBridge() {
+            const  float minDistance = 1 * NetUtil.MPU;
+            if (HoveredNodeId.ToNode().m_flags.IsFlagSet(NetNode.Flags.Middle))
+                return true;
+            var diff = HitPos - HoveredNodeId.ToNode().m_position;
+            return diff.sqrMagnitude > minDistance * minDistance;
         }
 
         bool IsSuitableJunction() {
             if (HoveredNodeId == 0)
                 return false;
             NetNode node = HoveredNodeId.ToNode();
-            if (node.CountSegments() < JunctionWrapper.MIN_SEGMENT_COUNT)
+            if (node.CountSegments() < 3)
                 return false;
 
-            if (!node.m_flags.IsFlagSet(NetNode.Flags.OnGround))
+            if (!node.Info.CanConnectPath())
                 return false;
 
             return true;

@@ -94,7 +94,7 @@ namespace PedestrianBridge.Shapes {
             hitPoint = Vector2.zero;
             var flags = endNodeID.ToNode().m_flags;
             bool b = flags.IsFlagSet(NetNode.Flags.End | NetNode.Flags.Bend);
-            b &= flags.IsFlagSet(NetNode.Flags.OnGround);
+            b &= endNodeID.ToNode().Info.CanConnectPath(); //flags.IsFlagSet(NetNode.Flags.OnGround);
             if (!b) {
                 return 0;
             }

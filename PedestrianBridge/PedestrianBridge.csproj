@@ -84,6 +84,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PedestrianBridgeMod.cs" />
+    <Compile Include="Shapes\RoadBridgeWrapper.cs" />
+    <Compile Include="Shapes\RoadSideWrapper.cs" />
     <Compile Include="Shapes\RoundAboutWrapper.cs" />
     <Compile Include="Shapes\JunctionWrapper.cs" />
     <Compile Include="Shapes\LWarapper.cs" />
@@ -97,7 +99,7 @@
     <Compile Include="Tool\PedBridgeTool.cs" />
     <Compile Include="Util\RenderUtil.cs" />
     <Compile Include="Util\GridUtil.cs" />
-    <Compile Include="Util\LineUtil.cs" />
+    <Compile Include="Util\BezierUtil.cs" />
     <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\RoundaboutUtil.cs" />
     <Compile Include="Util\TMPEUtil.cs" />

@@ -26,9 +26,9 @@ namespace PedestrianBridge.Shapes {
             internal Vector2 CornerDir1, CornerDir2;
             internal ushort JunctionID;
 
-            // segment has pedestrian paths and junction is on ground
-            internal bool CanConnectPathAtJunction1;
-            internal bool CanConnectPathAtJunction2;
+            // segment has pedestrian paths and is ground road
+            internal bool CanConnectPath1;
+            internal bool CanConnectPath2;
 
             // the other node is on the ground and at least one segment connected to it has pedestrian paths.
             internal bool CanConnectPathAtOtherNode1;
@@ -70,10 +70,8 @@ namespace PedestrianBridge.Shapes {
 
                 ////////////////////////////////////////////////////////////////
                 // Main calculations
-                CanConnectPathAtJunction1 = seg1.Info.m_hasPedestrianLanes &&
-                                            JunctionID.ToNode().m_flags.IsFlagSet(NetNode.Flags.OnGround);
-                CanConnectPathAtJunction2 = seg2.Info.m_hasPedestrianLanes &&
-                                            JunctionID.ToNode().m_flags.IsFlagSet(NetNode.Flags.OnGround);
+                CanConnectPath1 = seg1.CanConnectPath();
+                CanConnectPath2 = seg2.CanConnectPath();
 
                 FinalNodeID1 = seg1.GetOtherNode(JunctionID);
                 FinalNodeID2 = seg2.GetOtherNode(JunctionID);
@@ -115,7 +113,7 @@ namespace PedestrianBridge.Shapes {
 
                 Point1 = Point2 = EndDir1 = EndDir2 = default;
 
-                const float lengthError = 1f;
+                const float lengthError = 0.5f;
                 const float weight = 0.5f; // reduce weigth for the results to converge.
                 float distance_prev = 0, diff_prev = 0;
 
@@ -158,7 +156,7 @@ namespace PedestrianBridge.Shapes {
                         }
                     }
 
-                    float length = LineUtil.Bezier2ByDir(PointL, CornerDir1, Point1, EndDir1).ArcLength();
+                    float length = BezierUtil.Bezier2ByDir(PointL, CornerDir1, Point1, EndDir1).ArcLength();
                     Log.Debug($"1: distance={distance} length={length}");
                     if (forcedEnd)
                         break;
@@ -230,7 +228,7 @@ namespace PedestrianBridge.Shapes {
                     }
 
 
-                    float length = LineUtil.Bezier2ByDir(PointL, CornerDir2, Point2, EndDir2).ArcLength();
+                    float length = BezierUtil.Bezier2ByDir(PointL, CornerDir2, Point2, EndDir2).ArcLength();
                     //Log.Debug($"length2={length}");
                     if (forcedEnd)
                         break;
@@ -265,7 +263,7 @@ namespace PedestrianBridge.Shapes {
 
             // move the point toward the segment with pedestrian lane.
             // TODO does not work for 180 angle if the two segments have different half widths.
-            static void MovePointTowardOtherSegment(ushort segmentID, ushort nodeId, bool bLeft, ref Vector2 Point) {
+            internal static void MovePointTowardOtherSegment(ushort segmentID, ushort nodeId, bool bLeft, ref Vector2 Point) {
                 ushort OtherSementID = bLeft ?
                     segmentID.ToSegment().GetLeftSegment(nodeId) :
                     segmentID.ToSegment().GetRightSegment(nodeId);
@@ -280,12 +278,12 @@ namespace PedestrianBridge.Shapes {
                 Point += (otherHalfWidth/2) * OtherDir;
             }
 
-            // returns true if node is on ground and has at least one segment with pedestrian lanes.
-            static bool CanConnectPathAtNode(ushort nodeID) {
-                if (!nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.OnGround))
-                    return false;
+            // returns true if node has at least one that can connect to path.
+            internal static bool CanConnectPathAtNode(ushort nodeID) {
+                //if (!nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.OnGround))
+                //    return false;
                 foreach(ushort segmentID in GetSegmentsCoroutine(nodeID)) {
-                    if (segmentID.ToSegment().Info.m_hasPedestrianLanes)
+                    if (segmentID.ToSegment().CanConnectPath())
                         return true;
                 }
                 return false;
@@ -293,7 +291,7 @@ namespace PedestrianBridge.Shapes {
 
             // returns false if overflow or forceEnd
             // returns true otherwise.
-            static void Travel(
+            internal static void Travel(
                 ushort segmentId,
                 ushort nodeId,
                 float distance,
@@ -308,8 +306,7 @@ namespace PedestrianBridge.Shapes {
                 float length = bezier.ArcLength();
                 ushort otherNodeId = segmentId.ToSegment().GetOtherNode(nodeId);
 
-                bool hasPedestrianLanes = segmentId.ToSegment().Info.m_hasPedestrianLanes;
-                bool forceEnd = !hasPedestrianLanes && level > 0;
+                bool forceEnd = !CanConnectPathToSegment(segmentId) && level > 0;
                 overFlow = distance > length;
                 if (overFlow || forceEnd) {
                     ushort nextSegmentId = ContinueToNextSegment(segmentId, otherNodeId);
@@ -331,13 +328,13 @@ namespace PedestrianBridge.Shapes {
                     //Log.Debug("distance > length || forceEnd but could not find next segment");
                 }
 
-                forcedEnd = !hasPedestrianLanes;
+                forcedEnd = !CanConnectPathToSegment(segmentId);
                 finalSegmentID = segmentId;
                 finalOtherNodeID = otherNodeId;
-                point = bezier.Travel(distance, out tangent);
+                point = bezier.Travel2(distance, out tangent);
             }
 
-            static ushort ContinueToNextSegment(ushort segmentId, ushort nodeId) {
+            internal static ushort ContinueToNextSegment(ushort segmentId, ushort nodeId) {
                 ref NetSegment seg = ref segmentId.ToSegment();
                 ref NetNode node = ref nodeId.ToNode();
 
@@ -362,8 +359,8 @@ namespace PedestrianBridge.Shapes {
             nodeL = node1 = node2 = null;
             segment1 = segment2 = null;
 
-            bool create1 = calc.CanConnectPathAtOtherNode1 && calc.CanConnectPathAtJunction1;
-            bool create2 = calc.CanConnectPathAtFinalNode2 && calc.CanConnectPathAtJunction2;
+            bool create1 = calc.CanConnectPathAtOtherNode1 && calc.CanConnectPath1;
+            bool create2 = calc.CanConnectPathAtFinalNode2 && calc.CanConnectPath2;
             if (!create1 && !create2) {
                 return;
             }

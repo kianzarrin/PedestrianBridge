@@ -61,7 +61,7 @@ namespace PedestrianBridge.Tool {
 
         public ushort HoveredNodeId { get; private set; } = 0;
         public ushort HoveredSegmentId { get; private set; } = 0;
-
+        public Vector3 HitPos { get; private set; }
 
         protected bool IsMouseRayValid => !UIView.IsInsideUI() && Cursor.visible && m_mouseRayValid;
         protected bool HoverValid => IsMouseRayValid && (HoveredSegmentId != 0 || HoveredNodeId != 0);
@@ -70,6 +70,7 @@ namespace PedestrianBridge.Tool {
         {
             HoveredSegmentId = 0;
             HoveredNodeId = 0;
+            HitPos = Vector3.zero;
             if (!IsMouseRayValid)
             {
                 return false;
@@ -90,6 +91,7 @@ namespace PedestrianBridge.Tool {
             if (RayCast(nodeInput, out RaycastOutput nodeOutput))
             {
                 HoveredNodeId = nodeOutput.m_netNode;
+                HitPos = nodeOutput.m_hitPos;
             }
 
             HoveredSegmentId = GetSegmentFromNode();
@@ -114,6 +116,7 @@ namespace PedestrianBridge.Tool {
             if (RayCast(segmentInput, out RaycastOutput segmentOutput))
             {
                 HoveredSegmentId = segmentOutput.m_netSegment;
+                HitPos = segmentOutput.m_hitPos;
             }
 
 

@@ -7,7 +7,6 @@ namespace PedestrianBridge.Shapes {
     using System.Linq;
     using static Util.NetUtil;
     using static Util.RoundaboutUtil;
-    using VectorUtils = Util.VectorUtil;
 
     public class JunctionWrapper {
         public const int MIN_SEGMENT_COUNT = 2;
@@ -41,7 +40,7 @@ namespace PedestrianBridge.Shapes {
 
         public static void Create(ushort nodeID) {
             var junction = new JunctionWrapper(nodeID, PrefabUtil.SelectedPrefab);
-            if (junction.IsValid != null)
+            if (junction.IsValid)
                 junction.Create();
         }
 

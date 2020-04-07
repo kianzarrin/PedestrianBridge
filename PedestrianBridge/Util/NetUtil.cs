@@ -54,23 +54,24 @@ namespace PedestrianBridge.Util {
                             out cornerPoint, out cornerDir);
         }
 
-
         internal static Bezier3 CalculateSegmentBezier3(this ref NetSegment seg) {
+            ref NetNode startNode = ref seg.m_startNode.ToNode();
+            ref NetNode endNode = ref seg.m_endNode.ToNode();
             Bezier3 bezier = new Bezier3 {
-                a = seg.m_startNode.ToNode().m_position,
-                d= seg.m_endNode.ToNode().m_position,
+                a = startNode.m_position,
+                d= endNode.m_position,
             };
             NetSegment.CalculateMiddlePoints(
                 bezier.a, seg.m_startDirection,
                 bezier.d, seg.m_endDirection,
-                false, false,
+                startNode.m_flags.IsFlagSet(NetNode.Flags.Middle),
+                endNode.m_flags.IsFlagSet(NetNode.Flags.Middle),
                 out bezier.b,
                 out bezier.c);
             return bezier;
         }
 
-        internal static Bezier2 CalculateSegmentBezier2(ushort segmentId, ushort nodeId) {
-            bool startNode = IsStartNode(segmentId, nodeId);
+        internal static Bezier2 CalculateSegmentBezier2(ushort segmentId, bool startNode) {
             Bezier3 bezier3 = segmentId.ToSegment().CalculateSegmentBezier3();
             Bezier2 bezier2 = bezier3.ToCSBezier2();
             if (startNode)
@@ -79,12 +80,31 @@ namespace PedestrianBridge.Util {
                 return bezier2.Invert();
         }
 
+        internal static Bezier2 CalculateSegmentBezier2(ushort segmentId, ushort nodeId) {
+            bool startNode = IsStartNode(segmentId, nodeId);
+            return CalculateSegmentBezier2(segmentId, startNode);
+        }
+
+        internal static float GetClosestT(this ref NetSegment segment, Vector3 position) {
+            Bezier3 bezier = segment.CalculateSegmentBezier3();
+            return bezier.GetClosestT(position);
+        }
+
         #region copied from TMPE
         public static bool LHT => TrafficDrivesOnLeft;
         public static bool RHT => !LHT;
         public static bool TrafficDrivesOnLeft =>
             Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic
                 == SimulationMetaData.MetaBool.True;
+
+        public static bool CanConnectPathToSegment(ushort segmentID) =>
+            segmentID.ToSegment().CanConnectPath();
+
+        public static bool CanConnectPath(this ref NetSegment segment) =>
+            segment.Info.m_netAI is RoadAI & segment.Info.m_hasPedestrianLanes;
+
+        public static bool CanConnectPath(this NetInfo info) =>
+            info.m_netAI is RoadAI & info.m_hasPedestrianLanes;
 
         public static bool IsStartNode(ushort segmentId, ushort nodeId) =>
             segmentId.ToSegment().m_startNode == nodeId;

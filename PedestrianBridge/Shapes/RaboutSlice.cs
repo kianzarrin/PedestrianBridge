@@ -23,7 +23,7 @@ namespace PedestrianBridge.Shapes {
             internal Vector2 DirMinor => L.CornerDir2;
             internal Vector2 EndDirMinor => L.EndDir2;
 
-            internal bool CanConnectPathAtJunction => L.CanConnectPathAtJunction2;
+            internal bool CanConnectPathAtJunction => L.CanConnectPath2;
             internal bool CanConnectPathAtFinalNode => L.CanConnectPathAtFinalNode2;
             internal ushort FinalNodeID => L.FinalNodeID2;
 
@@ -49,11 +49,11 @@ namespace PedestrianBridge.Shapes {
                 return false;
             }
 
-            var b2 = LineUtil.Bezier2ByDir(
+            var b2 = BezierUtil.Bezier2ByDir(
                 corner1.Point, corner1.DirMain,
                 corner2.Point, corner2.DirMain);
 
-            MiddlePoint = b2.Travel(b2.ArcLength() * .5f, out MDir2);
+            MiddlePoint = b2.Travel2(b2.ArcLength() * .5f, out MDir2);
             MDir1 = -MDir2;
 
             return true;
