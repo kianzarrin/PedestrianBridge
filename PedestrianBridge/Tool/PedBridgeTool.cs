@@ -6,7 +6,11 @@ using PedestrianBridge.Util;
 using PedestrianBridge.UI;
 using PedestrianBridge.Shapes;
 using JetBrains.Annotations;
+using ColossalFramework.Math;
+
 namespace PedestrianBridge.Tool {
+    using static Util.RenderUtil;
+
     public sealed class PedBridgeTool : KianToolBase {
         UIButton button;
 
@@ -77,10 +81,20 @@ namespace PedestrianBridge.Tool {
             base.RenderOverlay(cameraInfo);
             if (!HoverValid)
                 return;
+
             //Log.Debug($"HoveredSegmentId={HoveredSegmentId} HoveredNodeId={HoveredNodeId} HitPos={HitPos}");
             if (Input.GetKey(KeyCode.LeftAlt)) {
-                Color color2 = Color.green;
-                NetTool.RenderOverlay(cameraInfo, ref HoveredSegmentId.ToSegment(), color2, color2);
+                var b = HoveredSegmentId.ToSegment().CalculateSegmentBezier3();
+                float hw = HoveredSegmentId.ToSegment().Info.m_halfWidth;
+                var b2d = b.ToCSBezier2();
+                var b1 = b2d.CalculateParallelBezier(hw * 2, false).TOCSBezier3();
+                var b2 = b2d.CalculateParallelBezier(hw * 2, true).TOCSBezier3();
+                b = b2d.TOCSBezier3();
+                b.Render(cameraInfo, Color.green, hw);
+                b1.Render(cameraInfo, Color.blue, hw);
+                b2.Render(cameraInfo, Color.blue, hw);
+
+                DrawOverlayCircle(cameraInfo, Color.red, HitPos, 1, true);
                 return;
             }
 
@@ -106,6 +120,8 @@ namespace PedestrianBridge.Tool {
                     new PathConnectWrapper(HoveredNodeId, HoveredSegmentId, PrefabUtil.SelectedPrefab);
                 _cachedPathConnectWrapper?.RenderOverlay(cameraInfo);
             }
+
+            DrawOverlayCircle(cameraInfo, Color.red, HitPos, 1, true);
         }
 
         protected override void OnPrimaryMouseClicked() {

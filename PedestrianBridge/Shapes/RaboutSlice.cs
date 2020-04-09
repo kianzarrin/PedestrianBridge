@@ -198,8 +198,8 @@ namespace PedestrianBridge.Shapes {
 
         public void Create() {
             //Log.Debug($"{nodeM != null} {node1 != null} {node2 != null} {segment1 != null} {segment2 != null} {segment3 != null}");
-            if (centerNode != null && !centerNode.IsCreated)
-                centerNode.Create();
+            //if (centerNode != null && !centerNode.IsCreated)
+            //    centerNode.Create(); // TODO fix Create action already exists but not created yet
             nodeM?.Create();
             node1?.Create();
             node2?.Create();

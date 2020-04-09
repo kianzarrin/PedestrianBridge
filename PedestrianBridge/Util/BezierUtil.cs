@@ -80,6 +80,7 @@ namespace PedestrianBridge.Util {
 
 
         public static bool IsStraight(this Bezier2 beizer) {
+            return false;
             var startDir = (beizer.a - beizer.b).normalized;
             var endDir = (beizer.c - beizer.d).normalized; // c actually gets past d.
             return EqualAprox((startDir + endDir).sqrMagnitude, 0f, Epsilon * Epsilon);
@@ -131,6 +132,9 @@ namespace PedestrianBridge.Util {
             };
         }
 
+        /// <param name="startDir">should be going toward the end of the bezier.</param>
+        /// <param name="endDir">should be going toward the start of the  bezier.</param>
+        /// <returns></returns>
         public static Bezier2 Bezier2ByDir(Vector2 startPos, Vector2 startDir, Vector2 endPos, Vector2 endDir) {
             NetSegment.CalculateMiddlePoints(
                 startPos.ToCS3D(), startDir.ToCS3D(),
@@ -188,6 +192,23 @@ namespace PedestrianBridge.Util {
                 num *= 0.5f;
             }
             return t;
+        }
+
+        public static Bezier2 CalculateParallelBezier(this Bezier2 bezier, float sideDistance, bool bLeft) {
+            bezier.NormalTangent(0, bLeft, out Vector2 normalStart, out Vector2 tangentStart);
+            bezier.NormalTangent(1, bLeft, out Vector2 normalEnd, out Vector2 tangentEnd);
+            return BezierUtil.Bezier2ByDir(
+                bezier.a + sideDistance * normalStart, tangentStart,
+                bezier.d + sideDistance * normalEnd, -tangentEnd);
+        }
+
+        public static Bezier3 TOCSBezier3(this Bezier2 bezier) {
+            return new Bezier3 {
+                a = Shapes.NodeWrapper.Get3DPos(bezier.a, 0),
+                b = Shapes.NodeWrapper.Get3DPos(bezier.b, 0),
+                c = Shapes.NodeWrapper.Get3DPos(bezier.c, 0),
+                d = Shapes.NodeWrapper.Get3DPos(bezier.d, 0),
+            };
         }
     }
 }

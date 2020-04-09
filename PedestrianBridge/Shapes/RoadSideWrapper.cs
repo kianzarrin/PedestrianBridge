@@ -31,7 +31,7 @@ namespace PedestrianBridge.Shapes {
                 // Prepration:
                 ref NetSegment seg = ref segmentID.ToSegment();
                 ushort finalNodeID = startNode ? seg.m_startNode : seg.m_endNode;
-                float sideDistance = (seg.Info.m_halfWidth + HWpb + SAFETY_NET);
+                float sideDistance = (seg.Info.m_halfWidth + HWpb + 1);
 
                 Bezier2 bezier = NetUtil.CalculateSegmentBezier2(segmentID, startNode);
                 if (startNode)
@@ -74,7 +74,7 @@ namespace PedestrianBridge.Shapes {
                 Log.Debug($"    Travel(bezier:{bezier.a}->{bezier.d},bLeft:{bLeft},sideDistance:{sideDistance},distance:{distance}," +
                     $"segmentId(in):{segmentId},finalNodeID(in):{finalNodeID})");
                 ref NetSegment segment = ref segmentId.ToSegment();
-                Bezier2 bezierParallel = CalculateParallelBezier(bezier, sideDistance, bLeft);
+                Bezier2 bezierParallel = BezierUtil.CalculateParallelBezier(bezier, sideDistance, bLeft);
                 float length = bezierParallel.ArcLength();
 
                 if (distance > length) {
@@ -98,14 +98,6 @@ namespace PedestrianBridge.Shapes {
                 point = bezierParallel.Travel2(distance, out tangent);
                 Log.Debug($"    distance={distance} length={length} return segmentId:{segmentId},finalNodeID:{finalNodeID} point={point} tangent={tangent}");
             }
-        }
-
-        static Bezier2 CalculateParallelBezier(Bezier2 bezier, float sideDistance, bool bLeft) {
-            bezier.NormalTangent(0, bLeft, out Vector2 normalStart, out Vector2 tangentStart);
-            bezier.NormalTangent(1, bLeft, out Vector2 normalEnd, out Vector2 tangentEnd);
-            return BezierUtil.Bezier2ByDir(
-                bezier.a + sideDistance * normalStart, tangentStart,
-                bezier.d + sideDistance * normalEnd, tangentEnd);
         }
 
         public bool IsValid { get; private set; }

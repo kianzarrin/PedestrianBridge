@@ -16,7 +16,7 @@ namespace PedestrianBridge.Shapes {
             }
 
             Vector2 centerPoint = raboutCalc.CalculateCenter();
-            NodeWrapper _center = new NodeWrapper(centerPoint, 10, info);
+            _center = new NodeWrapper(centerPoint, 10, info);
 
             _slices = new List<RaboutSlice>(n);
             for (int i = 0; i < n; ++i) {
@@ -41,18 +41,22 @@ namespace PedestrianBridge.Shapes {
         public static void Create(RoundaboutUtil raboutCalc) {
             NetInfo info = PrefabUtil.SelectedPrefab;
             var roundabout = new RoundAboutWrapper(raboutCalc, info);
-            if (roundabout.IsValid)
-                roundabout.Create();
+            roundabout.Create();
         }
 
         public void Create() {
             if (!IsValid)
                 return;
+            Log.Debug("A");
             _center.Create();
             for (int i = 0; i < _junctions.Count; ++i) {
+                Log.Debug("B");
                 if (_slices[i].IsValid) {
+                    Log.Debug("C");
                     _slices[i].Create();
+                    Log.Debug("D");
                     _junctions[i].BanCrossing();
+                    Log.Debug("E");
                 }
             }
         }

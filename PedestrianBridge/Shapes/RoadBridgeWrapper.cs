@@ -6,7 +6,6 @@ namespace PedestrianBridge.Shapes {
     using Shapes;
     using System.Linq;
     using static Util.NetUtil;
-    using static Util.RoundaboutUtil;
     using ColossalFramework;
 
     public class RoadBridgeWrapper {
@@ -39,27 +38,7 @@ namespace PedestrianBridge.Shapes {
             Vector3 pos = segmentID.ToSegment().GetClosestPosition(hitPos);
             float hw = segmentID.ToSegment().Info.m_halfWidth;
 
-            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
-            RenderManager.instance.OverlayEffect.DrawCircle(
-                cameraInfo,
-                color,
-                pos,
-                hw * 2,
-                -1f,
-                1280f,
-                renderLimits: false,
-                alphaBlend: true);
-
-            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
-            RenderManager.instance.OverlayEffect.DrawCircle(
-                cameraInfo,
-                Color.red,
-                hitPos,
-                hw * 1,
-                -1f,
-                1280f,
-                renderLimits: false,
-                alphaBlend: true);
+            RenderUtil.DrawOverlayCircle(cameraInfo, color, pos, hw, true);
             return true;
         }
 
