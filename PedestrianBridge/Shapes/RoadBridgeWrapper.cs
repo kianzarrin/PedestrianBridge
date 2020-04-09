@@ -19,8 +19,8 @@ namespace PedestrianBridge.Shapes {
         SegmentWrapper _bridge;
         public RoadBridgeWrapper(ushort segmentID, float t,  NetInfo pathInfo) {
             _side1 = new RoadSideWrapper(segmentID, t, pathInfo, leftSide: false);
-            //_side2 = new RoadSideWrapper(segmentID, t, pathInfo, leftSide: true);
-            //if(IsValid)_bridge = new SegmentWrapper(_side1.node0, _side2.node0);
+            _side2 = new RoadSideWrapper(segmentID, t, pathInfo, leftSide: true);
+            if(IsValid)_bridge = new SegmentWrapper(_side1.node0, _side2.node0);
         }
 
         public static void Create(ushort segmentID, Vector3 HitPos) {

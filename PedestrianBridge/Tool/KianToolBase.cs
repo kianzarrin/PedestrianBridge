@@ -153,7 +153,7 @@ namespace PedestrianBridge.Tool {
         }
 
         internal ushort GetSegmentFromNode() {
-            bool considerSegmentLenght = true;
+            bool considerSegmentLenght = false;
             ushort minSegId = 0;
             if (HoveredNodeId != 0) {
                 NetNode node = HoveredNodeId.ToNode();

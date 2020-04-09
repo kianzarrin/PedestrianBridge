@@ -3,6 +3,7 @@ namespace PedestrianBridge.Util {
     using System;
     using UnityEngine;
     using ColossalFramework.Math;
+    using static MathUtil;
 
     public static class LineUtil {
         public static bool IntersectLine(Vector2 A, Vector2 B, Vector2 C, Vector2 D, out Vector2 center) {
@@ -18,7 +19,7 @@ namespace PedestrianBridge.Util {
 
             float determinant = a1 * b2 - a2 * b1; // TODO VectorUtil.Determinent(A,B);
 
-            if (MathUtil.EqualAprox(determinant, 0)) {
+            if (EqualAprox(determinant, 0)) {
                 // The lines are parallel. This is simplified 
                 center = Vector2.zero;
                 return false;
@@ -37,6 +38,11 @@ namespace PedestrianBridge.Util {
     }
 
     public static class BezierUtil {
+        public static string STR(this Bezier2 bezier) {
+            return $"Bezier2("+ bezier.a + ", " + bezier.b + ", " + bezier.c + ", " + bezier.d +")";
+        }
+
+
         public static float ArcLength(this Bezier3 beizer, float step = 0.1f) {
             float ret = 0;
             float t;
@@ -74,9 +80,10 @@ namespace PedestrianBridge.Util {
 
 
         public static bool IsStraight(this Bezier2 beizer) {
-            var startDir = beizer.a - beizer.b;
-            var endDir = beizer.d - beizer.c;
-            return MathUtil.EqualAprox((startDir + endDir).magnitude, 0f);
+            var startDir = (beizer.a - beizer.b).normalized;
+            var endDir = (beizer.c - beizer.d).normalized; // c actually gets past d.
+            return EqualAprox((startDir + endDir).sqrMagnitude, 0f, Epsilon * Epsilon);
+                //.LogRet($"IsStraight bezier={beizer.STR()} startDir:{startDir} endDir:{endDir} sum={(startDir + endDir)} ret:");
         }
 
         public static float ArcLength(this Bezier2 bezier, float step = 0.1f) {
@@ -102,11 +109,11 @@ namespace PedestrianBridge.Util {
             }
             float ret = 0;
             float t;
-            for (t = step; t <= 1f + MathUtil.Epsilon; t += step) {
+            for (t = step; t <= 1f + Epsilon; t += step) {
                 var p0 = bezier.Position(t - step);
                 float len = (bezier.Position(t) - p0).magnitude;
                 float len2 = (point - p0).magnitude;
-                if (len2 <= len + MathUtil.Epsilon) {
+                if (len2 <= len + Epsilon) {
                     ret += len2;
                     return ret;
                 }

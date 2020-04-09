@@ -74,10 +74,16 @@ namespace PedestrianBridge.Tool {
 
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-            //Log.Debug($"HoveredSegmentId={HoveredSegmentId} HoveredNodeId={HoveredNodeId} HitPos={HitPos}");
             base.RenderOverlay(cameraInfo);
             if (!HoverValid)
                 return;
+            //Log.Debug($"HoveredSegmentId={HoveredSegmentId} HoveredNodeId={HoveredNodeId} HitPos={HitPos}");
+            if (Input.GetKey(KeyCode.LeftAlt)) {
+                Color color2 = Color.green;
+                NetTool.RenderOverlay(cameraInfo, ref HoveredSegmentId.ToSegment(), color2, color2);
+                return;
+            }
+
 
             Color color = Color.yellow;//  GetToolColor(Input.GetMouseButton(0), false);
             if (RoundaboutUtil.Instance_render.TraverseLoop(HoveredSegmentId, out var segList)) {
@@ -130,11 +136,12 @@ namespace PedestrianBridge.Tool {
         }
 
         bool IsSuitableRoadForRoadBridge() {
-            const  float minDistance = 1 * NetUtil.MPU;
+            float minDistance = 1 * NetUtil.MPU + NetUtil.MaxNodeHW(HoveredNodeId);
             if (HoveredNodeId.ToNode().m_flags.IsFlagSet(NetNode.Flags.Middle))
                 return true;
             var diff = HitPos - HoveredNodeId.ToNode().m_position;
-            return diff.sqrMagnitude > minDistance * minDistance;
+            float diff2 = diff.sqrMagnitude;
+            return diff2 > minDistance * minDistance;
         }
 
         bool IsSuitableJunction() {

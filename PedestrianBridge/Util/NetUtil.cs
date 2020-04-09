@@ -54,6 +54,18 @@ namespace PedestrianBridge.Util {
                             out cornerPoint, out cornerDir);
         }
 
+        internal static float MaxNodeHW(ushort nodeId) {
+            float ret = 0;
+            foreach(var segmentId in GetSegmentsCoroutine(nodeId)) {
+                float hw = segmentId.ToSegment().Info.m_halfWidth;
+                if (hw > ret)
+                    ret = hw;
+            }
+            return ret;
+        }
+
+
+        /// Note: inverted flag or LHT does not influce the beizer.
         internal static Bezier3 CalculateSegmentBezier3(this ref NetSegment seg) {
             ref NetNode startNode = ref seg.m_startNode.ToNode();
             ref NetNode endNode = ref seg.m_endNode.ToNode();
@@ -71,17 +83,20 @@ namespace PedestrianBridge.Util {
             return bezier;
         }
 
+        /// <param name="startNode"> if true the bezier is inverted so that it will be facing start node</param>
+        /// Note: inverted flag or LHT does not influce the beizer.
         internal static Bezier2 CalculateSegmentBezier2(ushort segmentId, bool startNode) {
             Bezier3 bezier3 = segmentId.ToSegment().CalculateSegmentBezier3();
             Bezier2 bezier2 = bezier3.ToCSBezier2();
-            if (startNode)
+            if (!startNode)
                 return bezier2;
             else
                 return bezier2.Invert();
         }
 
-        internal static Bezier2 CalculateSegmentBezier2(ushort segmentId, ushort nodeId) {
-            bool startNode = IsStartNode(segmentId, nodeId);
+        /// <param name="endNodeID">bezier will be facing endNodeID</param>
+        internal static Bezier2 CalculateSegmentBezier2(ushort segmentId, ushort endNodeID) {
+            bool startNode = !IsStartNode(segmentId, endNodeID);
             return CalculateSegmentBezier2(segmentId, startNode);
         }
 
