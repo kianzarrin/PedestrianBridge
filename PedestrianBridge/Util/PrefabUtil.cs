@@ -15,7 +15,7 @@ namespace PedestrianBridge.Util {
         static NetInfo GetSelectedPath() {
             NetInfo info = NetUtil.netTool?.m_prefab;
             if (info == null)
-                return default;
+                return defaultPrefab;
             //Log.Debug("selected Info is "+ info);
             try {
                 //Log.Debug("info.GetElevated().m_netAI is " + info.GetElevated().m_netAI);
