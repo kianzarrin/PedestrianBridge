@@ -47,16 +47,11 @@ namespace PedestrianBridge.Shapes {
         public void Create() {
             if (!IsValid)
                 return;
-            Log.Debug("A");
             _center.Create();
             for (int i = 0; i < _junctions.Count; ++i) {
-                Log.Debug("B");
                 if (_slices[i].IsValid) {
-                    Log.Debug("C");
                     _slices[i].Create();
-                    Log.Debug("D");
                     _junctions[i].BanCrossing();
-                    Log.Debug("E");
                 }
             }
         }
