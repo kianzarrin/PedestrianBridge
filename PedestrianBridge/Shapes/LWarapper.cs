@@ -76,17 +76,12 @@ namespace PedestrianBridge.Shapes {
                 FinalNodeID1 = seg1.GetOtherNode(JunctionID);
                 FinalNodeID2 = seg2.GetOtherNode(JunctionID);
 
-                float offset1 = 0;
-                float offset2 = 0;
-                const float extend0 = 1 * MPU; // if angle is too wide, length should increase.
                 if (!parallel) {
                     if (angle < 0) {
                         float d1 = (HW2 + HWpb) * ratio + SAFETY_NET;
                         float d2 = (HW1 + HWpb) * ratio + SAFETY_NET;
                         PointL = d1 * CornerDir1 + d2 * CornerDir2;
                         PointL += origin;
-                        offset1 = d1 + d2 * Vector2.Dot(CornerDir1, CornerDir2);
-                        offset2 = d2 + d1 * Vector2.Dot(CornerDir1, CornerDir2);
                     } else {
                         angle = VectorUtil.SignedAngleRadCCW(CornerDir1, CornerDir2);
                         if (isCW) angle = -angle;
@@ -96,10 +91,6 @@ namespace PedestrianBridge.Shapes {
                         PointL = (PointL1 + PointL2) / 2;
                         float d = HWpb * ratio + SAFETY_NET;
                         PointL += d * CornerDir1 + d * CornerDir2;
-
-                        offset1 = Vector2.Dot(PointL - origin, CornerDir1);
-                        offset2 = Vector2.Dot(PointL - origin, CornerDir2);
-                        //Log.Debug($"offset1={offset1} offset2={offset2}");
                     }
                 } else {
                     Vector2 normal = CornerDir1.Rotate90CCW();
@@ -110,159 +101,68 @@ namespace PedestrianBridge.Shapes {
                 }
 
 
-
-                Point1 = Point2 = EndDir1 = EndDir2 = default;
-
-                const float lengthError = 0.5f;
-                const float weight = 0.5f; // reduce weigth for the results to converge.
-                float distance_prev = 0, diff_prev = 0;
-
-                #region point1
+                const float extend0 = 1 * MPU; // for angles > 180 length should increase.
                 float targetLength = DEFAULT_LENGTH;
-                if (!parallel && angle < Epsilon) targetLength += extend0;
-                float distance = targetLength + offset1;
-                Log.Debug($"1: targetLength={targetLength} distance={distance}");
-                for (int counter = 0; counter < 10; ++counter) {
+                if (!parallel && angle < 0) targetLength += extend0; // TODO this should be based on incomming angles.
+                else if (!parallel && angle < Mathf.PI) {
+                    float dot = Vector2.Dot(CornerDir1, CornerDir2);
+                    targetLength += HWpb / (1-dot);
+                }
+                Log.Debug($"targetLength={targetLength}");
+                {
+                    ushort finalSegmentID = segID1;
+                    FinalNodeID1 = seg1.GetOtherNode(JunctionID);
+
+                    // calculate starting bezier
+                    Bezier3 bezier3D = seg1.CalculateSegmentBezier3();
+                    if (IsStartNode(finalSegmentID, FinalNodeID1))
+                        bezier3D = bezier3D.Invert();
+                    float t = bezier3D.GetClosestT(PointL.ToCS3D(bezier3D.a.Height()));
+                    bezier3D = bezier3D.Cut(t, 1);
+                    Bezier2 bezier = bezier3D.ToCSBezier2();
+
                     Travel(
-                        segID1,
-                        JunctionID,
-                        distance,
-                        out Point1,
-                        out Vector2 tangent,
-                        out ushort  finalSegmentID,
-                        out FinalNodeID1,
-                        out bool overFlow,
-                        out bool forcedEnd);
-                    var normal = tangent.Rotate90CCW();
-                    if (isCW) normal = -normal;
-                    Point1 += (HW1 + HWpb + SAFETY_NET) * normal;
+                        bezier: bezier,
+                        bLeft: isCCW,
+                        sideDistance: HW1 + HWpb + 1,
+                        distance: targetLength,
+                        finalSegmentId: ref finalSegmentID,
+                        finalNodeId: ref FinalNodeID1,
+                        point: out Point1,
+                        tangent: out var tangent);
                     EndDir1 = -tangent;
-
-                    if (FinalNodeID1.ToNode().CountSegments()>2)
-                    {
-                        //Log.Debug("FinalNodeID1.ToNode().CountSegments()>2");
-                        // TODO move to end of loop.
-                        // if we have moved too far into a corner
-                        // then bring back Point1 into the corner.
-                        Vector2 otherNodePoint = FinalNodeID1.ToNode().m_position.ToCS2D();
-                        CalculateCorner(finalSegmentID, FinalNodeID1, isCCW,
-                                        out Vector2 cornerPoint, out Vector2 cornerDir);
-                        if ((otherNodePoint - cornerPoint).magnitude >
-                            (Point1 - cornerPoint).magnitude) {
-                            Point1 = cornerPoint;
-                            Point1 += (HWpb + SAFETY_NET) * normal; // TODO this does not work for accute corners.
-                            MovePointTowardOtherSegment(finalSegmentID, FinalNodeID1, isCCW, ref Point1);
-                            EndDir1 = cornerDir;
-                        }
-                    }
-
-                    float length = BezierUtil.Bezier2ByDir(PointL, CornerDir1, Point1, EndDir1).ArcLength();
-                    Log.Debug($"1: distance={distance} length={length}");
-                    if (forcedEnd)
-                        break;
-
-                    float diff = length - targetLength;
-                    float distance_next;
-                    //Log.Debug($"diff={diff}");
-                    if (counter == 0) {
-                        distance_next = distance -  diff;
-                    } else if (diff * diff_prev < 0) {
-                        float w = diff_prev / diff;
-                        w = -w;
-                        w = 1f / (1f + w); // prevDiff α 1/w
-                        distance_next = (1-w) * distance + w * distance_prev;
-                    } else {
-                        distance_next = (1 - weight) * distance + weight * distance*targetLength/length;
-                    }
-                    diff_prev = diff;
-                    distance_prev = distance;
-                    distance = distance_next;
-                    
-
-                    if (overFlow && diff > 0) {
-                        continue;
-                    }else if (overFlow || Mathf.Abs(diff) < lengthError) 
-                        break;
-                    
+                    CanConnectPathAtOtherNode1 = CanConnectPathAtNode(FinalNodeID1);
                 }
-                #endregion
 
-                #region point2
-                targetLength = DEFAULT_LENGTH;
-                if (!parallel && angle < 0) targetLength += extend0;
+                {
+                    ushort finalSegmentID = segID2;
+                    FinalNodeID2 = seg2.GetOtherNode(JunctionID);
 
-                distance = targetLength + offset2;
-                for (int counter = 0; counter < 10; ++counter) {
+                    // calculate starting bezier
+                    Bezier3 bezier3D = seg2.CalculateSegmentBezier3();
+                    if (IsStartNode(finalSegmentID, FinalNodeID2))
+                        bezier3D = bezier3D.Invert();
+                    float t = bezier3D.GetClosestT(PointL.ToCS3D(bezier3D.a.Height()));
+                    bezier3D = bezier3D.Cut(t, 1);
+                    Bezier2 bezier = bezier3D.ToCSBezier2();
+
+
                     Travel(
-                        segID2,
-                        JunctionID,
-                        distance,
-                        out Point2,
-                        out Vector2 tangent,
-                        out ushort finalSegmentID,
-                        out FinalNodeID2,
-                        out bool overFlow,
-                        out bool forcedEnd);
-                    var normal = tangent.Rotate90CW();
-                    if (isCW) normal = -normal;
-                    Point2 += (HW2 + HWpb + SAFETY_NET) * normal;
+                        bezier: bezier,
+                        bLeft: !isCCW,
+                        sideDistance: HW2 + HWpb + 1,
+                        distance: targetLength,
+                        finalSegmentId: ref finalSegmentID,
+                        finalNodeId: ref FinalNodeID2,
+                        point: out Point2,
+                        tangent: out var tangent);
                     EndDir2 = -tangent;
-
-                    if (FinalNodeID2.ToNode().CountSegments() > 2)
-                    {
-                        // TODO move to end of loop.
-                        // if we have moved too far into a corner
-                        // then bring back Point1 into the corner.
-                        Vector2 otherNodePoint = FinalNodeID2.ToNode().m_position.ToCS2D();
-                        CalculateOtherCorner(finalSegmentID, FinalNodeID2, isCW,
-                                        out Vector2 cornerPointB, out Vector2 cornerDir);
-                        if (forcedEnd || (otherNodePoint - cornerPointB).magnitude >
-                            (Point2 - cornerPointB).magnitude) {
-                            Point2 = cornerPointB;
-                            Point2 += (HWpb + SAFETY_NET) * normal; // TODO this does not work for accute corners.
-
-                        CalculateCorner(finalSegmentID, FinalNodeID2, isCW,
-                            out Vector2 cornerPointA, out Vector2 cornerDirA);
-                            EndDir2 = cornerDirA;
-                        }
-                    }
-
-
-                    float length = BezierUtil.Bezier2ByDir(PointL, CornerDir2, Point2, EndDir2).ArcLength();
-                    //Log.Debug($"length2={length}");
-                    if (forcedEnd)
-                        break;
-
-
-                    float diff = length - targetLength;
-                    float distance_next;
-                    //Log.Debug($"diff={diff}");
-                    if (counter == 0) {
-                        distance_next = distance - diff;
-                    } else if (diff * diff_prev < 0) {
-                        float w = diff_prev / diff;
-                        w = -w;
-                        w = 1f / (1f + w); // prevDiff α 1/w
-                        distance_next = (1 - w) * distance + w * distance_prev;
-                    } else {
-                        distance_next = (1 - weight) * distance + weight * distance * targetLength / length;
-                    }
-                    diff_prev = diff;
-                    distance_prev = distance;
-                    distance = distance_next;
-
-                    if (overFlow && diff > 0) {
-                        continue;
-                    } else if (overFlow || Mathf.Abs(diff) < lengthError)
-                        break;
+                    CanConnectPathAtFinalNode2 = CanConnectPathAtNode(FinalNodeID2);
                 }
-                #endregion
-                CanConnectPathAtOtherNode1 = CanConnectPathAtNode(FinalNodeID1);
-                CanConnectPathAtFinalNode2 = CanConnectPathAtNode(FinalNodeID2);
             }
 
+
             // move the point toward the segment with pedestrian lane.
-            // TODO does not work for 180 angle if the two segments have different half widths.
             internal static void MovePointTowardOtherSegment(ushort segmentID, ushort nodeId, bool bLeft, ref Vector2 Point) {
                 ushort OtherSementID = bLeft ?
                     segmentID.ToSegment().GetLeftSegment(nodeId) :
@@ -289,49 +189,44 @@ namespace PedestrianBridge.Shapes {
                 return false;
             }
 
-            // returns false if overflow or forceEnd
-            // returns true otherwise.
-            internal static void Travel(
-                ushort segmentId,
-                ushort nodeId,
-                float distance,
-                out Vector2 point,
-                out Vector2 tangent,
-                out ushort finalSegmentID,
-                out ushort finalOtherNodeID,
-                out bool overFlow,
-                out bool forcedEnd, // result has been forced to continue to the node end because segment does not have pedestrian lanes.
-                int level=2) {
-                Bezier2 bezier = CalculateSegmentBezier2(segmentId, nodeId);
-                float length = bezier.ArcLength();
-                ushort otherNodeId = segmentId.ToSegment().GetOtherNode(nodeId);
 
-                bool forceEnd = !CanConnectPathToSegment(segmentId) && level > 0;
-                overFlow = distance > length;
+            static void Travel(
+                Bezier2 bezier,
+                bool bLeft, float sideDistance, float distance,
+                ref ushort finalSegmentId, ref ushort finalNodeId,
+                out Vector2 point, out Vector2 tangent,
+                int level=2
+                ) {
+                Log.Debug($"    Travel(bLeft:{bLeft},sideDistance:{sideDistance},distance:{distance}," +
+                    $"segmentId(in):{finalSegmentId},finalNodeID(in):{finalNodeId}), level={level}");
+                ref NetSegment segment = ref finalSegmentId.ToSegment();
+                Bezier2 bezierParallel = BezierUtil.CalculateParallelBezier(bezier, sideDistance, bLeft);
+                float length = bezierParallel.ArcLength();
+
+
+                bool forceEnd = !CanConnectPathToSegment(finalSegmentId) && level > 0;
+                bool overFlow = distance > length;
                 if (overFlow || forceEnd) {
-                    ushort nextSegmentId = ContinueToNextSegment(segmentId, otherNodeId);
+                    ushort nextSegmentId = ContinueToNextSegment(finalSegmentId, finalNodeId);
                     if (nextSegmentId != 0) {
-                        //Log.Debug("ContinueToNextSegment");
+                        finalSegmentId = nextSegmentId;
+                        bezier = CalculateSegmentBezier2(finalSegmentId, finalNodeId);
+                        finalNodeId = finalSegmentId.ToSegment().GetOtherNode(finalNodeId);
+                        Log.Debug("ContinueToNextSegment " + finalSegmentId);
                         Travel(
-                            nextSegmentId,
-                            otherNodeId,
-                            distance-length,
-                            out point,
-                            out tangent,
-                            out finalSegmentID,
-                            out finalOtherNodeID,
-                            out overFlow,
-                            out forcedEnd,
+                            bezier,
+                            bLeft, sideDistance, distance - length,
+                            ref finalSegmentId, ref finalNodeId,
+                            out point, out tangent,
                             level-1);
                         return;
                     }
-                    //Log.Debug("distance > length || forceEnd but could not find next segment");
+                    Log.Debug("    overFlow || forceEnd but could not find next segment");
                 }
 
-                forcedEnd = !CanConnectPathToSegment(segmentId);
-                finalSegmentID = segmentId;
-                finalOtherNodeID = otherNodeId;
-                point = bezier.Travel2(distance, out tangent);
+                distance = Mathf.Clamp(distance, 1f, length - 2);
+                point = bezierParallel.Travel2(distance, out tangent);
+                Log.Debug($"    distance={distance} length={length} return segmentId:{finalSegmentId},finalNodeID:{finalNodeId} point={point} tangent={tangent}");
             }
 
             internal static ushort ContinueToNextSegment(ushort segmentId, ushort nodeId) {

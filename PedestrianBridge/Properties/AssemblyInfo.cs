@@ -29,4 +29,4 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.10.1.*")] // junction node count = 2 
+[assembly: AssemblyVersion("2.0.0.*")] // faster and better Lwrapper travel.

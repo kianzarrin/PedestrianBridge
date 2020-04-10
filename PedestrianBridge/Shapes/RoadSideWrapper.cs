@@ -64,8 +64,7 @@ namespace PedestrianBridge.Shapes {
                 Log.Debug("}");
             }
 
-            // returns false if overflow or forceEnd
-            // returns true otherwise.
+
             static void Travel(
                 Bezier2 bezier, bool bLeft, float sideDistance, float distance,
                 ref ushort segmentId, ref ushort finalNodeID,
