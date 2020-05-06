@@ -152,6 +152,8 @@ namespace PedestrianBridge.Tool {
         }
 
         bool IsSuitableRoadForRoadBridge() {
+            if (!HoveredSegmentId.ToSegment().CanConnectPath())
+                return false;
             float minDistance = 1 * NetUtil.MPU + NetUtil.MaxNodeHW(HoveredNodeId);
             if (HoveredNodeId.ToNode().m_flags.IsFlagSet(NetNode.Flags.Middle))
                 return true;

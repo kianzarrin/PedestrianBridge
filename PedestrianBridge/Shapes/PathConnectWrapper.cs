@@ -18,7 +18,10 @@ namespace PedestrianBridge.Shapes {
         public NodeWrapper node1;
         public NodeWrapper node2;
         public SegmentWrapper segment;
-        public bool IsValid => segment != null;
+        public bool IsValid =>
+            segment != null &&
+            endNodeID.ToNode().Info.CanConnectPath() &&
+            HitSegmentID.ToSegment().CanConnectPath();
 
         public PathConnectWrapper(ushort endNodeID, ushort endSegmentID, NetInfo pathInfo) {
             this.endSegmentID = endSegmentID;
@@ -59,7 +62,7 @@ namespace PedestrianBridge.Shapes {
         }
 
         public void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-            if (segment == null)
+            if (!IsValid)
                 return;
             //Log.Debug("PathConnectWrapper.RenderOverlay() called");
             var a = node1.Get3DPos();
@@ -86,8 +89,6 @@ namespace PedestrianBridge.Shapes {
                 IsStartNode(endSegmentID, endNodeID),
                 Color.yellow,
                 false);
-
-
         }
 
         public static ushort FindConnactableSegment(ushort endNodeID, ushort segmentID0, out Vector2 hitPoint) {

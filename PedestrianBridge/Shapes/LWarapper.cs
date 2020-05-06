@@ -64,7 +64,7 @@ namespace PedestrianBridge.Shapes {
 
                 float angle = VectorUtil.SignedAngleRadCCW(CornerDir1, CornerDir2);
                 if (isCW) angle = -angle;
-                float ratio = 1f / Mathf.Sin(angle);
+                float ratio = 1f / Mathf.Sin(angle); // TODO optimize
                 bool parallel = VectorUtil.AreApprox180(CornerDir1, CornerDir2);
                 //Log.Debug($"parallel={parallel} angle={angle} ratio={ratio}");
 
@@ -101,12 +101,15 @@ namespace PedestrianBridge.Shapes {
                 }
 
 
+                // TODO push targetLength calculations to above if-else code.
                 const float extend0 = 1 * MPU; // for angles > 180 length should increase.
                 float targetLength = DEFAULT_LENGTH;
                 if (!parallel && angle < 0) targetLength += extend0; // TODO this should be based on incomming angles.
                 else if (!parallel && angle < Mathf.PI) {
                     float dot = Vector2.Dot(CornerDir1, CornerDir2);
-                    targetLength += HWpb / (1-dot);
+
+                    // Note sin(angle) does not work so good here.
+                    targetLength += HWpb / (1-dot); 
                 }
                 Log.Debug($"targetLength={targetLength}");
                 {
