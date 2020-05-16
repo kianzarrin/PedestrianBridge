@@ -97,6 +97,8 @@
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="Tool\KianToolBase.cs" />
     <Compile Include="Tool\PedBridgeTool.cs" />
+    <Compile Include="UI\KeymappingsPanel.cs" />
+    <Compile Include="UI\Settings.cs" />
     <Compile Include="Util\RenderUtil.cs" />
     <Compile Include="Util\GridUtil.cs" />
     <Compile Include="Util\BezierUtil.cs" />

@@ -12,6 +12,12 @@ namespace PedestrianBridge.Tool {
     using static Util.RenderUtil;
 
     public sealed class PedBridgeTool : KianToolBase {
+        public static readonly SavedInputKey ActivationShortcut = new SavedInputKey(
+            "ActivationShortcut",
+            UI.ModSettings.FileName,
+            SavedInputKey.Encode(KeyCode.B, true, false, false),
+            true);
+
         UIButton button;
 
         protected override void Awake() {
@@ -83,20 +89,20 @@ namespace PedestrianBridge.Tool {
                 return;
 
             //Log.Debug($"HoveredSegmentId={HoveredSegmentId} HoveredNodeId={HoveredNodeId} HitPos={HitPos}");
-            if (Input.GetKey(KeyCode.LeftAlt)) {
-                var b = HoveredSegmentId.ToSegment().CalculateSegmentBezier3();
-                float hw = HoveredSegmentId.ToSegment().Info.m_halfWidth;
-                var b2d = b.ToCSBezier2();
-                var b1 = b2d.CalculateParallelBezier(hw * 2, false).TOCSBezier3();
-                var b2 = b2d.CalculateParallelBezier(hw * 2, true).TOCSBezier3();
-                b = b2d.TOCSBezier3();
-                b.Render(cameraInfo, Color.green, hw);
-                b1.Render(cameraInfo, Color.blue, hw);
-                b2.Render(cameraInfo, Color.blue, hw);
+            //if (Input.GetKey(KeyCode.LeftAlt)) {
+            //    var b = HoveredSegmentId.ToSegment().CalculateSegmentBezier3();
+            //    float hw = HoveredSegmentId.ToSegment().Info.m_halfWidth;
+            //    var b2d = b.ToCSBezier2();
+            //    var b1 = b2d.CalculateParallelBezier(hw * 2, false).TOCSBezier3();
+            //    var b2 = b2d.CalculateParallelBezier(hw * 2, true).TOCSBezier3();
+            //    b = b2d.TOCSBezier3();
+            //    b.Render(cameraInfo, Color.green, hw);
+            //    b1.Render(cameraInfo, Color.blue, hw);
+            //    b2.Render(cameraInfo, Color.blue, hw);
 
-                DrawOverlayCircle(cameraInfo, Color.red, HitPos, 1, true);
-                return;
-            }
+            //    DrawOverlayCircle(cameraInfo, Color.red, HitPos, 1, true);
+            //    return;
+            //}
 
 
             Color color = Color.yellow;//  GetToolColor(Input.GetMouseButton(0), false);
@@ -122,6 +128,9 @@ namespace PedestrianBridge.Tool {
             }
 
             DrawOverlayCircle(cameraInfo, Color.red, HitPos, 1, true);
+
+            if (Input.GetKey(KeyCode.LeftAlt)) 
+                RenderGrids(cameraInfo, m_mousePosition, Color.black);
         }
 
         protected override void OnPrimaryMouseClicked() {

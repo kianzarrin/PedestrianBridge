@@ -1,5 +1,6 @@
 using ColossalFramework;
 using ColossalFramework.Math;
+using PedestrianBridge.Shapes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -130,5 +131,47 @@ namespace PedestrianBridge.Util {
                 hw, hw, -1, 1024, false, alphaBlend);
 
         }
+
+        public static void RenderLine(Segment3 line, RenderManager.CameraInfo cameraInfo, Color color) {
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawSegment(cameraInfo, color, line, 0,
+                0,
+                -1, 1024, false, true);
+        }
+
+        public static void RenderLine(Vector2 a, Vector2 b, RenderManager.CameraInfo cameraInfo, Color color) {
+            var line = new Segment3 {
+                a = NodeWrapper.Get3DPos(a, 0),
+                b = NodeWrapper.Get3DPos(b, 0),
+            };
+            RenderLine(line, cameraInfo, color);
+        }
+
+
+
+        public static void RenderGrid(RenderManager.CameraInfo cameraInfo, GridVector grid, Color color) {
+            var corner0 = grid.GetGirdStartCorner();
+            var corner3 = new GridVector(grid.x + 1, grid.y + 1).GetGirdStartCorner();
+            var corner1 = new Vector2(corner0.x, corner3.y);
+            var corner2 = new Vector2(corner3.x, corner0.y);
+            RenderLine(corner0, corner1, cameraInfo, color);
+            RenderLine(corner0, corner2, cameraInfo, color);
+            RenderLine(corner3, corner1, cameraInfo, color);
+            RenderLine(corner3, corner2, cameraInfo, color);
+        }
+
+        public static void RenderGrids(RenderManager.CameraInfo cameraInfo, Vector3 pos, Color color) {
+            var grid = new GridVector(pos);
+            for (int dx = -2; dx <= +2; ++dx) {
+                for (int dy = -2; dy <= +2; ++dy) {
+                    var grid2 = grid;
+                    grid2.x += dx;
+                    grid2.y += dy;
+                    RenderGrid(cameraInfo, grid2, color);
+                }
+            }
+        }
+
+
     }
 }

@@ -37,6 +37,10 @@ namespace PedestrianBridge.Util {
             return new GridVector(a);
         }
 
+        public Vector2 GetGirdStartCorner() {
+            return new Vector2(ConvertStartPoint(x), ConvertStartPoint(y));
+        }
+
         public int Index => y* GRID_LENGTH + x;
 
         public static GridVector up = new GridVector(0, 1);
@@ -59,6 +63,8 @@ namespace PedestrianBridge.Util {
         public const int GRID_LENGTH = 270;
         public static int ConvertGrid(float a) =>
             Mathf.Clamp((int)(a / GRID_SIZE + (GRID_LENGTH/2)), 0, GRID_LENGTH-1); //270/2=135 279-1=269
+        public static float ConvertStartPoint(int xy) =>
+            (xy - GRID_LENGTH / 2f) * GRID_SIZE;
 
         public static IEnumerable<ushort> ScanDirSegment(Vector2 start, Vector2 dir, float dist) {
             foreach (GridVector grid in ScaDir(start, dir, dist)) {

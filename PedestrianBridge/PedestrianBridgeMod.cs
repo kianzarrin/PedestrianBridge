@@ -22,6 +22,10 @@ namespace PedestrianBridge {
         public void OnDisabled() {
             LoadTool.Release();
         }
+
+        public void OnSettingsUI(UIHelperBase helper) {
+            UI.ModSettings.OnSettingsUI(helper);
+        }
     }
 
     public static class LoadTool {
