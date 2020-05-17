@@ -40,8 +40,14 @@ namespace PedestrianBridge {
 
     public class LoadingExtention : LoadingExtensionBase {
         public override void OnLevelLoaded(LoadMode mode) {
-            if (mode == LoadMode.LoadGame || mode == LoadMode.NewGame)
-                LoadTool.Load();
+            switch (mode) {
+                case LoadMode.NewAsset:
+                case LoadMode.LoadAsset:
+                case LoadMode.NewTheme:
+                case LoadMode.LoadTheme:
+                    return; // unsupported modes.
+            }
+            LoadTool.Load();
         }
 
         public override void OnLevelUnloading() {
