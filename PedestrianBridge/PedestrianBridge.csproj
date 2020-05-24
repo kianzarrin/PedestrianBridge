@@ -83,6 +83,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KianCommons\KianCommons\Math\BezierUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\ControlPoint3.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\CubicBezier3.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\LineUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\MathUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\VecetorUtils.cs" />
+    <Compile Include="KianCommons\KianCommons\Patches\TranspilerUtils.cs" />
+    <Compile Include="KianCommons\KianCommons\Properties\AssemblyInfo.cs" />
+    <Compile Include="KianCommons\KianCommons\UI\RenderUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\UI\TextureUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\UI\UIAutoSizePanel.cs" />
+    <Compile Include="KianCommons\KianCommons\UI\UIKeymappingsPanel.cs" />
+    <Compile Include="KianCommons\KianCommons\UI\UIToolButton.cs" />
+    <Compile Include="KianCommons\KianCommons\UI\UIUtils.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\CSURUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\GridUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\HelpersExtensions.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\Log.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\NetUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\PluginUtil.cs" />
     <Compile Include="PedestrianBridgeMod.cs" />
     <Compile Include="Shapes\RoadBridgeWrapper.cs" />
     <Compile Include="Shapes\RoadSideWrapper.cs" />
@@ -120,9 +140,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="KianCommons\.git" />
+    <None Include="KianCommons\KianCommons\.editorconfig" />
+    <None Include="KianCommons\KianCommons\KianCommons.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="KianUtils\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="KianCommons\.gitattributes" />
+    <Content Include="KianCommons\.gitignore" />
+    <Content Include="KianCommons\KianCommons.sln" />
+    <Content Include="KianCommons\libs\CSURToolBox.dll" />
+    <Content Include="KianCommons\libs\CSUtil.Commons.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">
