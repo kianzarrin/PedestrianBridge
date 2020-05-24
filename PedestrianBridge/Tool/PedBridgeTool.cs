@@ -28,7 +28,7 @@ namespace PedestrianBridge.Tool {
         }
 
         public static PedBridgeTool Create() {
-            Log.Debug("PedBridgeTool.Create()");
+            Log.Info("PedBridgeTool.Create()");
             GameObject toolModControl = ToolsModifierControl.toolController.gameObject;
             var tool = toolModControl.GetComponent<PedBridgeTool>() ?? toolModControl.AddComponent<PedBridgeTool>();
             return tool;

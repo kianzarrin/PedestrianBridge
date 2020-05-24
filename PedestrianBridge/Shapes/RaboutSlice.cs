@@ -183,6 +183,10 @@ namespace PedestrianBridge.Shapes {
             if (nodeM != null) {
                 segment3 = new SegmentWrapper(nodeM, centerNode);
                 this.centerNode = centerNode;
+                float center_h = centerNode.Get3DPos().Height();
+                float middle_h = nodeM.Get3DPos().Height();
+                if (center_h < middle_h)
+                    centerNode.elevation += (byte)Mathf.RoundToInt(middle_h - center_h);
             }
         }
 
