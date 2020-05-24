@@ -83,13 +83,12 @@ namespace PedestrianBridge.Util {
 
         public static ushort Get3rdSegment(ushort nodeID, ushort segmentID1, ushort segmentID2) {
             ref NetNode node = ref nodeID.ToNode();
-            if (node.CountSegments() != 3)
-                return 0;
             for (int i = 0; i < 8; ++i) {
                 ushort segmentID = node.GetSegment(i);
-                if (segmentID != 0 && segmentID != segmentID1 && segmentID != segmentID2) {
-                    return segmentID;
-                }
+                if (segmentID == 0 || segmentID == segmentID1 || segmentID == segmentID2)
+                    continue;
+                if (segmentID.ToSegment().Info.m_netAI is RoadBaseAI)
+                    return  segmentID;
             }
             return 0;
         }
