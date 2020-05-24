@@ -2,12 +2,14 @@ namespace PedestrianBridge.Util {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System;
-    using TrafficManager.Manager.Impl;
     using System.Linq;
     using UnityEngine;
-    using static NetUtil;
+    using KianCommons;
+    using static KianCommons.NetUtil;
+    using KianCommons.Math;
     using static TMPEUtil;
     using ColossalFramework.Math;
+    using Log = KianCommons.Log;
 
     public class RoundaboutUtil {
         public static RoundaboutUtil Instance_render = new RoundaboutUtil();

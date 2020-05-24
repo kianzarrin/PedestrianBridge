@@ -2,13 +2,16 @@ namespace PedestrianBridge.Shapes {
     using UnityEngine;
     using ColossalFramework;
     using PedestrianBridge.Util;
-    using static PedestrianBridge.Util.NetUtil;
-    using static PedestrianBridge.Util.HelpersExtensions;
-    using static PedestrianBridge.Util.VectorUtil;
-    using static PedestrianBridge.Util.GridUtil;
+    using KianCommons;
+    using KianCommons.UI;
+    using static KianCommons.NetUtil;
+    using static KianCommons.HelpersExtensions;
+    using static KianCommons.Math.VectorUtil;
+    using static KianCommons.GridUtil;
     using ColossalFramework.Math;
     using CSUtil.Commons;
-    using Log = Util.Log;
+    using Log = KianCommons.Log;
+    using KianCommons.Math;
 
     public struct PathConnectWrapper {
         public Vector2 HitPoint;

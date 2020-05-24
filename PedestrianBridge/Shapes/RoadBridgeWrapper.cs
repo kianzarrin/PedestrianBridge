@@ -5,7 +5,8 @@ namespace PedestrianBridge.Shapes {
     using Util;
     using Shapes;
     using System.Linq;
-    using static Util.NetUtil;
+    using static KianCommons.NetUtil;
+    using KianCommons.UI;
     using ColossalFramework;
 
     public class RoadBridgeWrapper {

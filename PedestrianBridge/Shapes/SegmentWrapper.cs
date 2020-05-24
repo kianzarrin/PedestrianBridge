@@ -1,6 +1,7 @@
 using UnityEngine;
-using PedestrianBridge.Util;
-using static PedestrianBridge.Util.NetUtil;
+using KianCommons;
+using KianCommons.Math;
+using static KianCommons.NetUtil;
 using System;
 
 namespace PedestrianBridge.Shapes {

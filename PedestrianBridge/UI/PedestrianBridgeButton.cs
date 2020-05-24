@@ -3,7 +3,10 @@ using PedestrianBridge.Tool;
 using PedestrianBridge.Util;
 using System;
 using UnityEngine;
-using static PedestrianBridge.Util.HelpersExtensions;
+using static KianCommons.HelpersExtensions;
+using KianCommons.UI;
+using KianCommons;
+
 
 /* A lot of copy-pasting from Crossings mod by Spectra and Roundabout Mod by Strad. The sprites are partly copied as well. */
 
@@ -43,10 +46,10 @@ namespace PedestrianBridge.UI {
                 PedestrianBridgeIcon,
                 PedestrianBridgeIconPressed
             };
-            var atlas = ResourceLoader.GetAtlas("PedestrianBridgeUI");
+            var atlas = KianCommons.UI.TextureUtil.GetAtlas("PedestrianBridgeUI");
 
             if (atlas == UIView.GetAView().defaultAtlas) {
-                atlas = ResourceLoader.CreateTextureAtlas("sprites.png", "PedestrianBridgeUI", uibutton.atlas.material, SIZE, SIZE, spriteNames);
+                atlas = KianCommons.UI.TextureUtil.CreateTextureAtlas("sprites.png", "PedestrianBridgeUI", SIZE, SIZE, spriteNames);
             }
             this.atlas = atlas;
 

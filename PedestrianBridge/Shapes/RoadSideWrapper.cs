@@ -4,9 +4,11 @@ namespace PedestrianBridge.Shapes {
     using System;
     using UnityEngine;
     using Util;
-    using static Util.MathUtil;
-    using static Util.NetUtil;
-    using static Util.HelpersExtensions;
+    using KianCommons;
+    using KianCommons.Math;
+    using static KianCommons.Math.MathUtil;
+    using static KianCommons.NetUtil;
+    using static KianCommons.HelpersExtensions;
     using static Shapes.LWrapper.Calc;
 
     class RoadSideWrapper {

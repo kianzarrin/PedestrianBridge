@@ -5,11 +5,11 @@ using UnityEngine;
 using PedestrianBridge.Util;
 using PedestrianBridge.UI;
 using PedestrianBridge.Shapes;
-using JetBrains.Annotations;
-using ColossalFramework.Math;
+using KianCommons;
+
 
 namespace PedestrianBridge.Tool {
-    using static Util.RenderUtil;
+    using static KianCommons.UI.RenderUtil;
 
     public sealed class PedBridgeTool : KianToolBase {
         public static readonly SavedInputKey ActivationShortcut = new SavedInputKey(

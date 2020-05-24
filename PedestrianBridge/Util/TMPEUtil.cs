@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-
 namespace PedestrianBridge.Util {
+    using System.Runtime.CompilerServices;
+    using KianCommons;
     public static class TMPEUtil {
         public static bool Active = true;
 

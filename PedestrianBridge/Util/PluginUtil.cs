@@ -2,6 +2,7 @@ using ColossalFramework.Plugins;
 using ICities;
 
 namespace PedestrianBridge.Util {
+    using KianCommons;
     public static class PluginUtil {
         public static bool FineRoadToolDetected => PluginDetected("FineRoadTool");
         static bool PluginDetected(string name) {

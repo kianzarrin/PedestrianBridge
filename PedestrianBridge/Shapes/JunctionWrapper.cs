@@ -1,12 +1,9 @@
 namespace PedestrianBridge.Shapes {
     using System.Collections.Generic;
-    using System;
-    using UnityEngine;
     using Util;
-    using Shapes;
     using System.Linq;
-    using static Util.NetUtil;
-    using static Util.RoundaboutUtil;
+    using KianCommons;
+    using static KianCommons.NetUtil;
 
     public class JunctionWrapper {
         public const int MIN_SEGMENT_COUNT = 2;

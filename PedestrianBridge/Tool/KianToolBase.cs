@@ -3,8 +3,8 @@ using ColossalFramework.UI;
 using UnityEngine;
 using System;
 
-using static PedestrianBridge.Util.HelpersExtensions;
-using PedestrianBridge.Util;
+using static KianCommons.HelpersExtensions;
+using KianCommons;
 using ColossalFramework.Math;
 
 namespace PedestrianBridge.Tool {

@@ -2,7 +2,9 @@ using System;
 using UnityEngine;
 using PedestrianBridge.Util;
 using static PedestrianBridge.Util.PrefabUtil;
-using static PedestrianBridge.Util.NetUtil;
+using static KianCommons.NetUtil;
+using KianCommons;
+using KianCommons.Math;
 
 namespace PedestrianBridge.Shapes {
     public class NodeWrapper {

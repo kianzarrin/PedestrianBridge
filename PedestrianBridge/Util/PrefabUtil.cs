@@ -1,7 +1,7 @@
 namespace PedestrianBridge.Util {
     using ColossalFramework;
     using System;
-    using static HelpersExtensions;
+    using KianCommons;
 
     public static class  PrefabUtil {
 

@@ -3,7 +3,7 @@ namespace PedestrianBridge {
     using System;
     using ICities;
     using UnityEngine;
-    using static PedestrianBridge.Util.HelpersExtensions;
+    using static KianCommons.HelpersExtensions;
     using PedestrianBridge.Tool;
     using PedestrianBridge.UI;
 

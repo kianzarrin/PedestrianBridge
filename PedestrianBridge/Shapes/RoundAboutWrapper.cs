@@ -3,6 +3,7 @@ namespace PedestrianBridge.Shapes {
     using System;
     using UnityEngine;
     using Util;
+    using KianCommons;
     public class RoundAboutWrapper {
         public bool IsValid { get; private set; } = false;
         RoundaboutUtil _raboutCalc;

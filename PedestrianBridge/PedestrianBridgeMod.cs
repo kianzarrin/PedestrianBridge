@@ -2,6 +2,7 @@ using ICities;
 using JetBrains.Annotations;
 using System;
 using PedestrianBridge.Util;
+using KianCommons;
 
 namespace PedestrianBridge {
     public class PedestrianBridgeMod : IUserMod {

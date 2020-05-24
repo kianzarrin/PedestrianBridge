@@ -4,9 +4,11 @@ namespace PedestrianBridge.Shapes {
     using System;
     using UnityEngine;
     using Util;
-    using static Util.MathUtil;
-    using static Util.NetUtil;
-    using static Util.VectorUtil;
+    using KianCommons;
+    using KianCommons.Math;
+    using static KianCommons.Math.MathUtil;
+    using static KianCommons.NetUtil;
+    using static KianCommons.Math.VectorUtil;
 
     public class RaboutSlice {
         public struct Corner {
@@ -71,7 +73,7 @@ namespace PedestrianBridge.Shapes {
         bool IsBetweenInOut(
             ushort segmentID1Main, ushort segmentID1Minor,
             ushort segmentID2Main, ushort segmentID2Minor) {
-            Util.HelpersExtensions.AssertStack();
+            KianCommons.HelpersExtensions.AssertStack();
             const float maxLen = 7 * MPU;
             bool bShort = (corner1.Point - corner2.Point).sqrMagnitude <= maxLen * maxLen;
             if (!bShort) {
