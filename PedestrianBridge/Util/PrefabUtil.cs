@@ -4,7 +4,6 @@ namespace PedestrianBridge.Util {
     using KianCommons;
 
     public static class  PrefabUtil {
-
         public static NetInfo SelectedPrefab => GetSelectedPath();
         public static NetInfo defaultPrefab => PedestrianPathInfo;
         public static NetInfo PedestrianBridgeInfo =>
@@ -40,6 +39,7 @@ namespace PedestrianBridge.Util {
             }
             throw new Exception("NetInfo not found!");
         }
+
         public static NetInfo GetElevated(this NetInfo info) {
             NetAI ai = info.m_netAI;
             if (ai is PedestrianBridgeAI || ai is RoadBridgeAI)
@@ -53,5 +53,42 @@ namespace PedestrianBridge.Util {
             return null;
         }
 
+        public static NetInfo GetTunnel(this NetInfo info) {
+            NetAI ai = info.m_netAI;
+            if (ai is PedestrianTunnelAI || ai is RoadTunnelAI)
+                return info;
+
+            if (ai is PedestrianPathAI)
+                return (ai as PedestrianPathAI).m_tunnelInfo;
+
+            if (ai is RoadAI)
+                return (ai as RoadAI).m_tunnelInfo;
+            return null;
+        }
+
+        public static NetInfo GetSlope(this NetInfo info) {
+            NetAI ai = info.m_netAI;
+            if (ai is PedestrianTunnelAI || ai is RoadTunnelAI)
+                return info;
+
+            if (ai is PedestrianPathAI)
+                return (ai as PedestrianPathAI).m_slopeInfo;
+
+            if (ai is RoadAI)
+                return (ai as RoadAI).m_slopeInfo;
+            return null;
+        }
+
+        public static int GetInfoPrioirty(NetInfo info, NetInfo baseInfo=null) {
+            PedestrianPathAI baseAI = baseInfo?.m_netAI as PedestrianPathAI;
+            HelpersExtensions.AssertNotNull(baseAI, "baseAI");
+            if (info == baseAI.m_info) return 0;
+            if (info == baseAI.m_elevatedInfo) return 1;
+            if (info == baseAI.m_slopeInfo) return 1;
+            if (info == baseAI.m_tunnelInfo) return 2;
+            if (info == baseAI.m_bridgeInfo) return 2;
+            Log.Error("Unreacahble code");
+            return -1;
+        }
     }
 }

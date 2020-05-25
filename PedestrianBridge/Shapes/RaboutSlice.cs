@@ -9,6 +9,8 @@ namespace PedestrianBridge.Shapes {
     using static KianCommons.Math.MathUtil;
     using static KianCommons.NetUtil;
     using static KianCommons.Math.VectorUtil;
+    using System.Collections.Generic;
+    using System.Linq;
 
     public class RaboutSlice {
         public struct Corner {
@@ -37,6 +39,7 @@ namespace PedestrianBridge.Shapes {
         Corner corner1, corner2;
         Vector2 MiddlePoint;
         Vector2 MDir1, MDir2;
+        IEnumerable<ushort> _segmentIDs;
         float Len1 => (MiddlePoint - corner1.Point).magnitude;
         float Len2 => (MiddlePoint - corner2.Point).magnitude;
 
@@ -57,7 +60,6 @@ namespace PedestrianBridge.Shapes {
 
             MiddlePoint = b2.Travel2(b2.ArcLength() * .5f, out MDir2);
             MDir1 = -MDir2;
-
             return true;
         }
 
@@ -103,15 +105,54 @@ namespace PedestrianBridge.Shapes {
             return ret;
         }
 
+        public static ushort GetClosestSegment(Vector2 point, IEnumerable<ushort> segmentList, out Vector3 HitPos) {
+            HitPos = Vector3.zero;
+            float min_dist = float.MaxValue;
+            ushort min_segmentID = 0;
+            var pos = Get3DPos(point);
+            var posGrid = new GridVector(point);
+            foreach (ushort segmentID in segmentList) {
+                // TODO, uncommnet for optimisation.
+                //GridVector segmetnGrid = GridVector.CreateFromSegment(segmentID);
+                //if ((segmetnGrid - posGrid).MangitudeSquare > 2)
+                //    continue; // too far away.
+                HitPos = segmentID.ToSegment().GetClosestPosition(pos);
+                var dist = (pos - HitPos).sqrMagnitude;
+                if (dist < min_dist) {
+                    min_dist = dist;
+                    min_segmentID = segmentID;
+                }
+            }
+            return min_segmentID;
+        }
+
+        public static Vector2 MirrorPoint(Vector2 point, IEnumerable<ushort> segmentList) {
+            HelpersExtensions.AssertNotNull(segmentList, "segmentList");
+            HelpersExtensions.Assert(segmentList.Count() > 0, "segmentList.Count()>0");
+            ushort closestSegmentID = GetClosestSegment(point, segmentList, out Vector3 hitpos);
+            if (closestSegmentID != 0) {
+                var diff = point - hitpos.ToCS2D();
+                return point + diff;
+            } else {
+                throw new Exception("unreachable code");
+            }
+        }
+
+        public static NodeWrapper MirrorNode(NodeWrapper node, IEnumerable<ushort> segmentList) {
+            var mirror_point = MirrorPoint(node.point, segmentList);
+            return new NodeWrapper(mirror_point, node.elevation, node.info);
+        }
+
         public const float MIN_LEN = 2.5f;
         public const float DESIRED_LEN = 3.2f;
         public RaboutSlice(
             ushort segmentID1Main, ushort segmentID1Minor,
             ushort segmentID2Main, ushort segmentID2Minor,
+            IEnumerable<ushort> segmentIDs,
             NodeWrapper centerNode, NetInfo info) {
             Log.Debug($"RaboutSlice: main1:{segmentID1Main}, minor1:{segmentID1Minor}, " +
                 $"main2:{segmentID2Main}, minor2:{segmentID2Minor},");
-
+            this._segmentIDs = segmentIDs;
             bool onGround =
                 IsIntersectionOnGround(segmentID1Main, segmentID1Minor) &
                 IsIntersectionOnGround(segmentID2Main, segmentID2Minor);
@@ -120,9 +161,11 @@ namespace PedestrianBridge.Shapes {
                 return;
             }
 
-            NetInfo eInfo = info.GetElevated();
-            corner1 = new Corner(segmentID1Main, segmentID1Minor, eInfo.m_halfWidth);
-            corner2 = new Corner(segmentID2Main, segmentID2Minor, eInfo.m_halfWidth);
+            NetInfo info2 = Options.Underground ? info.GetTunnel() : info.GetElevated();
+            NetInfo info1 = Options.Underground ? info.GetSlope() : info.GetElevated();
+            float halfWidth = System.Math.Max(info1.m_halfWidth, info2.m_halfWidth);
+            corner1 = new Corner(segmentID1Main, segmentID1Minor, halfWidth);
+            corner2 = new Corner(segmentID2Main, segmentID2Minor, halfWidth);
             if (IsSplit)
                 return;
             bool angleTooWide = !CalculateMiddlePoint();
@@ -132,19 +175,19 @@ namespace PedestrianBridge.Shapes {
                 return;
             }
 
-            nodeM = new NodeWrapper(MiddlePoint, 10, eInfo);
+            nodeM = new NodeWrapper(MiddlePoint, Options.Elevation, info1);
 
             float len1 = Len1;
             Log.Debug($"len1={len1} corner1.CanConnectPathAtJunction={corner1.CanConnectPathAtJunction}");
             if ((len1 > MIN_LEN * MPU) && corner1.CanConnectPathAtJunction) {
-                node1 = new NodeWrapper(corner1.Point, 0, eInfo);
+                node1 = new NodeWrapper(corner1.Point, 0, info1);
                 segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.DirMain);
             } else if (corner1.CanConnectPathAtFinalNode) {
                 if (len1 > 1f * MPU) {
-                    node1 = new NodeWrapper(corner1.AltPoint, 0, eInfo);
+                    node1 = new NodeWrapper(corner1.AltPoint, 0, info1);
                     segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.EndDirMinor);
                 } else {
-                    node1 = new NodeWrapper(corner1.AltPoint, 0, eInfo);
+                    node1 = new NodeWrapper(corner1.AltPoint, 0, info1);
                     segment1 = new SegmentWrapper(nodeM, node1);
                 }
             }
@@ -152,14 +195,14 @@ namespace PedestrianBridge.Shapes {
             float len2 = Len2;
             Log.Debug($"len2={len2} corner2.CanConnectPathAtJunction={corner2.CanConnectPathAtJunction}");
             if ((len2 > MIN_LEN * MPU) && corner2.CanConnectPathAtJunction) {
-                node2 = new NodeWrapper(corner2.Point, 0, eInfo);
+                node2 = new NodeWrapper(corner2.Point, 0, info1);
                 segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.DirMain);
             } else if (corner2.CanConnectPathAtFinalNode) {
                 if (len2 > 1f * MPU) {
-                    node2 = new NodeWrapper(corner2.AltPoint, 0, eInfo);
+                    node2 = new NodeWrapper(corner2.AltPoint, 0, info1);
                     segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.EndDirMinor);
                 } else {
-                    node2 = new NodeWrapper(corner2.AltPoint, 0, eInfo);
+                    node2 = new NodeWrapper(corner2.AltPoint, 0, info1);
                     segment2 = new SegmentWrapper(nodeM, node2);
                 }
             }
@@ -182,14 +225,42 @@ namespace PedestrianBridge.Shapes {
                 segment1.endDir = corner1.DirMain;
             }
 
-            if (nodeM != null) {
-                segment3 = new SegmentWrapper(nodeM, centerNode);
-                this.centerNode = centerNode;
-                float center_h = centerNode.Get3DPos().Height();
-                float middle_h = nodeM.Get3DPos().Height();
-                if (center_h < middle_h)
-                    centerNode.elevation += (byte)Mathf.RoundToInt(middle_h - center_h);
+            if (nodeM == null)
+                return;
+            switch (Options.RoundaboutBridgeStyle) {
+                case RoundaboutBridgeStyleT.CenterNode:
+                    segment3 = new SegmentWrapper(centerNode, nodeM);
+                    segment3.Info = info2;
+                    this.centerNode = centerNode;
+                    float center_h = centerNode.Get3DPos().Height();
+                    float middle_h = nodeM.Get3DPos().Height();
+                    if (Options.Underground) {
+                        if (center_h > middle_h)
+                            centerNode.elevation += (byte)Mathf.RoundToInt(middle_h - center_h);
+                    } else {
+                        if (center_h < middle_h)
+                            centerNode.elevation += (byte)Mathf.RoundToInt(middle_h - center_h);
+                    }
+                    break;
+                case RoundaboutBridgeStyleT.InnerCircle:
+                    centerNode = null;
+                    nodeM_mirrored = MirrorNode(nodeM, _segmentIDs);
+                    node1_mirrored = MirrorNode(node1, _segmentIDs);
+                    node2_mirrored = MirrorNode(node2, _segmentIDs);
+                    segment3 = new SegmentWrapper(nodeM_mirrored, nodeM);
+                    segment3.Info = info2;
+                    segment_circle1 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir1, corner1.EndDirMinor);
+                    segment_circle2 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir2, corner2.EndDirMinor);
+                    nodeM_mirrored.info = node1_mirrored.info = node2_mirrored.info = info2;
+                    break;
+                case RoundaboutBridgeStyleT.OuterCircle:
+                    // move node1 node2
+                    // segment1 and segment2 nodeM dir has to rotate 60 degrees.
+                    break;
             }
+
+
+
         }
 
         public bool IsValid => nodeM != null;
@@ -197,21 +268,37 @@ namespace PedestrianBridge.Shapes {
         NodeWrapper node1;
         NodeWrapper node2;
         NodeWrapper centerNode;
+        public NodeWrapper nodeM_mirrored;
+        NodeWrapper node1_mirrored;
+        NodeWrapper node2_mirrored;
 
         SegmentWrapper segment1;
         SegmentWrapper segment2;
-        SegmentWrapper segment3;
+        SegmentWrapper segment3; // connected to center or mirror
+        public SegmentWrapper segment_circle1;
+        public SegmentWrapper segment_circle2;
 
         public void Create() {
             //Log.Debug($"{nodeM != null} {node1 != null} {node2 != null} {segment1 != null} {segment2 != null} {segment3 != null}");
             //if (centerNode != null && !centerNode.IsCreated)
             //    centerNode.Create(); // TODO fix Create action already exists but not created yet
-            nodeM?.Create();
-            node1?.Create();
-            node2?.Create();
-            segment1?.Create();
-            segment2?.Create();
-            segment3?.Create();
+            //nodeM?.Create();
+            //node1?.Create();
+            //node2?.Create();
+            //nodeM_mirrored?.Create();
+            //node1_mirrored?.Create();
+            //node2_mirrored?.Create();
+
+            //segment1?.Create();
+            //segment2?.Create();
+            //segment3?.Create();
+            //segment_circle1?.Create();
+            //segment_circle2?.Create();
+
+            var Nodes = new[] { nodeM, node1, node2, nodeM_mirrored, node1_mirrored, node2_mirrored };
+            var Segments = new[] {segment1,segment2,segment3,segment_circle1,segment_circle2 };
+            foreach (var node in Nodes) node?.Create();
+            foreach (var segment in Segments) segment?.Create();
         }
     }
 }

@@ -101,6 +101,7 @@
     <Compile Include="KianCommons\KianCommons\Util\Log.cs" />
     <Compile Include="KianCommons\KianCommons\Util\NetUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Util\PluginUtil.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="PedestrianBridgeMod.cs" />
     <Compile Include="Shapes\RoadBridgeWrapper.cs" />
     <Compile Include="Shapes\RoadSideWrapper.cs" />
@@ -129,7 +130,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="KianCommons\.git" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -19,6 +19,9 @@ namespace PedestrianBridge.Shapes {
             this.elevation = elevation;
             if (elevation >= 1)
                 info = info.GetElevated();
+            if (elevation <= -1)
+                info = info.GetTunnel();
+
             this.info = info;
         }
 
@@ -30,7 +33,7 @@ namespace PedestrianBridge.Shapes {
                 throw new Exception("Node already has been created");
             Vector3 pos = Get3DPos(point, elevation);
             ID = CreateNode(pos, info);
-            ID.ToNode().m_elevation = elevation;
+            ID.ToNode().m_elevation = (byte)Math.Abs(elevation);
             if (elevation == 0) {
                 ID.ToNode().m_flags &= ~NetNode.Flags.Moveable;
                 ID.ToNode().m_flags |= NetNode.Flags.Transition | NetNode.Flags.OnGround;

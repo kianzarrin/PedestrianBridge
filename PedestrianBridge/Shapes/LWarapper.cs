@@ -255,8 +255,8 @@ namespace PedestrianBridge.Shapes {
         public bool Valid { get; private set;}
 
         public LWrapper(ushort segmentID1, ushort segmentID2, NetInfo info) {
-            NetInfo eInfo = info.GetElevated();
-            var calc = new Calc(segmentID1, segmentID2, eInfo.m_halfWidth);
+            NetInfo info1 = Options.Underground ? info.GetSlope() : info.GetElevated();
+            var calc = new Calc(segmentID1, segmentID2, info1.m_halfWidth);
             nodeL = node1 = node2 = null;
             segment1 = segment2 = null;
 
@@ -266,15 +266,15 @@ namespace PedestrianBridge.Shapes {
                 return;
             }
 
-            nodeL = new NodeWrapper(calc.PointL, 10, eInfo);
+            nodeL = new NodeWrapper(calc.PointL, 10, info1);
 
             if (create1) {
-                node1 = new NodeWrapper(calc.Point1, 0, eInfo);
+                node1 = new NodeWrapper(calc.Point1, 0, info1);
                 segment1 = new SegmentWrapper(nodeL, node1, calc.CornerDir1, calc.EndDir1);
             }
 
             if (create2) {
-                node2 = new NodeWrapper(calc.Point2, 0, eInfo);
+                node2 = new NodeWrapper(calc.Point2, 0, info1);
                 segment2 = new SegmentWrapper(nodeL, node2, calc.CornerDir2, calc.EndDir2);
             }
 

@@ -10,6 +10,7 @@ namespace PedestrianBridge.Shapes {
         public NodeWrapper endNode;
         public Vector3 startDir;
         public Vector3 endDir;
+        public NetInfo Info;
 
         public SegmentWrapper(NodeWrapper startNode, NodeWrapper endNode) {
             this.startNode = startNode;
@@ -33,9 +34,9 @@ namespace PedestrianBridge.Shapes {
 
         void _Create() {
             if (startDir == Vector3.zero)
-                ID = CreateSegment(startNode.ID, endNode.ID);
+                ID = CreateSegment(startNode.ID, endNode.ID, Info);
             else {
-                ID = CreateSegment(startNode.ID, endNode.ID, startDir, endDir);
+                ID = CreateSegment(startNode.ID, endNode.ID, startDir, endDir, Info);
             }
         }
 
