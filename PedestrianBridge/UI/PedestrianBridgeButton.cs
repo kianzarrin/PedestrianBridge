@@ -12,12 +12,13 @@ using KianCommons;
 
 namespace PedestrianBridge.UI {
     public class PedestrianBridgeButton : UIButton {
+        public const string ATLAS_NAME = "PedestrianBridgeUI";
 
         const int SIZE = 31;
         const string PedestrianBridgeButtonBg = "PedestrianBridgeButtonBg";
         const string PedestrianBridgeButtonBgPressed = "PedestrianBridgeButtonBgPressed";
         const string PedestrianBridgeButtonBgHovered = "PedestrianBridgeButtonBgHovered";
-        const string PedestrianBridgeIcon = "PedestrianBridgeIcon";
+        public const string PedestrianBridgeIcon = "PedestrianBridgeIcon";
         const string PedestrianBridgeIconPressed = "PedestrianBridgeIconPressed";
 
         static UIComponent GetPanel() {
@@ -46,10 +47,10 @@ namespace PedestrianBridge.UI {
                 PedestrianBridgeIcon,
                 PedestrianBridgeIconPressed
             };
-            var atlas = KianCommons.UI.TextureUtil.GetAtlas("PedestrianBridgeUI");
+            var atlas = KianCommons.UI.TextureUtil.GetAtlas(ATLAS_NAME);
 
             if (atlas == UIView.GetAView().defaultAtlas) {
-                atlas = KianCommons.UI.TextureUtil.CreateTextureAtlas("sprites.png", "PedestrianBridgeUI", SIZE, SIZE, spriteNames);
+                atlas = KianCommons.UI.TextureUtil.CreateTextureAtlas("sprites.png", ATLAS_NAME, SIZE, SIZE, spriteNames);
             }
             this.atlas = atlas;
 

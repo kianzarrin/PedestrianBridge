@@ -14,7 +14,7 @@ namespace PedestrianBridge.Tool {
     public sealed class PedBridgeTool : KianToolBase {
         public static readonly SavedInputKey ActivationShortcut = new SavedInputKey(
             "ActivationShortcut",
-            UI.ModSettings.FileName,
+            UI.ModSettings.FILE_NAME,
             SavedInputKey.Encode(KeyCode.B, true, false, false),
             true);
 

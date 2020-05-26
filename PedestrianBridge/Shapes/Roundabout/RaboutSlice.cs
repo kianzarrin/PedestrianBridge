@@ -226,7 +226,7 @@ namespace PedestrianBridge.Shapes {
             if (nodeM == null)
                 return;
             switch (ControlCenter.RoundaboutBridgeStyle) {
-                case RoundaboutBridgeStyleT.CenterNode:
+                case RoundaboutBridgeStyleT.Start:
                     segment3 = new SegmentWrapper(centerNode, nodeM);
                     this.centerNode = centerNode;
                     float center_h = centerNode.Get3DPos().Height();

@@ -8,7 +8,7 @@ using System.Text;
 
 namespace PedestrianBridge {
     public enum RoundaboutBridgeStyleT {
-        CenterNode,
+        Start,
         InnerCircle,
         OuterCircle,
     }

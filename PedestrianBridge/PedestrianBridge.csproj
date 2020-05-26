@@ -90,9 +90,12 @@
     <Compile Include="KianCommons\KianCommons\Math\MathUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Math\VecetorUtils.cs" />
     <None Include="KianCommons\KianCommons\Patches\TranspilerUtils.cs" />
+    <Compile Include="KianCommons\KianCommons\UI\Helpers\UIAutoSizePanel.cs" />
+    <Compile Include="KianCommons\KianCommons\UI\Helpers\UIButtonExt.cs" />
+    <Compile Include="KianCommons\KianCommons\UI\Helpers\UICheckBoxExt.cs" />
+    <Compile Include="KianCommons\KianCommons\UI\Helpers\UISliderExt.cs" />
     <Compile Include="KianCommons\KianCommons\UI\RenderUtil.cs" />
     <Compile Include="KianCommons\KianCommons\UI\TextureUtil.cs" />
-    <Compile Include="KianCommons\KianCommons\UI\UIAutoSizePanel.cs" />
     <Compile Include="KianCommons\KianCommons\UI\UIKeymappingsPanel.cs" />
     <Compile Include="KianCommons\KianCommons\UI\UIToolButton.cs" />
     <Compile Include="KianCommons\KianCommons\UI\UIUtils.cs" />
@@ -116,7 +119,12 @@
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="Tool\KianToolBase.cs" />
     <Compile Include="Tool\PedBridgeTool.cs" />
-    <Compile Include="UI\KeymappingsPanel.cs" />
+    <Compile Include="UI\ControlPanel\SlopeSlider.cs" />
+    <Compile Include="UI\ControlPanel\ElevationSlider.cs" />
+    <Compile Include="UI\ControlPanel\StyleInnerCircleCheckBox.cs" />
+    <Compile Include="UI\ControlPanel\StyleStarCheckBox.cs" />
+    <Compile Include="UI\ControlPanel\ControlPanel.cs" />
+    <Compile Include="UI\ControlPanel\UnderpassCheckbox.cs" />
     <Compile Include="UI\Settings.cs" />
     <Compile Include="Util\RoundaboutUtil.cs" />
     <Compile Include="Util\TMPEUtil.cs" />
