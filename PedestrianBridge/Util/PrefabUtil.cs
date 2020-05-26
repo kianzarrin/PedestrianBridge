@@ -1,9 +1,8 @@
 namespace PedestrianBridge.Util {
-    using ColossalFramework;
-    using System;
     using KianCommons;
+    using System;
 
-    public static class  PrefabUtil {
+    public static class PrefabUtil {
         public static NetInfo SelectedPrefab => GetSelectedPath();
         public static NetInfo defaultPrefab => PedestrianPathInfo;
         public static NetInfo PedestrianBridgeInfo =>
@@ -50,6 +49,8 @@ namespace PedestrianBridge.Util {
 
             if (ai is RoadAI)
                 return (ai as RoadAI).m_elevatedInfo;
+
+            Log.Error($"GetElevated({info} returns null. ai={ai}");
             return null;
         }
 
@@ -58,11 +59,14 @@ namespace PedestrianBridge.Util {
             if (ai is PedestrianTunnelAI || ai is RoadTunnelAI)
                 return info;
 
+
             if (ai is PedestrianPathAI)
                 return (ai as PedestrianPathAI).m_tunnelInfo;
 
             if (ai is RoadAI)
                 return (ai as RoadAI).m_tunnelInfo;
+
+            Log.Error($"GetTunnel({info}) returns null. ai={ai}");
             return null;
         }
 
@@ -76,10 +80,12 @@ namespace PedestrianBridge.Util {
 
             if (ai is RoadAI)
                 return (ai as RoadAI).m_slopeInfo;
+
+            Log.Error($"GetSlope({info} returns null. ai={ai}");
             return null;
         }
 
-        public static int GetInfoPrioirty(NetInfo info, NetInfo baseInfo=null) {
+        public static int GetInfoPrioirty(NetInfo info, NetInfo baseInfo = null) {
             PedestrianPathAI baseAI = baseInfo?.m_netAI as PedestrianPathAI;
             HelpersExtensions.AssertNotNull(baseAI, "baseAI");
             if (info == baseAI.m_info) return 0;

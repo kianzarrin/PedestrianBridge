@@ -15,7 +15,7 @@ namespace PedestrianBridge.Shapes {
         private List<ushort> _segList;
         private List<SegmentWrapper> _overPasses;
 
-        public JunctionWrapper(ushort nodeID, NetInfo pathInfo) {
+        public JunctionWrapper(ushort nodeID) {
             NodeID = nodeID;
             _segList = GetCCSegList(nodeID).ToList();
             _count = _segList.Count;
@@ -28,7 +28,7 @@ namespace PedestrianBridge.Shapes {
 
             for (int i = 0; i < _count; ++i) {
                 ushort segID1 = _segList[i], segID2 = _segList[(i + 1) % _count];
-                var corner = new LWrapper(segID1, segID2, pathInfo);
+                var corner = new LWrapper(segID1, segID2);
                 //Log.Info($"created L from segments: {segID1} {segID2}");
                 if (corner.Valid) {
                     _corners.Add(corner);
@@ -38,17 +38,15 @@ namespace PedestrianBridge.Shapes {
 
             if (_count < 2)
                 return;
-            NetInfo info2 = Options.Underground ? pathInfo.GetTunnel() : pathInfo.GetElevated();
             for (int i = 0; i < _count; ++i) {
                 var startNode = _corners[i].nodeL;
                 var endNode = _corners[(i + 1) % _count].nodeL;
                 if (startNode != null && endNode != null) {
-                    if (!(_count == 2 && i == 1))
+                    if (_count == 2 && i == 1)
                         continue;
                     SegmentWrapper segment = new SegmentWrapper(
                         startNode, endNode);
-                        segment.Create();
-                    segment.Info = info2;
+                    segment.Info = ControlCenter.Info2;
                     _overPasses.Add(segment);
 
                 }
@@ -56,7 +54,7 @@ namespace PedestrianBridge.Shapes {
         }
 
         public static void Create(ushort nodeID) {
-            var junction = new JunctionWrapper(nodeID, PrefabUtil.SelectedPrefab);
+            var junction = new JunctionWrapper(nodeID);
             if (junction.IsValid)
                 junction.Create();
         }
@@ -64,9 +62,8 @@ namespace PedestrianBridge.Shapes {
         public void Create() {
             foreach(var corner in _corners)
                 corner.Create();
-            foreach (var overpass in _overPasses)
-                overpass?.Create();
-
+            foreach (var segment in _overPasses)
+                segment?.Create();
             for (int i = 0; i < _count; ++i)
                 TMPEUtil.BanPedestrianCrossings(_segList[i], NodeID);
         }

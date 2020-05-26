@@ -15,7 +15,7 @@ namespace PedestrianBridge.Shapes {
                 Log.Info("Roundabout has too few junctions.");
                 return;
             }
-            NetInfo info2 = Options.Underground ? info.GetTunnel() : info.GetElevated();
+            NetInfo info2 = ControlCenter.Underground ? info.GetTunnel() : info.GetElevated();
             Vector2 centerPoint = raboutCalc.CalculateCenter();
             _center = new NodeWrapper(centerPoint, 10, info2);
             _slices = new List<RaboutSlice>(n);

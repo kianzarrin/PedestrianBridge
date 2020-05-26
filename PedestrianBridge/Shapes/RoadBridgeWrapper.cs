@@ -22,8 +22,6 @@ namespace PedestrianBridge.Shapes {
             _side2 = new RoadSideWrapper(segmentID, t, pathInfo, leftSide: true);
             if (IsValid) {
                 _bridge = new SegmentWrapper(_side1.node0, _side2.node0);
-                NetInfo info2 = Options.Underground ? pathInfo.GetTunnel() : pathInfo.GetElevated();
-                _bridge.Info = info2;
             }
         }
 

@@ -161,8 +161,8 @@ namespace PedestrianBridge.Shapes {
                 return;
             }
 
-            NetInfo info2 = Options.Underground ? info.GetTunnel() : info.GetElevated();
-            NetInfo info1 = Options.Underground ? info.GetSlope() : info.GetElevated();
+            NetInfo info2 = ControlCenter.Underground ? info.GetTunnel() : info.GetElevated();
+            NetInfo info1 = ControlCenter.Underground ? info.GetSlope() : info.GetElevated();
             float halfWidth = System.Math.Max(info1.m_halfWidth, info2.m_halfWidth);
             corner1 = new Corner(segmentID1Main, segmentID1Minor, halfWidth);
             corner2 = new Corner(segmentID2Main, segmentID2Minor, halfWidth);
@@ -175,7 +175,7 @@ namespace PedestrianBridge.Shapes {
                 return;
             }
 
-            nodeM = new NodeWrapper(MiddlePoint, Options.Elevation, info1);
+            nodeM = new NodeWrapper(MiddlePoint, ControlCenter.Elevation, info2);
 
             float len1 = Len1;
             Log.Debug($"len1={len1} corner1.CanConnectPathAtJunction={corner1.CanConnectPathAtJunction}");
@@ -227,14 +227,13 @@ namespace PedestrianBridge.Shapes {
 
             if (nodeM == null)
                 return;
-            switch (Options.RoundaboutBridgeStyle) {
+            switch (ControlCenter.RoundaboutBridgeStyle) {
                 case RoundaboutBridgeStyleT.CenterNode:
                     segment3 = new SegmentWrapper(centerNode, nodeM);
-                    segment3.Info = info2;
                     this.centerNode = centerNode;
                     float center_h = centerNode.Get3DPos().Height();
                     float middle_h = nodeM.Get3DPos().Height();
-                    if (Options.Underground) {
+                    if (ControlCenter.Underground) {
                         if (center_h > middle_h)
                             centerNode.elevation += (byte)Mathf.RoundToInt(middle_h - center_h);
                     } else {
@@ -248,7 +247,6 @@ namespace PedestrianBridge.Shapes {
                     node1_mirrored = MirrorNode(node1, _segmentIDs);
                     node2_mirrored = MirrorNode(node2, _segmentIDs);
                     segment3 = new SegmentWrapper(nodeM_mirrored, nodeM);
-                    segment3.Info = info2;
                     segment_circle1 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir1, corner1.EndDirMinor);
                     segment_circle2 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir2, corner2.EndDirMinor);
                     nodeM_mirrored.info = node1_mirrored.info = node2_mirrored.info = info2;
