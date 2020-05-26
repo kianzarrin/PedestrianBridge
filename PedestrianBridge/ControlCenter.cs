@@ -1,10 +1,7 @@
-using ColossalFramework.PlatformServices;
+using ColossalFramework;
 using KianCommons;
+using PedestrianBridge.UI;
 using PedestrianBridge.Util;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace PedestrianBridge {
     public enum RoundaboutBridgeStyleT {
@@ -14,33 +11,56 @@ namespace PedestrianBridge {
     }
 
     public static class ControlCenter {
-
-
         public static NetInfo Info => PrefabUtil.SelectedPrefab;
         public static NetInfo Info1 => Underground ? Info.GetSlope() : Info.GetElevated();
         public static NetInfo Info2 => Underground ? Info.GetTunnel() : Info.GetElevated();
         public static float HalfWidth => System.Math.Max(Info1.m_halfWidth, Info2.m_halfWidth);
 
-        public static RoundaboutBridgeStyleT RoundaboutBridgeStyle { get; set; } = RoundaboutBridgeStyleT.InnerCircle;
-        public static bool Underground { get; set; } = false;
+        #region style
+        static readonly SavedInt style_ = new SavedInt(
+            "Style", ModSettings.FILE_NAME, (int)RoundaboutBridgeStyleT.InnerCircle, true);
+        public static RoundaboutBridgeStyleT RoundaboutBridgeStyle {
+            get => (RoundaboutBridgeStyleT)style_.value;
+            set => style_.value = (int)value;
+        }
+        #endregion
 
-        static int _bridgeElevation = 9;
-        static int _tunnelElevation = -12;
+        #region underground
+        static readonly SavedBool underground_ = new SavedBool(
+            "Underground", ModSettings.FILE_NAME, def:false, autoUpdate: true);
+        public static bool Underground {
+            get => underground_.value;
+            set => underground_.value=value;
+        }
+        #endregion
+
+        #region elevation
+        static readonly SavedInt bridgeElevation_ = new SavedInt(
+            "BridgeElevation", ModSettings.FILE_NAME, def: 10, autoUpdate: true);
+        static int tunnelElevation_ = -12;
         public static int Elevation {
-            get => Underground ? _tunnelElevation : _bridgeElevation;
+            get => Underground ? tunnelElevation_ : bridgeElevation_.value;
             set {
-                if (Underground) _tunnelElevation = value;
-                else _bridgeElevation = value;
+                if (Underground) tunnelElevation_ = value;
+                else bridgeElevation_.value = value;
             }
         }
+        #endregion
 
-        static float _inverseSlopeRatio = 1f; 
+        #region slope
+        static readonly SavedFloat inverseSlope_ = new SavedFloat(
+            "InverseSlopeRatio", ModSettings.FILE_NAME, def: 1f, autoUpdate: true);
+
         public static float InverseSlopeRatio {
-            get => _inverseSlopeRatio * (System.Math.Abs(Elevation) * 0.1f); // 1 => h=10 and length=3
-            set => _inverseSlopeRatio = value;
+            get => inverseSlope_.value;
+            set => inverseSlope_.value = value;
         }
-        public static float BaseLength => ControlCenter.InverseSlopeRatio * 3 * NetUtil.MPU;
 
+        public static float BaseLength =>
+            ControlCenter.InverseSlopeRatio *
+            (System.Math.Abs(Elevation) * 0.1f) *
+            3 * NetUtil.MPU;
+        #endregion
 
     }
 }

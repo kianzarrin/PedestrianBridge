@@ -58,6 +58,7 @@ namespace PedestrianBridge.Tool {
         //public override void EnableTool() => ToolsModifierControl.SetTool<PedBridgeTool>();
 
         protected override void OnEnable() {
+            UI.ControlPanel.ControlPanel.Instance.Open();
             Log.Debug("PedBridgeTool.OnEnable");
             button.Focus();
             base.OnEnable();
@@ -66,12 +67,12 @@ namespace PedestrianBridge.Tool {
         }
 
         protected override void OnDisable() {
+            UI.ControlPanel.ControlPanel.Instance.Close();
             Log.Debug("PedBridgeTool.OnDisable");
             button?.Unfocus();
             base.OnDisable();
             button?.Unfocus();
             button?.Invalidate();
-
         }
 
         protected override void OnToolUpdate() {

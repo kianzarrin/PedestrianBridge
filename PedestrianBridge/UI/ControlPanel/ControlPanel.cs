@@ -6,12 +6,6 @@ namespace PedestrianBridge.UI.ControlPanel {
     using UnityEngine;
 
     public class ControlPanel : UIAutoSizePanel {
-        public static readonly SavedInputKey ActivationShortcut = new SavedInputKey(
-            "ActivationShortcut",
-            ModSettings.FILE_NAME,
-            SavedInputKey.Encode(KeyCode.N, true, false, false),
-            true);
-
         public static readonly SavedFloat SavedX = new SavedFloat(
             "PanelX", ModSettings.FILE_NAME, 87, true);
         public static readonly SavedFloat SavedY = new SavedFloat(
@@ -142,4 +136,4 @@ namespace PedestrianBridge.UI.ControlPanel {
         }
     }
 }
-}
+
