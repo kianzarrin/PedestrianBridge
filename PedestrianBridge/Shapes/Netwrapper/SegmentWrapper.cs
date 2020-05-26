@@ -1,32 +1,28 @@
-using UnityEngine;
 using KianCommons;
 using KianCommons.Math;
-using static KianCommons.NetUtil;
 using System;
-using UnityEngine.EventSystems;
+using UnityEngine;
+using static KianCommons.NetUtil;
 
 namespace PedestrianBridge.Shapes {
     public class SegmentWrapper {
-        public NodeWrapper startNode;
-        public NodeWrapper endNode;
-        public Vector3 startDir;
-        public Vector3 endDir;
+        public NodeWrapper StartNode;
+        public NodeWrapper EndNode;
+        public Vector2 StartDir;
+        public Vector2 EndDir;
         //public NetInfo BaseInfo;
 
         public SegmentWrapper(NodeWrapper startNode, NodeWrapper endNode) {
-            this.startNode = startNode;
-            this.endNode = endNode;
-
-            Vector3 startPos = startNode.ID.ToNode().m_position;
-            Vector3 endPos = endNode.ID.ToNode().m_position;
-            startDir = endDir = Vector3.zero;
+            this.StartNode = startNode;
+            this.EndNode = endNode;
+            StartDir = EndDir = Vector2.zero;
         }
 
         public SegmentWrapper(NodeWrapper startNode, NodeWrapper endNode, Vector2 startDir, Vector2 endDir) {
-            this.startNode = startNode;
-            this.endNode = endNode;
-            this.startDir = startDir.ToCS3D();
-            this.endDir = endDir.ToCS3D();
+            this.StartNode = startNode;
+            this.EndNode = endNode;
+            this.StartDir = startDir;
+            this.EndDir = endDir;
         }
 
         public ushort ID;
@@ -34,10 +30,10 @@ namespace PedestrianBridge.Shapes {
             simMan.AddAction(_Create);
 
         void _Create() {
-            if (startDir == Vector3.zero)
-                ID = CreateSegment(startNode.ID, endNode.ID, GetFinalNetInfo());
+            if (StartDir == Vector2.zero)
+                ID = CreateSegment(StartNode.ID, EndNode.ID, GetFinalNetInfo());
             else {
-                ID = CreateSegment(startNode.ID, endNode.ID, startDir, endDir, GetFinalNetInfo() );
+                ID = CreateSegment(StartNode.ID, EndNode.ID, StartDir.ToCS3D(), EndDir.ToCS3D(), GetFinalNetInfo());
             }
         }
 
@@ -67,14 +63,14 @@ namespace PedestrianBridge.Shapes {
             return CreateSegment(startNodeID, endNodeID, dir, -dir, info);
         }
 
-        static ushort CreateSegment(ushort startNodeID, ushort endNodeID, Vector2 middlePoint, NetInfo info = null) {
-            Vector3 startPos = startNodeID.ToNode().m_position;
-            Vector3 endPos = endNodeID.ToNode().m_position;
-            Vector3 middlePos = middlePoint.ToCS3D();
-            Vector3 startDir = middlePos - startPos;
-            Vector3 endDir = middlePos - endPos;
-            return CreateSegment(startNodeID, endNodeID, startDir, endDir, info);
-        }
+        //static ushort CreateSegment(ushort startNodeID, ushort endNodeID, Vector2 middlePoint, NetInfo info = null) {
+        //    Vector3 startPos = startNodeID.ToNode().m_position;
+        //    Vector3 endPos = endNodeID.ToNode().m_position;
+        //    Vector3 middlePos = middlePoint.ToCS3D(); 
+        //    Vector3 startDir = middlePos - startPos; // TODO set y to 0
+        //    Vector3 endDir = middlePos - endPos; // TODO set y to 0
+        //    return CreateSegment(startNodeID, endNodeID, startDir, endDir, info);
+        //}
 
         public static float GetClosestHeight(ushort segmentID, Vector3 Pos) =>
             segmentID.ToSegment().GetClosestPosition(Pos).Height();
@@ -96,15 +92,19 @@ namespace PedestrianBridge.Shapes {
         }
 
         private NetInfo GetFinalNetInfo() {
-            int e1 = startNode.elevation;
-            int e2 = endNode.elevation;
+            int e1 = StartNode.elevation;
+            int e2 = EndNode.elevation;
             HelpersExtensions.Assert(!(e1 == 0 && e2 < 0), "Underground road is oppostie way arround");
-            if (e1 !=0  && e2 != 0)
-                return ControlCenter.Info2;
-            if (e2 == 0 && e1 != 0)
-                return ControlCenter.Info1;
-            else
-                return ControlCenter.Info;
+            int nElevated = 0;
+            if (e1 != 0) nElevated++;
+            if (e2 != 0) nElevated++;
+
+            switch (nElevated) {
+                case 0: return ControlCenter.Info;
+                case 1: return ControlCenter.Info1;
+                case 2: return ControlCenter.Info2;
+                default: throw new Exception("Unreachable code");
+            }
         }
 
     }

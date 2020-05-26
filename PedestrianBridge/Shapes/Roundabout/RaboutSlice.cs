@@ -110,17 +110,17 @@ namespace PedestrianBridge.Shapes {
             float min_dist = float.MaxValue;
             ushort min_segmentID = 0;
             var pos = Get3DPos(point);
-            var posGrid = new GridVector(point);
             foreach (ushort segmentID in segmentList) {
                 // TODO, uncommnet for optimisation.
                 //GridVector segmetnGrid = GridVector.CreateFromSegment(segmentID);
                 //if ((segmetnGrid - posGrid).MangitudeSquare > 2)
                 //    continue; // too far away.
-                HitPos = segmentID.ToSegment().GetClosestPosition(pos);
-                var dist = (pos - HitPos).sqrMagnitude;
+                Vector3 HitPosCurrent = segmentID.ToSegment().GetClosestPosition(pos);
+                var dist = (point - HitPosCurrent.ToCS2D()).sqrMagnitude;
                 if (dist < min_dist) {
                     min_dist = dist;
                     min_segmentID = segmentID;
+                    HitPos = HitPosCurrent;
                 }
             }
             return min_segmentID;
@@ -131,8 +131,8 @@ namespace PedestrianBridge.Shapes {
             HelpersExtensions.Assert(segmentList.Count() > 0, "segmentList.Count()>0");
             ushort closestSegmentID = GetClosestSegment(point, segmentList, out Vector3 hitpos);
             if (closestSegmentID != 0) {
-                var diff = point - hitpos.ToCS2D();
-                return point + diff;
+                var diff = hitpos.ToCS2D() - point;
+                return hitpos.ToCS2D() + diff;
             } else {
                 throw new Exception("unreachable code");
             }
@@ -212,15 +212,15 @@ namespace PedestrianBridge.Shapes {
                 // make space by moving nodeM to node1 if that would be enough.
                 nodeM.point = corner1.Point;
                 node2.point = corner2.Point;
-                segment2.startDir = corner1.DirMain;
-                segment2.endDir = corner2.DirMain;
+                segment2.StartDir = corner1.DirMain;
+                segment2.EndDir = corner2.DirMain;
             } else if (segment2 == null && len1 < DESIRED_LEN && len1 * 2 >= DESIRED_LEN) {
                 // if space is tight and segment2 is null then
                 // make space by moving nodeM to node1 if that would be enough.
                 nodeM.point = corner2.Point;
                 node1.point = corner1.Point;
-                segment1.startDir = corner2.DirMain;
-                segment1.endDir = corner1.DirMain;
+                segment1.StartDir = corner2.DirMain;
+                segment1.EndDir = corner1.DirMain;
             }
 
             if (nodeM == null)
@@ -244,9 +244,10 @@ namespace PedestrianBridge.Shapes {
                     nodeM_mirrored = MirrorNode(nodeM, _segmentIDs);
                     node1_mirrored = MirrorNode(node1, _segmentIDs);
                     node2_mirrored = MirrorNode(node2, _segmentIDs);
+                    node1_mirrored.elevation = node2_mirrored.elevation = ControlCenter.Elevation;
                     segment3 = new SegmentWrapper(nodeM_mirrored, nodeM);
-                    segment_circle1 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir1, corner1.EndDirMinor);
-                    segment_circle2 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir2, corner2.EndDirMinor);
+                    segment_circle1 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir1, corner1.DirMain);
+                    segment_circle2 = new SegmentWrapper(nodeM_mirrored, node2_mirrored, MDir2, corner2.DirMain);
                     break;
                 case RoundaboutBridgeStyleT.OuterCircle:
                     // move node1 node2

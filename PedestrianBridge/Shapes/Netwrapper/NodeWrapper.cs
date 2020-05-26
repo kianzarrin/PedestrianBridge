@@ -13,6 +13,8 @@ namespace PedestrianBridge.Shapes {
         public int elevation;
         public ushort ID { get; private set; }
         public bool IsCreated => ID != 0;
+        public bool Queued { get; private set; } = false;
+
         //public NetInfo BaseInfo;
 
         public NodeWrapper(Vector2 point, int elevation) {
@@ -20,8 +22,10 @@ namespace PedestrianBridge.Shapes {
             this.elevation = elevation;
         }
 
-        public void Create() =>
+        public void Create() {
+            Queued = true;
             simMan.AddAction(_Create);
+        }
 
         void _Create() {
             if (IsCreated) throw new Exception("Node already has been created");

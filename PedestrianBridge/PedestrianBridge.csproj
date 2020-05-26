@@ -108,10 +108,10 @@
     <Compile Include="Shapes\Roundabout\RaboutWraper.cs" />
     <Compile Include="Shapes\Junction\JunctionWrapper.cs" />
     <Compile Include="Shapes\Junction\LWarapper.cs" />
-    <Compile Include="Shapes\Net\NodeWrapper.cs" />
+    <Compile Include="Shapes\Netwrapper\NodeWrapper.cs" />
     <Compile Include="Shapes\PathConnectWrapper.cs" />
     <Compile Include="Shapes\Roundabout\RaboutSlice.cs" />
-    <Compile Include="Shapes\Net\SegmentWrapper.cs" />
+    <Compile Include="Shapes\Netwrapper\SegmentWrapper.cs" />
     <Compile Include="TestsExperiments.cs" />
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="Tool\KianToolBase.cs" />

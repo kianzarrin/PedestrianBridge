@@ -104,7 +104,7 @@ namespace PedestrianBridge.Shapes {
 
                 // TODO push targetLength calculations to above if-else code.
                 const float extend0 = 1 * MPU; // for angles > 180 length should increase.
-                float targetLength = ControlCenter.DefaultLength;
+                float targetLength = ControlCenter.BaseLength;
                 if (!parallel && angle < 0) targetLength += extend0; // TODO this should be based on incomming angles.
                 else if (!parallel && angle < Mathf.PI) {
                     float dot = Vector2.Dot(CornerDir1, CornerDir2);

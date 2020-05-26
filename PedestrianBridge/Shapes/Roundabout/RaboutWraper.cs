@@ -42,12 +42,12 @@ namespace PedestrianBridge.Shapes {
                 var slice2 = _slices[(i + 1) % _slices.Count];
                 var segment12 = slice1.segment_circle2;
                 var segment21 = slice2.segment_circle1;
-                if (segment12 == null && segment21 == null)
+                if (segment12 == null || segment21 == null)
                     continue;
                 var segment = new SegmentWrapper(
-                    segment12.endNode, segment21.endNode,
-                    segment12.endDir, segment21.endDir);
-                _segments.Add(segment);
+                    segment12.EndNode, segment21.EndNode,
+                    -segment12.EndDir, -segment21.EndDir);
+               _segments.Add(segment);
             }
         }
 

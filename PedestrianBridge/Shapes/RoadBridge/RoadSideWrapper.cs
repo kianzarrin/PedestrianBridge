@@ -58,7 +58,7 @@ namespace PedestrianBridge.Shapes {
                     $"    Dir0={Dir0} Point0={Point0}\n");
 #pragma warning enable
 
-                Travel(bezier, isCW, sideDistance, ControlCenter.DefaultLength,
+                Travel(bezier, isCW, sideDistance, ControlCenter.BaseLength,
                        ref segmentID, ref finalNodeID,
                        out Point2, out Dir2);
                 Dir2 = -Dir2; // end direction should be reversed.
@@ -119,15 +119,15 @@ namespace PedestrianBridge.Shapes {
 
 
             if (create1) {
-                node0 = new NodeWrapper(calc1.Point0, 10);
+                node0 = new NodeWrapper(calc1.Point0, ControlCenter.Elevation);
                 node1 = new NodeWrapper(calc1.Point2, 0);
-                segment1 = new SegmentWrapper(node1, node0, calc1.Dir0, calc1.Dir2);
+                segment1 = new SegmentWrapper(node0, node1, calc1.Dir0, calc1.Dir2);
             }
 
             if (create2) {
-                node0 = node0 ?? new NodeWrapper(calc2.Point0, 10);
+                node0 = node0 ?? new NodeWrapper(calc2.Point0, ControlCenter.Elevation);
                 node2 = new NodeWrapper(calc2.Point2, 0);
-                segment2 = new SegmentWrapper(node2, node0, calc2.Dir0, calc2.Dir2);
+                segment2 = new SegmentWrapper(node0, node2 , calc2.Dir0, calc2.Dir2);
             }
          }
 
