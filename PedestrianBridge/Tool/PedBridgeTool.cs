@@ -123,7 +123,7 @@ namespace PedestrianBridge.Tool {
                   _cachedPathConnectWrapper?.endNodeID == HoveredNodeId;
                 _cachedPathConnectWrapper = cached ?
                     _cachedPathConnectWrapper :
-                    new PathConnectWrapper(HoveredNodeId, HoveredSegmentId, PrefabUtil.SelectedPrefab);
+                    new PathConnectWrapper(HoveredNodeId, HoveredSegmentId);
                 _cachedPathConnectWrapper?.RenderOverlay(cameraInfo);
             }
 
@@ -139,7 +139,7 @@ namespace PedestrianBridge.Tool {
             Log.Info($"OnPrimaryMouseClicked: segment {HoveredSegmentId} node {HoveredNodeId}");
             if(RoundaboutUtil.Instance_Click.TraverseLoop(HoveredSegmentId,out var segList)) {
                 Singleton<SimulationManager>.instance.AddAction(delegate () {
-                    RoundAboutWrapper.Create(RoundaboutUtil.Instance_Click);
+                    RaboutWraper.Create(RoundaboutUtil.Instance_Click);
                 });
             } else if (IsSuitableRoadForRoadBridge()) {
                 Singleton<SimulationManager>.instance.AddAction(delegate () {

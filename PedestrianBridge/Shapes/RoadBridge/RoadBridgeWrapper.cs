@@ -17,9 +17,9 @@ namespace PedestrianBridge.Shapes {
         RoadSideWrapper _side1;
         RoadSideWrapper _side2;
         SegmentWrapper _bridge;
-        public RoadBridgeWrapper(ushort segmentID, float t,  NetInfo pathInfo) {
-            _side1 = new RoadSideWrapper(segmentID, t, pathInfo, leftSide: false);
-            _side2 = new RoadSideWrapper(segmentID, t, pathInfo, leftSide: true);
+        public RoadBridgeWrapper(ushort segmentID, float t) {
+            _side1 = new RoadSideWrapper(segmentID, t,  leftSide: false);
+            _side2 = new RoadSideWrapper(segmentID, t, leftSide: true);
             if (IsValid) {
                 _bridge = new SegmentWrapper(_side1.node0, _side2.node0);
             }
@@ -31,7 +31,7 @@ namespace PedestrianBridge.Shapes {
         }
 
         public static void Create(ushort segmentID, float t) {
-            var roadBridge = new RoadBridgeWrapper(segmentID, t, PrefabUtil.SelectedPrefab);
+            var roadBridge = new RoadBridgeWrapper(segmentID, t);
             if (roadBridge.IsValid)
                 roadBridge.Create();
         }
@@ -52,7 +52,5 @@ namespace PedestrianBridge.Shapes {
             _side2?.Create();
             _bridge?.Create();
         }
-
-
     }
 }

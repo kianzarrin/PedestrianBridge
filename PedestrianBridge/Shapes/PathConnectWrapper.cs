@@ -26,7 +26,7 @@ namespace PedestrianBridge.Shapes {
             endNodeID.ToNode().Info.CanConnectPath() &&
             HitSegmentID.ToSegment().CanConnectPath();
 
-        public PathConnectWrapper(ushort endNodeID, ushort endSegmentID, NetInfo pathInfo) {
+        public PathConnectWrapper(ushort endNodeID, ushort endSegmentID) {
             this.endSegmentID = endSegmentID;
             this.endNodeID = endNodeID;
 
@@ -44,16 +44,16 @@ namespace PedestrianBridge.Shapes {
             var nodeInfo = endNodeID.ToNode().Info;
             var segmentInfo = HitSegmentID.ToSegment().Info;
             const float endWidth = 8;//meters
-            Vector2 startPoint = start + (pathInfo.m_halfWidth + endWidth + SAFETY_NET) * dir;
-            Vector2 endPoint = HitPoint - (pathInfo.m_halfWidth + segmentInfo.m_halfWidth + SAFETY_NET) * dir;
+            Vector2 startPoint = start + (ControlCenter.HalfWidth + endWidth + SAFETY_NET) * dir;
+            Vector2 endPoint = HitPoint - (ControlCenter.HalfWidth + segmentInfo.m_halfWidth + SAFETY_NET) * dir;
 
-            node1 = new NodeWrapper(startPoint, 0, pathInfo);
-            node2 = new NodeWrapper(endPoint , 0, pathInfo);
+            node1 = new NodeWrapper(startPoint, 0);
+            node2 = new NodeWrapper(endPoint , 0);
             segment = new SegmentWrapper(node1, node2);
         }
 
         public static void Create(ushort segmentID, ushort nodeID) {
-            var path = new PathConnectWrapper(segmentID, nodeID, PrefabUtil.SelectedPrefab);
+            var path = new PathConnectWrapper(segmentID, nodeID);
             if (path.IsValid)
                 path.Create();
         }
@@ -75,7 +75,7 @@ namespace PedestrianBridge.Shapes {
             RenderManager.instance.OverlayEffect.DrawSegment(
                 cameraInfo, Color.blue,
                 new Segment3(a, b),
-                node1.info.m_halfWidth * 2, 1000,
+                node1.GetFinalInfo().m_halfWidth * 2, 1000,
                 -1000, +1000, true,
                 false);
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;

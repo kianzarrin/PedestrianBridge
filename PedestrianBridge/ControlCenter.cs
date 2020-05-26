@@ -1,3 +1,4 @@
+using KianCommons;
 using PedestrianBridge.Util;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,10 @@ namespace PedestrianBridge {
         public static RoundaboutBridgeStyleT RoundaboutBridgeStyle { get; set; } = RoundaboutBridgeStyleT.CenterNode;
         public static bool Underground { get; set; } = true;
         public static int Elevation { get; set; } = -9;
-        public static float SlopeRatio { get; set; } = 1; // 1 = 10m in 3 units.
+        public static float LengthRatio { get; set; } = 1; // 1 = 10m in 3 units.
+
+        public static float DefaultLength = ControlCenter.LengthRatio * 3 * NetUtil.MPU;
+
+
     }
 }

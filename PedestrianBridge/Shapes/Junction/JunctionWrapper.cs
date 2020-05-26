@@ -46,7 +46,6 @@ namespace PedestrianBridge.Shapes {
                         continue;
                     SegmentWrapper segment = new SegmentWrapper(
                         startNode, endNode);
-                    segment.Info = ControlCenter.Info2;
                     _overPasses.Add(segment);
 
                 }

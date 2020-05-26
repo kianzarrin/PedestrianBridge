@@ -3,6 +3,7 @@ using KianCommons;
 using KianCommons.Math;
 using static KianCommons.NetUtil;
 using System;
+using UnityEngine.EventSystems;
 
 namespace PedestrianBridge.Shapes {
     public class SegmentWrapper {
@@ -10,7 +11,7 @@ namespace PedestrianBridge.Shapes {
         public NodeWrapper endNode;
         public Vector3 startDir;
         public Vector3 endDir;
-        public NetInfo Info;
+        //public NetInfo BaseInfo;
 
         public SegmentWrapper(NodeWrapper startNode, NodeWrapper endNode) {
             this.startNode = startNode;
@@ -34,9 +35,9 @@ namespace PedestrianBridge.Shapes {
 
         void _Create() {
             if (startDir == Vector3.zero)
-                ID = CreateSegment(startNode.ID, endNode.ID, Info);
+                ID = CreateSegment(startNode.ID, endNode.ID, GetFinalNetInfo());
             else {
-                ID = CreateSegment(startNode.ID, endNode.ID, startDir, endDir, Info);
+                ID = CreateSegment(startNode.ID, endNode.ID, startDir, endDir, GetFinalNetInfo() );
             }
         }
 
@@ -92,6 +93,18 @@ namespace PedestrianBridge.Shapes {
                 $"startDir:{startDir.ToString(f)}, endDir:{endDir.ToString(f)},\n" +
                 $"end2start={end2start.ToString(f)}, end2start_normal={end2start_normal.ToString(f)}";
             Log.Info(m);
+        }
+
+        private NetInfo GetFinalNetInfo() {
+            int e1 = startNode.elevation;
+            int e2 = endNode.elevation;
+            HelpersExtensions.Assert(!(e1 == 0 && e2 < 0), "Underground road is oppostie way arround");
+            if (e1 !=0  && e2 != 0)
+                return ControlCenter.Info2;
+            if (e2 == 0 && e1 != 0)
+                return ControlCenter.Info1;
+            else
+                return ControlCenter.Info;
         }
 
     }

@@ -1,50 +1,37 @@
-using System;
-using UnityEngine;
-using PedestrianBridge.Util;
-using static PedestrianBridge.Util.PrefabUtil;
-using static KianCommons.NetUtil;
 using KianCommons;
 using KianCommons.Math;
+using PedestrianBridge.Util;
+using System;
+using UnityEngine;
 using static KianCommons.HelpersExtensions;
+using static KianCommons.NetUtil;
+using static PedestrianBridge.Util.PrefabUtil;
 
 namespace PedestrianBridge.Shapes {
     public class NodeWrapper {
         public Vector2 point;
         public int elevation;
-        public  NetInfo info; // TODO pass base info.
         public ushort ID { get; private set; }
         public bool IsCreated => ID != 0;
+        //public NetInfo BaseInfo;
 
-        public NodeWrapper(Vector2 point, int elevation, NetInfo info) {
+        public NodeWrapper(Vector2 point, int elevation) {
             this.point = point;
             this.elevation = elevation;
-            //if (elevation >= 1)
-            //    info = info.GetElevated();
-            //else if (elevation <= -9)
-            //    info = info.GetsTunnel();
-            //else if (elevation <= -1)
-            //    info = info.GetSlope();
-            //AssertNotNull(info,"info elevation="+elevation);
-
-            this.info = info;
         }
 
         public void Create() =>
             simMan.AddAction(_Create);
 
         void _Create() {
-            if (IsCreated)
-                throw new Exception("Node already has been created");
-            Vector3 pos = Get3DPos();
-            ID = CreateNode(pos, info);
-            ID.ToNode().m_elevation = (byte)Math.Abs(elevation);
-            if (elevation == 0) {
-                ID.ToNode().m_flags |= NetNode.Flags.Transition | NetNode.Flags.OnGround;
-            }else if(elevation < 0) {
-                ID.ToNode().m_flags |= NetNode.Flags.Underground;
-            } else {
+            if (IsCreated) throw new Exception("Node already has been created");
 
-            }
+            ID = CreateNode(Get3DPos(), GetFinalInfo());
+
+            ID.ToNode().m_elevation = (byte)Math.Abs(elevation);
+            if (elevation == 0)     ID.ToNode().m_flags |= NetNode.Flags.OnGround | NetNode.Flags.Transition;
+            else if (elevation < 0) ID.ToNode().m_flags |= NetNode.Flags.Underground;
+
             ID.ToNode().m_flags &= ~NetNode.Flags.Moveable;
         }
 
@@ -59,7 +46,13 @@ namespace PedestrianBridge.Shapes {
             return nodeID;
         }
 
+
+        public NetInfo GetFinalInfo() {
+            return elevation == 0 ? ControlCenter.Info : ControlCenter.Info1;
+        }
+
         public Vector3 Get3DPos() => Get3DPos(point, elevation);
+
         public static Vector3 Get3DPos(Vector2 point, int elevation) {
             float terrainH = terrainMan.SampleDetailHeightSmooth(point.ToCS3D(0));
             return point.ToCS3D(terrainH + elevation);

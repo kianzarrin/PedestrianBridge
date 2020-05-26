@@ -140,7 +140,7 @@ namespace PedestrianBridge.Shapes {
 
         public static NodeWrapper MirrorNode(NodeWrapper node, IEnumerable<ushort> segmentList) {
             var mirror_point = MirrorPoint(node.point, segmentList);
-            return new NodeWrapper(mirror_point, node.elevation, node.info);
+            return new NodeWrapper(mirror_point, node.elevation);
         }
 
         public const float MIN_LEN = 2.5f;
@@ -161,11 +161,9 @@ namespace PedestrianBridge.Shapes {
                 return;
             }
 
-            NetInfo info2 = ControlCenter.Underground ? info.GetTunnel() : info.GetElevated();
-            NetInfo info1 = ControlCenter.Underground ? info.GetSlope() : info.GetElevated();
-            float halfWidth = System.Math.Max(info1.m_halfWidth, info2.m_halfWidth);
-            corner1 = new Corner(segmentID1Main, segmentID1Minor, halfWidth);
-            corner2 = new Corner(segmentID2Main, segmentID2Minor, halfWidth);
+
+            corner1 = new Corner(segmentID1Main, segmentID1Minor, ControlCenter.HalfWidth);
+            corner2 = new Corner(segmentID2Main, segmentID2Minor, ControlCenter.HalfWidth);
             if (IsSplit)
                 return;
             bool angleTooWide = !CalculateMiddlePoint();
@@ -175,19 +173,19 @@ namespace PedestrianBridge.Shapes {
                 return;
             }
 
-            nodeM = new NodeWrapper(MiddlePoint, ControlCenter.Elevation, info2);
+            nodeM = new NodeWrapper(MiddlePoint, ControlCenter.Elevation);
 
             float len1 = Len1;
             Log.Debug($"len1={len1} corner1.CanConnectPathAtJunction={corner1.CanConnectPathAtJunction}");
             if ((len1 > MIN_LEN * MPU) && corner1.CanConnectPathAtJunction) {
-                node1 = new NodeWrapper(corner1.Point, 0, info1);
+                node1 = new NodeWrapper(corner1.Point, 0);
                 segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.DirMain);
             } else if (corner1.CanConnectPathAtFinalNode) {
                 if (len1 > 1f * MPU) {
-                    node1 = new NodeWrapper(corner1.AltPoint, 0, info1);
+                    node1 = new NodeWrapper(corner1.AltPoint, 0);
                     segment1 = new SegmentWrapper(nodeM, node1, MDir1, corner1.EndDirMinor);
                 } else {
-                    node1 = new NodeWrapper(corner1.AltPoint, 0, info1);
+                    node1 = new NodeWrapper(corner1.AltPoint, 0);
                     segment1 = new SegmentWrapper(nodeM, node1);
                 }
             }
@@ -195,14 +193,14 @@ namespace PedestrianBridge.Shapes {
             float len2 = Len2;
             Log.Debug($"len2={len2} corner2.CanConnectPathAtJunction={corner2.CanConnectPathAtJunction}");
             if ((len2 > MIN_LEN * MPU) && corner2.CanConnectPathAtJunction) {
-                node2 = new NodeWrapper(corner2.Point, 0, info1);
+                node2 = new NodeWrapper(corner2.Point, 0);
                 segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.DirMain);
             } else if (corner2.CanConnectPathAtFinalNode) {
                 if (len2 > 1f * MPU) {
-                    node2 = new NodeWrapper(corner2.AltPoint, 0, info1);
+                    node2 = new NodeWrapper(corner2.AltPoint, 0);
                     segment2 = new SegmentWrapper(nodeM, node2, MDir2, corner2.EndDirMinor);
                 } else {
-                    node2 = new NodeWrapper(corner2.AltPoint, 0, info1);
+                    node2 = new NodeWrapper(corner2.AltPoint, 0);
                     segment2 = new SegmentWrapper(nodeM, node2);
                 }
             }
@@ -249,7 +247,6 @@ namespace PedestrianBridge.Shapes {
                     segment3 = new SegmentWrapper(nodeM_mirrored, nodeM);
                     segment_circle1 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir1, corner1.EndDirMinor);
                     segment_circle2 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir2, corner2.EndDirMinor);
-                    nodeM_mirrored.info = node1_mirrored.info = node2_mirrored.info = info2;
                     break;
                 case RoundaboutBridgeStyleT.OuterCircle:
                     // move node1 node2

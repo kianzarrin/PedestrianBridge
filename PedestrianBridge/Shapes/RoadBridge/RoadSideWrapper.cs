@@ -58,7 +58,7 @@ namespace PedestrianBridge.Shapes {
                     $"    Dir0={Dir0} Point0={Point0}\n");
 #pragma warning enable
 
-                Travel(bezier, isCW, sideDistance, DEFAULT_LENGTH,
+                Travel(bezier, isCW, sideDistance, ControlCenter.DefaultLength,
                        ref segmentID, ref finalNodeID,
                        out Point2, out Dir2);
                 Dir2 = -Dir2; // end direction should be reversed.
@@ -103,13 +103,9 @@ namespace PedestrianBridge.Shapes {
 
         public bool IsValid { get; private set; }
 
-        public RoadSideWrapper(ushort segmentID, float t, NetInfo pathInfo, bool leftSide) {
-            NetInfo info1 = ControlCenter.Underground ? pathInfo.GetSlope() : pathInfo.GetElevated();
-            NetInfo info2 = ControlCenter.Underground ? pathInfo.GetSlope() : pathInfo.GetElevated();
-            float hw = System.Math.Max(info1.m_halfWidth, info2.m_halfWidth);
-
-            var calc1 = new RoadSideWrapper.Calc(segmentID, t, hw, leftSide: leftSide, startNode: false);
-            var calc2 = new RoadSideWrapper.Calc(segmentID, t, hw, leftSide: leftSide, startNode: true);
+        public RoadSideWrapper(ushort segmentID, float t, bool leftSide) {
+            var calc1 = new RoadSideWrapper.Calc(segmentID, t, ControlCenter.HalfWidth, leftSide: leftSide, startNode: false);
+            var calc2 = new RoadSideWrapper.Calc(segmentID, t, ControlCenter.HalfWidth, leftSide: leftSide, startNode: true);
 
             node0 = node1 = node2 = null;
             segment1 = segment2 = null;
@@ -123,14 +119,14 @@ namespace PedestrianBridge.Shapes {
 
 
             if (create1) {
-                node0 = new NodeWrapper(calc1.Point0, 10, info2);
-                node1 = new NodeWrapper(calc1.Point2, 0, info1);
+                node0 = new NodeWrapper(calc1.Point0, 10);
+                node1 = new NodeWrapper(calc1.Point2, 0);
                 segment1 = new SegmentWrapper(node1, node0, calc1.Dir0, calc1.Dir2);
             }
 
             if (create2) {
-                node0 = node0 ?? new NodeWrapper(calc2.Point0, 10, info2);
-                node2 = new NodeWrapper(calc2.Point2, 0, info1);
+                node0 = node0 ?? new NodeWrapper(calc2.Point0, 10);
+                node2 = new NodeWrapper(calc2.Point2, 0);
                 segment2 = new SegmentWrapper(node2, node0, calc2.Dir0, calc2.Dir2);
             }
          }

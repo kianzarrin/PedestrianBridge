@@ -4,10 +4,10 @@ namespace PedestrianBridge.Shapes {
     using UnityEngine;
     using Util;
     using KianCommons;
-    public class RoundAboutWrapper {
+    public class RaboutWraper {
         public bool IsValid { get; private set; } = false;
         RoundaboutUtil _raboutCalc;
-        public RoundAboutWrapper(RoundaboutUtil raboutCalc, NetInfo info) {
+        public RaboutWraper(RoundaboutUtil raboutCalc, NetInfo info) {
             _raboutCalc = raboutCalc;
             _junctions = raboutCalc.GetJunctions();
             int n = _junctions.Count;
@@ -15,9 +15,8 @@ namespace PedestrianBridge.Shapes {
                 Log.Info("Roundabout has too few junctions.");
                 return;
             }
-            NetInfo info2 = ControlCenter.Underground ? info.GetTunnel() : info.GetElevated();
             Vector2 centerPoint = raboutCalc.CalculateCenter();
-            _center = new NodeWrapper(centerPoint, 10, info2);
+            _center = new NodeWrapper(centerPoint, ControlCenter.Elevation);
             _slices = new List<RaboutSlice>(n);
             _segments = new List<SegmentWrapper>(n - 1);
 
@@ -59,7 +58,7 @@ namespace PedestrianBridge.Shapes {
 
         public static void Create(RoundaboutUtil raboutCalc) {
             NetInfo info = PrefabUtil.SelectedPrefab;
-            var roundabout = new RoundAboutWrapper(raboutCalc, info);
+            var roundabout = new RaboutWraper(raboutCalc, info);
             roundabout.Create();
         }
 

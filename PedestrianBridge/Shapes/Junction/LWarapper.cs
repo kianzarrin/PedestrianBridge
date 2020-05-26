@@ -39,8 +39,6 @@ namespace PedestrianBridge.Shapes {
 
             internal ushort FinalNodeID1, FinalNodeID2;
 
-            public const float DEFAULT_LENGTH = 3 * MPU;
-
             internal Calc(ushort segID1, ushort segID2, float HWpb) {
                 //Log.Debug($"LWrapper.Calc: {segID1}, {segID2}");
                 // Prepration:
@@ -106,7 +104,7 @@ namespace PedestrianBridge.Shapes {
 
                 // TODO push targetLength calculations to above if-else code.
                 const float extend0 = 1 * MPU; // for angles > 180 length should increase.
-                float targetLength = DEFAULT_LENGTH;
+                float targetLength = ControlCenter.DefaultLength;
                 if (!parallel && angle < 0) targetLength += extend0; // TODO this should be based on incomming angles.
                 else if (!parallel && angle < Mathf.PI) {
                     float dot = Vector2.Dot(CornerDir1, CornerDir2);
@@ -230,7 +228,7 @@ namespace PedestrianBridge.Shapes {
                     Log.Debug("    overFlow || forceEnd but could not find next segment");
                 }
 
-                distance = Mathf.Clamp(distance, 1f, length - 2);
+                distance = Mathf.Clamp(distance, 1f, length - 2); // avoid getting to close to bezier end.
                 point = bezierParallel.Travel2(distance, out tangent);
                 Log.Debug($"    distance={distance} length={length} return segmentId:{finalSegmentId},finalNodeID:{finalNodeId} point={point} tangent={tangent}");
             }
@@ -265,17 +263,17 @@ namespace PedestrianBridge.Shapes {
                 return;
             }
 
-            nodeL = new NodeWrapper(calc.PointL, ControlCenter.Elevation, ControlCenter.Info1);
+            nodeL = new NodeWrapper(calc.PointL, ControlCenter.Elevation);
 
             if (create1) {
-                node1 = new NodeWrapper(calc.Point1, 0, ControlCenter.Info1);
+                node1 = new NodeWrapper(calc.Point1, 0);
                 segment1 = new SegmentWrapper(
                     nodeL, node1,
                     calc.CornerDir1, calc.EndDir1);
             }
 
             if (create2) {
-                node2 = new NodeWrapper(calc.Point2, 0, ControlCenter.Info1);
+                node2 = new NodeWrapper(calc.Point2, 0);
                 segment2 = new SegmentWrapper(
                     nodeL, node2,
                     calc.CornerDir2, calc.EndDir2);
