@@ -65,7 +65,8 @@ namespace PedestrianBridge.Shapes {
         public void Create() {
             if (!IsValid)
                 return;
-            _center.Create();
+            if(ControlCenter.RoundaboutBridgeStyle == RoundaboutBridgeStyleT.Start)
+                _center.Create();
             for (int i = 0; i < _junctions.Count; ++i) {
                 if (_slices[i].IsValid) {
                     _slices[i].Create();

@@ -278,18 +278,6 @@ namespace PedestrianBridge.Shapes {
             //Log.Debug($"{nodeM != null} {node1 != null} {node2 != null} {segment1 != null} {segment2 != null} {segment3 != null}");
             //if (centerNode != null && !centerNode.IsCreated)
             //    centerNode.Create(); // TODO fix Create action already exists but not created yet
-            //nodeM?.Create();
-            //node1?.Create();
-            //node2?.Create();
-            //nodeM_mirrored?.Create();
-            //node1_mirrored?.Create();
-            //node2_mirrored?.Create();
-
-            //segment1?.Create();
-            //segment2?.Create();
-            //segment3?.Create();
-            //segment_circle1?.Create();
-            //segment_circle2?.Create();
 
             var Nodes = new[] { nodeM, node1, node2, nodeM_mirrored, node1_mirrored, node2_mirrored };
             var Segments = new[] {segment1,segment2,segment3,segment_circle1,segment_circle2 };
