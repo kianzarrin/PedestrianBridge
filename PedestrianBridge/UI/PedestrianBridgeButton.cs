@@ -19,7 +19,7 @@ namespace PedestrianBridge.UI {
         const string PedestrianBridgeButtonBgPressed = "PedestrianBridgeButtonBgPressed";
         const string PedestrianBridgeButtonBgHovered = "PedestrianBridgeButtonBgHovered";
         public const string PedestrianBridgeIcon = "PedestrianBridgeIcon";
-        const string PedestrianBridgeIconPressed = "PedestrianBridgeIconPressed";
+        public const string PedestrianBridgeIconPressed = "PedestrianBridgeIconPressed";
 
         static UIComponent GetPanel() {
             var ret = UIUtils.Instance.FindComponent<UIComponent>("PathsOptionPanel", null, UIUtils.FindOptions.NameContains);

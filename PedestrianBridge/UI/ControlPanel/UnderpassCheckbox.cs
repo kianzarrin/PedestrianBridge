@@ -7,13 +7,17 @@ namespace PedestrianBridge.UI.ControlPanel {
             base.Awake();
             Label = "Tunnel";
             Tooltip = "Overpass/Underpass";
+        }
+
+        public override void Start() {
+            base.Start();
             isChecked = ControlCenter.Underground;
         }
 
         protected override void OnCheckChanged() {
             ControlCenter.Underground = isChecked;
             Invalidate();          
-            (ElevationSlider.Instance as ElevationSlider).Refresh();
+            ElevationSlider.Instance.Refresh();
         }
 
     }

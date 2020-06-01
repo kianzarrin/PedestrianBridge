@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using System;
 using PedestrianBridge.Util;
 using KianCommons;
+using PedestrianBridge.UI.ControlPanel;
 
 namespace PedestrianBridge {
     public class PedestrianBridgeMod : IUserMod {
@@ -32,10 +33,12 @@ namespace PedestrianBridge {
     public static class LoadTool {
         public static void Load() {
             TMPEUtil.Active = true;
+            ControlPanel.Create();
             Tool.PedBridgeTool.Create();
         }
         public static void Release() {
             Tool.PedBridgeTool.Remove();
+            ControlPanel.Release();
         }
     }
 

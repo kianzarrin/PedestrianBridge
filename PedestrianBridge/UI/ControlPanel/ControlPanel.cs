@@ -30,6 +30,7 @@ namespace PedestrianBridge.UI.ControlPanel {
         public override void Awake() {
             base.Awake();
             Instance = this;
+            isVisible = false;
         }
 
         public override void Start() {
@@ -41,7 +42,6 @@ namespace PedestrianBridge.UI.ControlPanel {
             backgroundSprite = "MenuPanel2";
             absolutePosition = new Vector3(SavedX, SavedY);
 
-            isVisible = false;
 
             {
                 var dragHandle_ = AddUIComponent<UIDragHandle>();
@@ -51,14 +51,14 @@ namespace PedestrianBridge.UI.ControlPanel {
                 dragHandle_.target = parent;
 
                 var lblCaption = dragHandle_.AddUIComponent<UILabel>();
-                lblCaption.text = "Node controller";
-                lblCaption.relativePosition = new Vector3(70, 14, 0);
+                lblCaption.text = "Overpass builder";
+                lblCaption.relativePosition = new Vector3(65, 14, 0);
 
                 var sprite = dragHandle_.AddUIComponent<UISprite>();
                 sprite.size = new Vector2(40, 40);
-                sprite.relativePosition = new Vector3(5, 3, 0);
+                sprite.relativePosition = new Vector3(5, 2.5f, 0);
                 sprite.atlas = TextureUtil.GetAtlas(PedestrianBridgeButton.ATLAS_NAME);
-                sprite.spriteName = PedestrianBridgeButton.PedestrianBridgeIcon;
+                sprite.spriteName = PedestrianBridgeButton.PedestrianBridgeIconPressed;
             }
 
 
@@ -72,15 +72,17 @@ namespace PedestrianBridge.UI.ControlPanel {
 
             {
                 var panel = AddPanel();
-                panel.AddUIComponent<UnderpassCheckbox>();
+                var label = panel.AddUIComponent<UILabel>();
+                label.text = "Elevation";
+                label.tooltip = "Height of the pedestrian overpass.";
+                var slider = panel.AddUIComponent<ElevationSlider>();
+                slider.Label = label;
+
             }
 
             {
                 var panel = AddPanel();
-                var label = panel.AddUIComponent<UILabel>();
-                label.text = "Elevation";
-                label.tooltip = "Height of the pedestrian overpass.";
-                panel.AddUIComponent<ElevationSlider>();
+                panel.AddUIComponent<UnderpassCheckbox>();
             }
 
             {
@@ -88,7 +90,8 @@ namespace PedestrianBridge.UI.ControlPanel {
                 var label = panel.AddUIComponent<UILabel>();
                 label.text = "Slope";
                 label.tooltip = "steepness of pedesterian paths.";
-                panel.AddUIComponent<SlopeSlider>();
+                var slider = panel.AddUIComponent<SlopeSlider>();
+                slider.Label = label;
             }
 
             //{

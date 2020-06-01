@@ -3,8 +3,11 @@ using KianCommons.UI;
 
 namespace PedestrianBridge.UI.ControlPanel {
     public class StyleStarCheckBox: UICheckBoxExt{
+        public static StyleStarCheckBox Instance { get; private set; }
+
         public override void Awake() {
             base.Awake();
+            Instance = this;
             Label = "Star";
             Tooltip = "All paths are connected at the center";
             Refresh();
@@ -14,12 +17,13 @@ namespace PedestrianBridge.UI.ControlPanel {
             base.OnClick(p);
             ControlCenter.RoundaboutBridgeStyle = RoundaboutBridgeStyleT.Start;
             Refresh();
-            (StyleInnerCircleCheckBox.Instance as StyleInnerCircleCheckBox).Refresh();
+            StyleInnerCircleCheckBox.Instance.Refresh();
 
         }
 
         public void Refresh() {
             isChecked = ControlCenter.RoundaboutBridgeStyle == RoundaboutBridgeStyleT.Start;
+            Invalidate();
         }
 
     }
