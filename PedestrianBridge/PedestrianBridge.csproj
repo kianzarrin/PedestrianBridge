@@ -84,12 +84,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KianCommons\KianCommons\Math\BezierUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\ControlPoint2.cs" />
     <Compile Include="KianCommons\KianCommons\Math\ControlPoint3.cs" />
     <Compile Include="KianCommons\KianCommons\Math\CubicBezier3.cs" />
     <Compile Include="KianCommons\KianCommons\Math\LineUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Math\MathUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Math\VecetorUtils.cs" />
     <None Include="KianCommons\KianCommons\Patches\TranspilerUtils.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\Vector2D.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\Vector3D.cs" />
     <Compile Include="KianCommons\KianCommons\UI\Helpers\UIAutoSizePanel.cs" />
     <Compile Include="KianCommons\KianCommons\UI\Helpers\UIButtonExt.cs" />
     <Compile Include="KianCommons\KianCommons\UI\Helpers\UICheckBoxExt.cs" />

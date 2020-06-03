@@ -40,11 +40,11 @@ namespace PedestrianBridge {
         static int tunnelElevation_ = -12;
         public static int Elevation {
             get {
-                Log.Debug($"Elevation.Get:bridgeElevation_={bridgeElevation_.value}\n" + System.Environment.StackTrace);
+                //Log.Debug($"Elevation.Get:bridgeElevation_={bridgeElevation_.value}\n" + System.Environment.StackTrace);
                 return Underground ? tunnelElevation_ : bridgeElevation_.value;
             }
             set {
-                Log.Debug("Elevation.Set=>" + value + "\n" + System.Environment.StackTrace);
+                //Log.Debug("Elevation.Set=>" + value + "\n" + System.Environment.StackTrace);
                 if (Underground) tunnelElevation_ = -System.Math.Abs(value);
                 else bridgeElevation_.value = System.Math.Abs(value);
             }
@@ -57,11 +57,11 @@ namespace PedestrianBridge {
 
         public static float InverseSlopeRatio {
             get {
-                Log.Debug("InverseSlopeRatio.Get=>" + inverseSlope_.value + "\n"+System.Environment.StackTrace);
+                //Log.Debug("InverseSlopeRatio.Get=>" + inverseSlope_.value + "\n"+System.Environment.StackTrace);
                 return inverseSlope_.value;
             }
             set {
-                Log.Debug("InverseSlopeRatio.Set=>" + value + "\n" + System.Environment.StackTrace);
+                //Log.Debug("InverseSlopeRatio.Set=>" + value + "\n" + System.Environment.StackTrace);
                 inverseSlope_.value = value;
             }
         }

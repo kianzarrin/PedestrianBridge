@@ -241,8 +241,8 @@ namespace PedestrianBridge.Shapes {
                     break;
                 case RoundaboutBridgeStyleT.InnerCircle:
                     centerNode = null;
-                    nodeM_mirrored = MirrorNode(nodeM, _segmentIDs);
-                    node1_mirrored = MirrorNode(node1, _segmentIDs);
+                    nodeM_mirrored = MirrorNode(nodeM, _segmentIDs); // calculate based on corner1.L.pointL1 and corner2.L.pointL1
+                    node1_mirrored = MirrorNode(node1, _segmentIDs); // TODO use corner1.L.pointL1 for more accurate circle.
                     node2_mirrored = MirrorNode(node2, _segmentIDs);
                     node1_mirrored.elevation = node2_mirrored.elevation = ControlCenter.Elevation;
                     segment3 = new SegmentWrapper(nodeM_mirrored, nodeM);
