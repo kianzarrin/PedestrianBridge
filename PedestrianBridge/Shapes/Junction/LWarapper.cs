@@ -165,23 +165,6 @@ namespace PedestrianBridge.Shapes {
                 }
             }
 
-
-            // move the point toward the segment with pedestrian lane.
-            internal static void MovePointTowardOtherSegment(ushort segmentID, ushort nodeId, bool bLeft, ref Vector2 Point) {
-                ushort OtherSementID = bLeft ?
-                    segmentID.ToSegment().GetLeftSegment(nodeId) :
-                    segmentID.ToSegment().GetRightSegment(nodeId);
-                //Log.Debug($"segmentID={segmentID} OtherSementID={OtherSementID} bLeft={bLeft}");
-
-                ref NetSegment OtherSegment = ref OtherSementID.ToSegment();
-                Vector2 OtherDir = IsStartNode(OtherSementID, nodeId) ?
-                    OtherSegment.m_startDirection.ToCS2D().normalized :
-                    OtherSegment.m_endDirection.ToCS2D().normalized;
-                float otherHalfWidth = OtherSegment.Info.m_halfWidth;
-
-                Point += (otherHalfWidth/2) * OtherDir;
-            }
-
             // returns true if node has at least one that can connect to path.
             internal static bool CanConnectPathAtNode(ushort nodeID) {
                 //if (!nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.OnGround))
@@ -193,7 +176,18 @@ namespace PedestrianBridge.Shapes {
                 return false;
             }
 
-
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="bezier"></param>
+            /// <param name="bLeft">left side when going toward <paramref name="finalNodeId"/></param>
+            /// <param name="sideDistance"></param>
+            /// <param name="distance"></param>
+            /// <param name="finalSegmentId"></param>
+            /// <param name="finalNodeId"></param>
+            /// <param name="point"></param>
+            /// <param name="tangent"></param>
+            /// <param name="level"></param>
             static void Travel(
                 Bezier2 bezier,
                 bool bLeft, float sideDistance, float distance,
@@ -202,7 +196,7 @@ namespace PedestrianBridge.Shapes {
                 int level=2
                 ) {
                 Log.Debug($"    Travel(bLeft:{bLeft},sideDistance:{sideDistance},distance:{distance}," +
-                    $"segmentId(in):{finalSegmentId},finalNodeID(in):{finalNodeId}), level={level}");
+                    $"segmentId(in):{finalSegmentId},finalNodeID(in):{finalNodeId}, level={level})");
                 ref NetSegment segment = ref finalSegmentId.ToSegment();
                 Bezier2 bezierParallel = BezierUtil.CalculateParallelBezier(bezier, sideDistance, bLeft);
                 float length = bezierParallel.ArcLength();
@@ -216,7 +210,7 @@ namespace PedestrianBridge.Shapes {
                         finalSegmentId = nextSegmentId;
                         bezier = CalculateSegmentBezier2(finalSegmentId, finalNodeId);
                         finalNodeId = finalSegmentId.ToSegment().GetOtherNode(finalNodeId);
-                        Log.Debug("ContinueToNextSegment " + finalSegmentId);
+                        Log.Debug("    ContinueToNextSegment " + finalSegmentId);
                         Travel(
                             bezier,
                             bLeft, sideDistance, distance - length,
@@ -228,9 +222,29 @@ namespace PedestrianBridge.Shapes {
                     Log.Debug("    overFlow || forceEnd but could not find next segment");
                 }
 
-                distance = Mathf.Clamp(distance, 1f, length - 2); // avoid getting to close to bezier end.
-                point = bezierParallel.Travel2(distance, out tangent);
+                if (!CanConnectPathToSegment(finalSegmentId)) {
+                    Log.Debug($"    could not connect path to final segment. calculating next corner ...");
+                    finalSegmentId = bLeft ?
+                        finalSegmentId.ToSegment().GetLeftSegment(finalNodeId) :
+                        finalSegmentId.ToSegment().GetRightSegment(finalNodeId);
+                    NetUtil.CalculateCorner(finalSegmentId, finalNodeId, !bLeft, out point, out tangent);
+                } else {
+                    distance = Mathf.Clamp(distance, 1f, length - 2); // avoid getting to close to bezier end.
+                    point = bezierParallel.Travel2(distance, out tangent);
+                    if (DistanceToNodeEdge(point, finalNodeId) < sideDistance - SAFETY_NET) {
+                        Log.Debug($"    point is inside node. calculating corner ...");
+                        NetUtil.CalculateCorner(finalSegmentId, finalNodeId, bLeft, out point, out tangent);
+                        tangent = -tangent;
+                    }
+                }
                 Log.Debug($"    distance={distance} length={length} return segmentId:{finalSegmentId},finalNodeID:{finalNodeId} point={point} tangent={tangent}");
+
+            }
+
+            //negative if the point is inside the node.
+            static float DistanceToNodeEdge(Vector2 point, ushort nodeID) {
+                float dist = (point - nodeID.ToNode().m_position.ToCS2D()).magnitude;
+                return dist - NetUtil.MaxNodeHW(nodeID);
             }
 
             internal static ushort ContinueToNextSegment(ushort segmentId, ushort nodeId) {
