@@ -242,9 +242,11 @@ namespace PedestrianBridge.Shapes {
                 case RoundaboutBridgeStyleT.InnerCircle:
                     centerNode = null;
                     nodeM_mirrored = MirrorNode(nodeM, _segmentIDs); // calculate based on corner1.L.pointL1 and corner2.L.pointL1
-                    node1_mirrored = MirrorNode(node1, _segmentIDs); // TODO use corner1.L.pointL1 for more accurate circle.
-                    node2_mirrored = MirrorNode(node2, _segmentIDs);
-                    node1_mirrored.elevation = node2_mirrored.elevation = ControlCenter.Elevation;
+                    var point1_mirrored = MirrorPoint(corner1.Point, segmentIDs);
+                    node1_mirrored = new NodeWrapper(point1_mirrored, ControlCenter.Elevation); // TODO use corner1.L.pointL1 for more accurate circle.
+                    var point2_mirrored = MirrorPoint(corner2.Point, segmentIDs);
+                    node2_mirrored = new NodeWrapper(point2_mirrored, ControlCenter.Elevation); 
+
                     segment3 = new SegmentWrapper(nodeM_mirrored, nodeM);
                     segment_circle1 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir1, corner1.DirMain);
                     segment_circle2 = new SegmentWrapper(nodeM_mirrored, node2_mirrored, MDir2, corner2.DirMain);
@@ -254,9 +256,6 @@ namespace PedestrianBridge.Shapes {
                     // segment1 and segment2 nodeM dir has to rotate 60 degrees.
                     break;
             }
-
-
-
         }
 
         public bool IsValid => nodeM != null;
@@ -280,7 +279,7 @@ namespace PedestrianBridge.Shapes {
             //    centerNode.Create(); // TODO fix Create action already exists but not created yet
 
             var Nodes = new[] { nodeM, node1, node2, nodeM_mirrored, node1_mirrored, node2_mirrored };
-            var Segments = new[] {segment1,segment2,segment3,segment_circle1,segment_circle2 };
+            var Segments = new[] { segment1, segment2, segment3, segment_circle1, segment_circle2 };
             foreach (var node in Nodes) node?.Create();
             foreach (var segment in Segments) segment?.Create();
         }

@@ -41,31 +41,19 @@ namespace PedestrianBridge.Shapes {
 
             RaboutSlice slice_prev = _slices.Last();
             foreach(var slice in _slices) {
-                if (slice == null) continue;
-                if(slice_prev!=null) {
+                if (!slice.IsValid) continue;
+                if (slice_prev.IsValid) {
                     var segment12 = slice_prev.segment_circle2;
                     var segment21 = slice.segment_circle1;
-                    if (segment12 == null || segment21 == null)
-                        continue;
-                    var segment = new SegmentWrapper(
-                        segment12.EndNode, segment21.EndNode,
-                        -segment12.EndDir, -segment21.EndDir);
+                    if (segment12 != null && segment21 != null) {
+                        var segment = new SegmentWrapper(
+                            segment12.EndNode, segment21.EndNode,
+                            -segment12.EndDir, -segment21.EndDir);
+                        _segments.Add(segment);
+                    }
                 }
                 slice_prev = slice;
             }
-
-            //for (int i=0;i<_slices.Count; ++i) {
-            //    var slice1 = _slices[i];
-            //    var slice2 = _slices[(i + 1) % _slices.Count];
-            //    var segment12 = slice1.segment_circle2;
-            //    var segment21 = slice2.segment_circle1;
-            //    if (segment12 == null || segment21 == null)
-            //        continue;
-            //    var segment = new SegmentWrapper(
-            //        segment12.EndNode, segment21.EndNode,
-            //        -segment12.EndDir, -segment21.EndDir);
-            //   _segments.Add(segment);
-            //}
         }
 
         List<SegmentWrapper> _segments;
