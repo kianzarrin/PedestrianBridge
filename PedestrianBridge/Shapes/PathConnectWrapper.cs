@@ -110,14 +110,16 @@ namespace PedestrianBridge.Shapes {
             float min_distance = max_distance + MathUtil.Epsilon;
             ushort ret = 0;
             foreach (ushort segmentID in ScanDirSegment(start, dir, max_distance)) {
-                foreach (ushort segID in GetCWSegList(endNodeID)) {
-                    if (GetSharedNode(segID, segmentID) != 0)
-                        continue;
+                if (IsNodeTooCloseToSegment(endNodeID, segmentID)) {
+                    Log.Debug($"segment:{segmentID} was ignored because it is too close to endNodeID:{endNodeID}");
+                    continue;
                 }
 
                 bool onGround = segmentID.ToSegment().Info.m_netAI is RoadAI;
-                if (!onGround)
+                if (!onGround) {
+                    Log.Debug($"segment:{segmentID} was ignored because it is not on ground");
                     continue;
+                }
 
                 segmentID.ToSegment().GetClosestPositionAndDirection(pos, out Vector3 hit, out Vector3 _);
                 Vector2 _hitPoint = hit.ToCS2D();
@@ -127,14 +129,30 @@ namespace PedestrianBridge.Shapes {
                 float distance = diff.magnitude;
                 //Log.Debug($"segmentID={segmentID} angle={angle} distance={distance}");
 
-                if (angle < 45 && distance < min_distance) {
-                    ret = segmentID;
-                    hitPoint = _hitPoint;
-                    min_distance = distance;
+                if (angle >= 45) {
+                    Log.Debug($"segment:{segmentID} was ignored its angle is too much: {angle} degrees");
+                    continue;
                 }
+                if (distance >= min_distance) {
+                    Log.Debug($"segment:{segmentID} was ignored distance>min_distance");
+                    continue;
+                }
+
+                ret = segmentID;
+                hitPoint = _hitPoint;
+                min_distance = distance;
             }
 
             return ret;
+        }
+
+        /// <summary>returns if there is only one segment distance between given node and segment.</summary>
+        static bool IsNodeTooCloseToSegment(ushort nodeID, ushort segmentID) {
+            foreach (ushort segID in GetCWSegList(nodeID)) {
+                if (GetSharedNode(segID, segmentID) != 0)
+                    return true;
+            }
+            return false;
         }
     }
 }
