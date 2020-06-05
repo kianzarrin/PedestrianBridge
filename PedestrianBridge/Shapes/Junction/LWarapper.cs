@@ -231,7 +231,7 @@ namespace PedestrianBridge.Shapes {
                 } else {
                     distance = Mathf.Clamp(distance, 1f, length - 2); // avoid getting to close to bezier end.
                     point = bezierParallel.Travel2(distance, out tangent);
-                    if (DistanceToNodeEdge(point, finalNodeId) < sideDistance - SAFETY_NET) {
+                    if (DistanceToNodeEdge(point, finalNodeId) - ControlCenter.HalfWidth < -2*SAFETY_NET) {
                         Log.Debug($"    point is inside node. calculating corner ...");
                         NetUtil.CalculateCorner(finalSegmentId, finalNodeId, bLeft, out point, out tangent);
                         tangent = -tangent;
@@ -241,7 +241,7 @@ namespace PedestrianBridge.Shapes {
 
             }
 
-            //negative if the point is inside the node.
+            // negative if the point is inside the node.
             static float DistanceToNodeEdge(Vector2 point, ushort nodeID) {
                 float dist = (point - nodeID.ToNode().m_position.ToCS2D()).magnitude;
                 return dist - NetUtil.MaxNodeHW(nodeID);
