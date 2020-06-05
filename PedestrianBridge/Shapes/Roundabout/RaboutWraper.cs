@@ -36,10 +36,22 @@ namespace PedestrianBridge.Shapes {
                 }
             }
 
-            if (_slices.Count == 1)
+            if (ControlCenter.RoundaboutBridgeStyle == RoundaboutBridgeStyleT.Star)
+                return;
+            if(_slices.Count == 1)
                 return;
 
-            RaboutSlice slice_prev = _slices.Last();
+            // get last valid slice.
+            RaboutSlice slice_prev = null;
+            for (int i = _slices.Count - 1; i >= 0 ; --i) {
+                if (_slices[i].IsValid) {
+                    slice_prev = _slices[i];
+                    break;
+                }
+            }
+            if (slice_prev == null)
+                return;
+
             foreach(var slice in _slices) {
                 if (!slice.IsValid) continue;
                 if (slice_prev.IsValid) {
@@ -70,7 +82,7 @@ namespace PedestrianBridge.Shapes {
         public void Create() {
             if (!IsValid)
                 return;
-            if(ControlCenter.RoundaboutBridgeStyle == RoundaboutBridgeStyleT.Start)
+            if(ControlCenter.RoundaboutBridgeStyle == RoundaboutBridgeStyleT.Star)
                 _center.Create();
             for (int i = 0; i < _junctions.Count; ++i) {
                 if (_slices[i].IsValid) {

@@ -35,15 +35,22 @@ namespace PedestrianBridge.Shapes {
                 ushort finalNodeID = startNode ? seg.m_startNode : seg.m_endNode;
                 float sideDistance = (seg.Info.m_halfWidth + HWpb + 1);
 
-                Bezier2 bezier = NetUtil.CalculateSegmentBezier2(segmentID, startNode);
+                Bezier2 bezier0 = NetUtil.CalculateSegmentBezier2(segmentID, startNode);
                 if (startNode)
                     t = 1 - t;
-                bezier = bezier.Cut(t, 1f);
+                Bezier2 bezier = bezier0.Cut(t, 1f);
+
 
                 Vector2 origin = bezier.a;
                 bool isCW = leftSide ^ startNode;
-                bezier.NormalTangent(0, isCW, out Vector2 normal, out Vector2 tangent);
-                
+                Vector2 normal, tangent;
+                if (EqualAprox(t, 1)) {
+                    Log.Debug("Extreme case for 0 length bezier (mouse at node)");
+                    bezier0.NormalTangent(1, isCW, out normal, out tangent);
+                } else {
+                    bezier.NormalTangent(0, isCW, out normal, out tangent);
+                }
+
                 // Main Calculations:
                 CanConnectPath = seg.CanConnectPath();
 
@@ -82,7 +89,7 @@ namespace PedestrianBridge.Shapes {
                     ushort segmentId2 = ContinueToNextSegment(segmentId, finalNodeID);
                     if (segmentId2 != 0) {
                         segmentId = segmentId2;
-                        Log.Debug("ContinueToNextSegment " + segmentId);
+                        Log.Debug("    ContinueToNextSegment " + segmentId);
                         bezier = CalculateSegmentBezier2(segmentId, finalNodeID);
                         finalNodeID = segmentId.ToSegment().GetOtherNode(finalNodeID);
 

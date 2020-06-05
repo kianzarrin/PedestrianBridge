@@ -15,14 +15,14 @@ namespace PedestrianBridge.UI.ControlPanel {
 
         protected override void OnClick(UIMouseEventParameter p) {
             base.OnClick(p);
-            ControlCenter.RoundaboutBridgeStyle = RoundaboutBridgeStyleT.Start;
+            ControlCenter.RoundaboutBridgeStyle = RoundaboutBridgeStyleT.Star;
             Refresh();
             StyleInnerCircleCheckBox.Instance.Refresh();
 
         }
 
         public void Refresh() {
-            isChecked = ControlCenter.RoundaboutBridgeStyle == RoundaboutBridgeStyleT.Start;
+            isChecked = ControlCenter.RoundaboutBridgeStyle == RoundaboutBridgeStyleT.Star;
             Invalidate();
         }
 

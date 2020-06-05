@@ -5,7 +5,7 @@ using PedestrianBridge.Util;
 
 namespace PedestrianBridge {
     public enum RoundaboutBridgeStyleT {
-        Start,
+        Star,
         InnerCircle,
         OuterCircle,
     }

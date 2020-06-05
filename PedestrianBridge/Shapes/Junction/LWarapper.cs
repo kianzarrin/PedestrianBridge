@@ -224,10 +224,13 @@ namespace PedestrianBridge.Shapes {
 
                 if (!CanConnectPathToSegment(finalSegmentId)) {
                     Log.Debug($"    could not connect path to final segment. calculating next corner ...");
+                    // direction from this segment point from next segment
+                    NetUtil.CalculateCorner(finalSegmentId, finalNodeId, bLeft, out _, out tangent);
+                    tangent = -tangent;
                     finalSegmentId = bLeft ?
                         finalSegmentId.ToSegment().GetLeftSegment(finalNodeId) :
                         finalSegmentId.ToSegment().GetRightSegment(finalNodeId);
-                    NetUtil.CalculateCorner(finalSegmentId, finalNodeId, !bLeft, out point, out tangent);
+                    NetUtil.CalculateCorner(finalSegmentId, finalNodeId, !bLeft, out point, out _);
                 } else {
                     distance = Mathf.Clamp(distance, 1f, length - 2); // avoid getting to close to bezier end.
                     point = bezierParallel.Travel2(distance, out tangent);

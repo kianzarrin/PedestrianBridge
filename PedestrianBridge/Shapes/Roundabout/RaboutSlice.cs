@@ -38,7 +38,7 @@ namespace PedestrianBridge.Shapes {
 
         Corner corner1, corner2;
         Vector2 MiddlePoint;
-        Vector2 MDir1, MDir2;
+        public Vector2 MDir1, MDir2;
         IEnumerable<ushort> _segmentIDs;
         float Len1 => (MiddlePoint - corner1.Point).magnitude;
         float Len2 => (MiddlePoint - corner2.Point).magnitude;
@@ -226,7 +226,7 @@ namespace PedestrianBridge.Shapes {
             if (nodeM == null)
                 return;
             switch (ControlCenter.RoundaboutBridgeStyle) {
-                case RoundaboutBridgeStyleT.Start:
+                case RoundaboutBridgeStyleT.Star:
                     segment3 = new SegmentWrapper(centerNode, nodeM);
                     this.centerNode = centerNode;
                     float center_h = centerNode.Get3DPos().Height();
@@ -245,7 +245,7 @@ namespace PedestrianBridge.Shapes {
                     var point1_mirrored = MirrorPoint(corner1.Point, segmentIDs);
                     node1_mirrored = new NodeWrapper(point1_mirrored, ControlCenter.Elevation); // TODO use corner1.L.pointL1 for more accurate circle.
                     var point2_mirrored = MirrorPoint(corner2.Point, segmentIDs);
-                    node2_mirrored = new NodeWrapper(point2_mirrored, ControlCenter.Elevation); 
+                    node2_mirrored = new NodeWrapper(point2_mirrored, ControlCenter.Elevation);
 
                     segment3 = new SegmentWrapper(nodeM_mirrored, nodeM);
                     segment_circle1 = new SegmentWrapper(nodeM_mirrored, node1_mirrored, MDir1, corner1.DirMain);
