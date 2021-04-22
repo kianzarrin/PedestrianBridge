@@ -3,6 +3,7 @@ using KianCommons.Math;
 using System;
 using UnityEngine;
 using static KianCommons.NetUtil;
+using static KianCommons.Assertion;
 
 namespace PedestrianBridge.Shapes {
     public class SegmentWrapper {
@@ -94,7 +95,7 @@ namespace PedestrianBridge.Shapes {
         private NetInfo GetFinalNetInfo() {
             int e1 = StartNode.elevation;
             int e2 = EndNode.elevation;
-            HelpersExtensions.Assert(!(e1 == 0 && e2 < 0), "Underground road is oppostie way arround");
+            Assert(!(e1 == 0 && e2 < 0), "Underground road is oppostie way arround");
             int nElevated = 0;
             if (e1 != 0) nElevated++;
             if (e2 != 0) nElevated++;

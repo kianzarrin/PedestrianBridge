@@ -93,6 +93,7 @@
     <None Include="KianCommons\KianCommons\Patches\TranspilerUtils.cs" />
     <Compile Include="KianCommons\KianCommons\Math\Vector2D.cs" />
     <Compile Include="KianCommons\KianCommons\Math\Vector3D.cs" />
+    <Compile Include="KianCommons\KianCommons\Plugins\PluginUtil.cs" />
     <Compile Include="KianCommons\KianCommons\UI\Helpers\UIAutoSizePanel.cs" />
     <Compile Include="KianCommons\KianCommons\UI\Helpers\UIButtonExt.cs" />
     <Compile Include="KianCommons\KianCommons\UI\Helpers\UICheckBoxExt.cs" />
@@ -102,12 +103,16 @@
     <Compile Include="KianCommons\KianCommons\UI\UIKeymappingsPanel.cs" />
     <Compile Include="KianCommons\KianCommons\UI\UIToolButton.cs" />
     <Compile Include="KianCommons\KianCommons\UI\UIUtils.cs" />
+    <Compile Include="ControlCenter.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\Assertion.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\EnumBitMaskExtensions.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\EnumerationExtensions.cs" />
     <Compile Include="KianCommons\KianCommons\Util\GridUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Util\HelpersExtensions.cs" />
     <Compile Include="KianCommons\KianCommons\Util\Log.cs" />
     <Compile Include="KianCommons\KianCommons\Util\NetUtil.cs" />
-    <Compile Include="KianCommons\KianCommons\Util\PluginUtil.cs" />
-    <Compile Include="ControlCenter.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\ReflectionHelpers.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\StringExtensions.cs" />
     <Compile Include="PedestrianBridgeMod.cs" />
     <Compile Include="Shapes\RoadBridge\RoadBridgeWrapper.cs" />
     <Compile Include="Shapes\RoadBridge\RoadSideWrapper.cs" />

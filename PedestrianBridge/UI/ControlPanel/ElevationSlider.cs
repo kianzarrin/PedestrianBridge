@@ -1,9 +1,6 @@
 using ColossalFramework.UI;
-using ICities;
-using KianCommons;
 using KianCommons.UI;
 using System;
-using System.Reflection.Emit;
 using UnityEngine;
 
 namespace PedestrianBridge.UI.ControlPanel {
@@ -25,7 +22,7 @@ namespace PedestrianBridge.UI.ControlPanel {
             started_ = true;
         }
 
-        const int low = 9;
+        const int low = 3;
         const int high = 30;
         const int diff = high - low;
         public float LinearValue {

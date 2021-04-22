@@ -14,11 +14,10 @@ namespace PedestrianBridge.UI.ControlPanel {
             isChecked = ControlCenter.Underground;
         }
 
-        protected override void OnCheckChanged() {
+        public override void OnCheckChanged(UIComponent component, bool value) {
+            base.OnCheckChanged(component, value);
             ControlCenter.Underground = isChecked;
-            Invalidate();          
             ElevationSlider.Instance.Refresh();
         }
-
     }
 }

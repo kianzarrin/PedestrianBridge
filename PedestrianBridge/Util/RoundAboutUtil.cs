@@ -1,5 +1,4 @@
 namespace PedestrianBridge.Util {
-    using CSUtil.Commons;
     using System.Collections.Generic;
     using System;
     using System.Linq;
@@ -10,6 +9,7 @@ namespace PedestrianBridge.Util {
     using static TMPEUtil;
     using ColossalFramework.Math;
     using Log = KianCommons.Log;
+    using KianCommons;
 
     public class RoundaboutUtil {
         public static RoundaboutUtil Instance_render = new RoundaboutUtil();
@@ -163,10 +163,18 @@ namespace PedestrianBridge.Util {
 
         private static ushort GetNextSegment(ushort segmentID) {
             ushort headNodeId = GetHeadNode(segmentID);
-            ushort ret = GetCWSegList(headNodeId).Where(
-                nextSegmentID => IsPartofRoundabout(nextSegmentID, segmentID)).
-                FirstOrDefault();
-            return ret;
+            for(int whatchdog=0; whatchdog < 8; ++ whatchdog) {
+                // get next inward segment:
+                ushort nextSegmentID = RHT
+                    ? segmentID.ToSegment().GetLeftSegment(headNodeId)
+                    : segmentID.ToSegment().GetRightSegment(headNodeId);
+                if (nextSegmentID == segmentID)
+                    break;
+                if (IsPartofRoundabout(nextSegmentID, segmentID))
+                    return nextSegmentID;
+            }
+
+            return 0;
         }
 
         /// <summary>

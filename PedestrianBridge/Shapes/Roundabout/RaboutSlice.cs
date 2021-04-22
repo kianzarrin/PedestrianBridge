@@ -11,6 +11,7 @@ namespace PedestrianBridge.Shapes {
     using static KianCommons.Math.VectorUtil;
     using System.Collections.Generic;
     using System.Linq;
+    using static KianCommons.Assertion;
 
     public class RaboutSlice {
         public struct Corner {
@@ -75,7 +76,7 @@ namespace PedestrianBridge.Shapes {
         bool IsBetweenInOut(
             ushort segmentID1Main, ushort segmentID1Minor,
             ushort segmentID2Main, ushort segmentID2Minor) {
-            KianCommons.HelpersExtensions.AssertStack();
+            AssertStack();
             const float maxLen = 7 * MPU;
             bool bShort = (corner1.Point - corner2.Point).sqrMagnitude <= maxLen * maxLen;
             if (!bShort) {
@@ -127,8 +128,8 @@ namespace PedestrianBridge.Shapes {
         }
 
         public static Vector2 MirrorPoint(Vector2 point, IEnumerable<ushort> segmentList) {
-            HelpersExtensions.AssertNotNull(segmentList, "segmentList");
-            HelpersExtensions.Assert(segmentList.Count() > 0, "segmentList.Count()>0");
+            AssertNotNull(segmentList, "segmentList");
+            Assert(segmentList.Count() > 0, "segmentList.Count()>0");
             ushort closestSegmentID = GetClosestSegment(point, segmentList, out Vector3 hitpos);
             if (closestSegmentID != 0) {
                 var diff = hitpos.ToCS2D() - point;

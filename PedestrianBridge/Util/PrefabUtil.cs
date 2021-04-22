@@ -87,7 +87,7 @@ namespace PedestrianBridge.Util {
 
         public static int GetInfoPrioirty(NetInfo info, NetInfo baseInfo = null) {
             PedestrianPathAI baseAI = baseInfo?.m_netAI as PedestrianPathAI;
-            HelpersExtensions.AssertNotNull(baseAI, "baseAI");
+            Assertion.AssertNotNull(baseAI, "baseAI");
             if (info == baseAI.m_info) return 0;
             if (info == baseAI.m_elevatedInfo) return 1;
             if (info == baseAI.m_slopeInfo) return 1;

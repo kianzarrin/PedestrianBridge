@@ -1,11 +1,9 @@
 using ColossalFramework.UI;
+using KianCommons;
 using PedestrianBridge.Tool;
-using PedestrianBridge.Util;
 using System;
 using UnityEngine;
-using static KianCommons.HelpersExtensions;
-using KianCommons.UI;
-using KianCommons;
+using static KianCommons.Assertion;
 
 
 /* A lot of copy-pasting from Crossings mod by Spectra and Roundabout Mod by Strad. The sprites are partly copied as well. */
@@ -55,19 +53,19 @@ namespace PedestrianBridge.UI {
             this.atlas = atlas;
 
             normalBgSprite = focusedBgSprite = disabledBgSprite = PedestrianBridgeButtonBg;
-            hoveredBgSprite  = PedestrianBridgeButtonBgHovered;
-            pressedBgSprite  = PedestrianBridgeButtonBgPressed;
+            hoveredBgSprite = PedestrianBridgeButtonBgHovered;
+            pressedBgSprite = PedestrianBridgeButtonBgPressed;
 
             normalFgSprite = disabledFgSprite = hoveredFgSprite = pressedFgSprite = PedestrianBridgeIcon;
             focusedFgSprite = PedestrianBridgeIconPressed;
 
-            relativePosition = new Vector3(33, 38); 
+            relativePosition = new Vector3(33, 38);
             size = new Vector2(SIZE, SIZE);
             Show();
             Log.Info("PedestrianBridgeButton button created sucessfully.");
         }
 
-        public static UIButton CreateButton() { 
+        public static UIButton CreateButton() {
             Log.Info("PedestrianBridgeButton.CreateButton() called");
             return GetPanel().AddUIComponent<PedestrianBridgeButton>();
         }
