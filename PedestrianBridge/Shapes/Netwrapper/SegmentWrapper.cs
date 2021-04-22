@@ -11,6 +11,8 @@ namespace PedestrianBridge.Shapes {
         public Vector2 StartDir;
         public Vector2 EndDir;
         //public NetInfo BaseInfo;
+        public ControlPoint2D StartControlPoint => new ControlPoint2D(StartNode.point, StartDir);
+        public ControlPoint2D EndControlPoint => new ControlPoint2D(EndNode.point, EndDir);
 
         public SegmentWrapper(NodeWrapper startNode, NodeWrapper endNode) {
             this.StartNode = startNode;

@@ -23,10 +23,11 @@ namespace PedestrianBridge.Shapes {
     public class LWrapper {
         internal struct Calc {
             // Output:
-            internal Vector2 Point1, PointL, Point2;
-            //internal Vector2 StartDir1, StartDir2;
-            internal Vector2 EndDir1, EndDir2;
-            internal Vector2 CornerDir1, CornerDir2;
+            DoubleControlPoint2D CornerPoint;
+            ControlPoint2D CornerPoint1, CornerPoint2;// Dir1=tangent, Dir2=normal
+
+            internal ControlPoint2D Point1, Point2;
+
             internal ushort JunctionID;
 
             // segment has pedestrian paths and is ground road
@@ -48,25 +49,33 @@ namespace PedestrianBridge.Shapes {
                 float HW2 = seg2.Info.m_halfWidth;
                 JunctionID = seg1.GetSharedNode(segID2);
                 ref NetNode junction = ref JunctionID.ToNode();
-                Vector2 origin = junction.m_position.ToCS2D();
+                Vector2D origin = junction.m_position.To2D();
                 bool bStartNode1 = seg1.m_startNode == JunctionID;
                 bool bStartNode2 = seg2.m_startNode == JunctionID;
-                Vector2 V1 = (bStartNode1 ? seg1.m_startDirection : seg1.m_endDirection).ToCS2D();
-                Vector2 V2 = (bStartNode2 ? seg2.m_startDirection : seg2.m_endDirection).ToCS2D();
-                CornerDir1 = V1.normalized;
-                CornerDir2 = V2.normalized;
 
                 // the code is written for seg2 CCW WRT seg1.
                 // if CW, some values need inversion.
                 bool isCW = seg2.GetRightSegment(JunctionID) == segID1;
                 //bool isCCW = seg1.GetRightSegment(JunctionID) == segID2;
-                bool isCCW = !isCW; // 
+                bool isCCW = !isCW; 
                 //Assert(isCCW ^ isCW, $"isCCW ^ isCW: {isCCW} ^ {isCW}"); // if there are only two segments, this assertion will fail.
 
-                float angle = VectorUtil.SignedAngleRadCCW(CornerDir1, CornerDir2);
+                var cornerPoint1 = CalculateCorner(segID1, JunctionID, isCW);
+                CornerPoint1 = cornerPoint1.ControlPoint1;
+                CornerPoint1.Point += cornerPoint1.Dir2 * HWpb;
+
+                var cornerPoint2 = CalculateCorner(segID2, JunctionID, !isCW);
+                CornerPoint2 = cornerPoint2.ControlPoint2;
+                CornerPoint2.Point += cornerPoint2.Dir2 * HWpb;
+
+
+
+
+
+                float angle = VectorUtil.SignedAngleRadCCW(CornerPoint1.Dir, CornerPoint2.Dir);
                 if (isCW) angle = -angle;
                 float ratio = 1f / Mathf.Sin(angle); // TODO optimize
-                bool parallel = VectorUtil.AreApprox180(CornerDir1, CornerDir2);
+                bool parallel = VectorUtil.AreApprox180(CornerPoint1.Dir, CornerPoint2.Dir);
                 //Log.Debug($"parallel={parallel} angle={angle} ratio={ratio}");
 
                 ////////////////////////////////////////////////////////////////
@@ -81,24 +90,32 @@ namespace PedestrianBridge.Shapes {
                     if (angle < 0) {
                         float d1 = (HW2 + HWpb) * ratio + SAFETY_NET;
                         float d2 = (HW1 + HWpb) * ratio + SAFETY_NET;
-                        PointL = d1 * CornerDir1 + d2 * CornerDir2;
-                        PointL += origin;
+                        CornerPoint1.Point = origin + d2* CornerPoint.Dir2
+
+                        CornerPoint.Point = d1 * CornerPoint.Dir1 + d2 * CornerPoint.Dir2;
+                        CornerPoint.Point += origin;
                     } else {
-                        angle = VectorUtil.SignedAngleRadCCW(CornerDir1, CornerDir2);
+                        angle = VectorUtil.SignedAngleRadCCW(CornerPoint.Dir1, CornerPoint.Dir2);
                         if (isCW) angle = -angle;
                         ratio = 1f / Mathf.Sin(angle);
-                        CalculateCorner(segID1, JunctionID, isCW, out var PointL1, out CornerDir1);
-                        CalculateCorner(segID2, JunctionID, !isCW, out var PointL2, out CornerDir2);
-                        PointL = (PointL1 + PointL2) / 2;
+                        CornerPoint1 = CalculateCorner(segID1, JunctionID, isCW);
+                        CornerPoint2 = CalculateCorner(segID2, JunctionID, !isCW);
                         float d = HWpb * ratio + SAFETY_NET;
-                        PointL += d * CornerDir1 + d * CornerDir2;
+                        CornerPoint1.Point += d * CornerPoint2.Dir;
+                        CornerPoint2.Point += d * CornerPoint1.Dir;
+                        CornerPoint.Point = (CornerPoint1.Point + CornerPoint2.Point) / 2;
                     }
                 } else {
-                    Vector2 normal = CornerDir1.Rotate90CCW();
+                    CornerPoint = new DoubleControlPoint2D {
+                        Dir1= cornerPoint1.Dir1;;
+                    };
+                    Vector2D normal = CornerPoint.Dir1.Rotate90CCW();
                     if (isCW) normal = -normal;
                     float HW = Mathf.Max(HW1, HW2);
-                    PointL = (HW + HWpb + SAFETY_NET) * normal;
-                    PointL += origin;
+                    CornerPoint.Point = (HW + HWpb + SAFETY_NET) * normal;
+                    CornerPoint.Point += origin;
+                    CornerPoint1 = CornerPoint2 = default;
+
                 }
 
 
@@ -107,7 +124,7 @@ namespace PedestrianBridge.Shapes {
                 float targetLength = ControlCenter.BaseLength;
                 if (!parallel && angle < 0) targetLength += extend0; // TODO this should be based on incomming angles.
                 else if (!parallel && angle < Mathf.PI) {
-                    float dot = Vector2.Dot(CornerDir1, CornerDir2);
+                    float dot = Vector2D.Dot(CornerPoint.Dir1, CornerPoint.Dir2);
 
                     // Note sin(angle) does not work so good here.
                     targetLength += HWpb / (1-dot); 
@@ -121,7 +138,7 @@ namespace PedestrianBridge.Shapes {
                     Bezier3 bezier3D = seg1.CalculateSegmentBezier3();
                     if (IsStartNode(finalSegmentID, FinalNodeID1))
                         bezier3D = bezier3D.Invert();
-                    float t = bezier3D.GetClosestT(PointL.ToCS3D(bezier3D.a.Height()));
+                    float t = bezier3D.GetClosestT(CornerPoint.Point.ToCS3D(bezier3D.a.Height()));
                     bezier3D = bezier3D.Cut(t, 1);
                     Bezier2 bezier = bezier3D.ToCSBezier2();
 
@@ -146,7 +163,7 @@ namespace PedestrianBridge.Shapes {
                     Bezier3 bezier3D = seg2.CalculateSegmentBezier3();
                     if (IsStartNode(finalSegmentID, FinalNodeID2))
                         bezier3D = bezier3D.Invert();
-                    float t = bezier3D.GetClosestT(PointL.ToCS3D(bezier3D.a.Height()));
+                    float t = bezier3D.GetClosestT(CornerPoint.Point.ToCS3D(bezier3D.a.Height()));
                     bezier3D = bezier3D.Cut(t, 1);
                     Bezier2 bezier = bezier3D.ToCSBezier2();
 
@@ -192,7 +209,7 @@ namespace PedestrianBridge.Shapes {
                 Bezier2 bezier,
                 bool bLeft, float sideDistance, float distance,
                 ref ushort finalSegmentId, ref ushort finalNodeId,
-                out Vector2 point, out Vector2 tangent,
+                out Vector2D point, out Vector2D tangent,
                 int level=2
                 ) {
                 Log.Debug($"    Travel(bLeft:{bLeft},sideDistance:{sideDistance},distance:{distance}," +
@@ -245,8 +262,8 @@ namespace PedestrianBridge.Shapes {
             }
 
             // negative if the point is inside the node.
-            static float DistanceToNodeEdge(Vector2 point, ushort nodeID) {
-                float dist = (point - nodeID.ToNode().m_position.ToCS2D()).magnitude;
+            static float DistanceToNodeEdge(Vector2D point, ushort nodeID) {
+                float dist = (point - nodeID.ToNode().m_position.To2D()).magnitude;
                 return dist - NetUtil.MaxNodeHW(nodeID);
             }
 
@@ -280,20 +297,20 @@ namespace PedestrianBridge.Shapes {
                 return;
             }
 
-            nodeL = new NodeWrapper(calc.PointL, ControlCenter.Elevation);
+            nodeL = new NodeWrapper(calc.CornerPoint.Point, ControlCenter.Elevation);
 
             if (create1) {
                 node1 = new NodeWrapper(calc.Point1, 0);
                 segment1 = new SegmentWrapper(
                     nodeL, node1,
-                    calc.CornerDir1, calc.EndDir1);
+                    calc.CornerPoint.Dir1, calc.EndDir1);
             }
 
             if (create2) {
                 node2 = new NodeWrapper(calc.Point2, 0);
                 segment2 = new SegmentWrapper(
                     nodeL, node2,
-                    calc.CornerDir2, calc.EndDir2);
+                    calc.CornerPoint.Dir2, calc.EndDir2);
             }
 
             Valid = create1 | create2;

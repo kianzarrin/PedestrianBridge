@@ -83,16 +83,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KianCommons\KianCommons\Math\2D\ControlPoint2D.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\2D\CubicBezier2D.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\2D\DoubleControlPoint2D.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\2D\Line2D.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\2D\QBezier2D.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\2D\Vector2D.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\3D\Vector3D.cs" />
     <Compile Include="KianCommons\KianCommons\Math\BezierUtil.cs" />
-    <Compile Include="KianCommons\KianCommons\Math\ControlPoint2.cs" />
-    <Compile Include="KianCommons\KianCommons\Math\ControlPoint3.cs" />
-    <Compile Include="KianCommons\KianCommons\Math\CubicBezier3.cs" />
-    <Compile Include="KianCommons\KianCommons\Math\LineUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Math\MathUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Math\VecetorUtils.cs" />
     <None Include="KianCommons\KianCommons\Patches\TranspilerUtils.cs" />
-    <Compile Include="KianCommons\KianCommons\Math\Vector2D.cs" />
-    <Compile Include="KianCommons\KianCommons\Math\Vector3D.cs" />
     <Compile Include="KianCommons\KianCommons\UI\Helpers\UIAutoSizePanel.cs" />
     <Compile Include="KianCommons\KianCommons\UI\Helpers\UIButtonExt.cs" />
     <Compile Include="KianCommons\KianCommons\UI\Helpers\UICheckBoxExt.cs" />
@@ -143,11 +144,6 @@
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <Content Include="KianCommons\.gitattributes" />
-    <Content Include="KianCommons\.gitignore" />
-    <Content Include="KianCommons\KianCommons.sln" />
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">
     <!-- Code from https://superuser.com/questions/82231/how-do-i-do-comments-at-a-windows-command-prompt -->
