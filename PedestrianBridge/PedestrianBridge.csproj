@@ -27,7 +27,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Workshop|AnyCPU' ">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants/>
     <ContentID>2030755273</ContentID>
     <ContentPath>$(SteamPath)/steamapps/workshop/content/255710/$(ContentID)</ContentPath>
   </PropertyGroup>
