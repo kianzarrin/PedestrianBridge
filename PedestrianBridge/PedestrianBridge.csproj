@@ -37,6 +37,23 @@
     </Reference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Compile Remove="KianCommons\KianCommons\obj\**" />
+    <Compile Remove="KianCommons\KianCommons\Serialization\**" />
+    <Compile Remove="KianCommons\KianCommons\StockCode\**" />
+    <Compile Remove="KianCommons\KianCommons\Tool\**" />
+    <Compile Remove="KianCommons\KianCommons\Util\unsafe\**" />
+    <EmbeddedResource Remove="KianCommons\KianCommons\obj\**" />
+    <EmbeddedResource Remove="KianCommons\KianCommons\Serialization\**" />
+    <EmbeddedResource Remove="KianCommons\KianCommons\StockCode\**" />
+    <EmbeddedResource Remove="KianCommons\KianCommons\Tool\**" />
+    <EmbeddedResource Remove="KianCommons\KianCommons\Util\unsafe\**" />
+    <None Remove="KianCommons\KianCommons\obj\**" />
+    <None Remove="KianCommons\KianCommons\Serialization\**" />
+    <None Remove="KianCommons\KianCommons\StockCode\**" />
+    <None Remove="KianCommons\KianCommons\Tool\**" />
+    <None Remove="KianCommons\KianCommons\Util\unsafe\**" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="CitiesHarmony.API" Version="2.0.0" />
     <PackageReference Include="Mono.Unofficial.pdb2mdb" Version="4.2.3.4" />
     <PackageReference Include="GitInfo" Version="2.1.2">
@@ -73,14 +90,10 @@
     <Compile Remove="KianCommons\KianCommons\Patches\PrefixUtils.cs" />
     <Compile Remove="KianCommons\KianCommons\Plugins\AdaptiveRoadsUtil.cs" />
     <Compile Remove="KianCommons\KianCommons\Plugins\CSURUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\Serialization\IOHelpers.cs" />
-    <Compile Remove="KianCommons\KianCommons\Serialization\JsonUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\Serialization\SerializationUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\Serialization\Vector3Serializable.cs" />
-    <Compile Remove="KianCommons\KianCommons\Serialization\XMLUtil.cs" />
     <Compile Remove="KianCommons\KianCommons\UI\UIExtensions.cs" />
     <Compile Remove="KianCommons\KianCommons\Util\AssemblyTypeExtensions.cs" />
     <Compile Remove="KianCommons\KianCommons\Util\AuxilaryThread.cs" />
+    <Compile Remove="KianCommons\KianCommons\Util\DCUtil.cs" />
     <Compile Remove="KianCommons\KianCommons\Util\MeshUtil.cs" />
     <Compile Remove="KianCommons\KianCommons\Util\StackHelpers.cs" />
     <Compile Remove="KianCommons\KianCommons\ObjUnity3D\Extensions\MeshExt.cs" />
@@ -111,7 +124,7 @@
     </ItemGroup>
 
     <Delete Files="$(TargetPath).mdb" />
-    <Exec Command='"$(pdb2mdb)" "$(TargetPath)"' />
+    <Exec Command="&quot;$(pdb2mdb)&quot; &quot;$(TargetPath)&quot;" />
     <Copy SourceFiles="$(TargetPath).mdb" DestinationFolder="$(DeployDir)" />
     <Delete Files="$(DeployDir)$(TargetFileName)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DeployDir)" />
