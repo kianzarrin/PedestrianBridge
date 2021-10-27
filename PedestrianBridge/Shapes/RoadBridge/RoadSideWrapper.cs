@@ -35,7 +35,9 @@ namespace PedestrianBridge.Shapes {
                 ushort finalNodeID = startNode ? seg.m_startNode : seg.m_endNode;
                 float sideDistance = (seg.Info.m_halfWidth + HWpb + 1);
 
-                Bezier2 bezier0 = NetUtil.CalculateSegmentBezier2(segmentID, startNode);
+                // TODO: after updating KianCommons I changed startNode to !startNode
+                // check if the directions are correct.
+                Bezier2 bezier0 = NetUtil.CalculateSegmentBezier2(segmentID, !startNode);
                 if (startNode)
                     t = 1 - t;
                 Bezier2 bezier = bezier0.Cut(t, 1f);
@@ -90,7 +92,9 @@ namespace PedestrianBridge.Shapes {
                     if (segmentId2 != 0) {
                         segmentId = segmentId2;
                         Log.Debug("    ContinueToNextSegment " + segmentId);
-                        bezier = CalculateSegmentBezier2(segmentId, finalNodeID);
+                        // TODO: inverting bezier here was a work around update in KianCommons.
+                        // check if the directions are correct.
+                        bezier = CalculateSegmentBezier2(segmentId, finalNodeID).Invert(); 
                         finalNodeID = segmentId.ToSegment().GetOtherNode(finalNodeID);
 
                         Travel(
