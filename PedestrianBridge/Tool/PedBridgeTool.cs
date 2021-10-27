@@ -21,7 +21,7 @@ namespace PedestrianBridge.Tool {
         private UIComponent button_;
 
         protected override void Awake() {
-            string iconPath = UUIHelpers.GetFullPath<PedestrianBridgeMod>("uui_pbb.png"); 
+            string iconPath = UUIHelpers.GetFullPath<PedestrianBridgeMod>("uui_pbb.png");
             button_ = UUIHelpers.RegisterToolButton(
                     name: "PedestrianBridge",
                     groupName: null, // default group
