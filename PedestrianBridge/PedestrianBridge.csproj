@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net35</TargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>2.0.1.*</AssemblyVersion>
+    <AssemblyVersion>2.1.0.*</AssemblyVersion>
     <LangVersion>latest</LangVersion>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
@@ -27,7 +27,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Workshop|AnyCPU' ">
-    <DefineConstants/>
+    <DefineConstants />
     <ContentID>2030755273</ContentID>
     <ContentPath>$(SteamPath)/steamapps/workshop/content/255710/$(ContentID)</ContentPath>
   </PropertyGroup>
@@ -70,10 +70,12 @@
     <Reference Include="CSUtil.Commons" />
     <Reference Include="FineRoadTool" />
     <Reference Include="TrafficManager" />
+    <Reference Include="UnifiedUILib">
+      <Private>true</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="KianCommons\KianCommons\Patches\TranspilerUtils.cs" />
-    <EmbeddedResource Include="Resources\sprites.png" />
     <Compile Remove="KianCommons\KianCommons\Patches\TranspilerUtils.cs" />
     <Compile Remove="KianCommons\KianCommons\LifeCycleBase.cs" />
     <Compile Remove="KianCommons\KianCommons\Backport\GetSubArray.cs" />
@@ -104,12 +106,24 @@
     <Compile Remove="KianCommons\KianCommons\UI\Helpers\UICheckboxDropDownExt.cs" />
     <Compile Remove="KianCommons\KianCommons\UI\Helpers\UIDropDownExt.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="Resources\PreviewImage.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sprite.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\uui_pbb.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Target Name="DeployToModDirectory" AfterTargets="Build">
     <Message Importance="high" Text="DeployToModDirectory ..." />
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
       <Output TaskParameter="Assemblies" ItemName="Targets" />
     </GetAssemblyIdentity>
     <ItemGroup>
+      <AuxiliaryFiles Include="$(TargetDir)**/*.png;$(TargetDir)UnifiedUILib.*" Exclude="$(TargetPath);$(TargetDir)*.pdb;$(TargetDir)*.mdb" />
       <VersionNumber Include="@(Targets->'%(Version)')" />
     </ItemGroup>
     <PropertyGroup>
@@ -126,6 +140,7 @@
     <Delete Files="$(TargetPath).mdb" />
     <Exec Command="&quot;$(pdb2mdb)&quot; &quot;$(TargetPath)&quot;" />
     <Copy SourceFiles="$(TargetPath).mdb" DestinationFolder="$(DeployDir)" />
+    <Copy SourceFiles="@(AuxiliaryFiles)" DestinationFolder="$(DeployDir)" />
     <Delete Files="$(DeployDir)$(TargetFileName)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DeployDir)" />
     <Message Importance="high" Text="AssemblyVersion=@(VersionNumber) time=$(Now)" />
@@ -134,7 +149,7 @@
   </Target>
   <Target Name="DeployToWorkshop" AfterTargets="DeployToModDirectory" Condition="'$(ContentID)'!=''">
     <ItemGroup>
-      <FilesToDelete Include="$(ContentPath)/*.*" Exclude="$(ContentPath)/PreviewImage.png" />
+      <FilesToDelete Include="$(ContentPath)/*.*" />
       <FilesToCopy Include="$(DeployDir)/*.*" />
     </ItemGroup>
     <Delete Files="@(FilesToDelete)" />

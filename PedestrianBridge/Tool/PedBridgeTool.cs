@@ -3,10 +3,10 @@ using ColossalFramework.UI;
 using System;
 using UnityEngine;
 using PedestrianBridge.Util;
-using PedestrianBridge.UI;
 using PedestrianBridge.Shapes;
 using KianCommons;
 using PedestrianBridge.UI.ControlPanel;
+using UnifiedUI.Helpers;
 
 namespace PedestrianBridge.Tool {
     using static KianCommons.UI.RenderUtil;
@@ -18,10 +18,17 @@ namespace PedestrianBridge.Tool {
             SavedInputKey.Encode(KeyCode.B, true, false, false),
             true);
 
-        UIButton button;
+        private UIComponent button_;
 
         protected override void Awake() {
-            button = PedestrianBridgeButton.CreateButton();
+            string iconPath = UUIHelpers.GetFullPath<PedestrianBridgeMod>("uui_pbb.png"); 
+            button_ = UUIHelpers.RegisterToolButton(
+                    name: "PedestrianBridge",
+                    groupName: null, // default group
+                    tooltip: "Pedestrian Bridge",
+                    tool: this,
+                    icon: UUIHelpers.LoadTexture(iconPath),
+                    hotkeys: new UUIHotKeys { ActivationKey = ActivationShortcut});
             base.Awake();
         }
 
@@ -48,8 +55,8 @@ namespace PedestrianBridge.Tool {
 
         protected override void OnDestroy() {
             Log.Debug("PedBridgeTool.OnDestroy()\n" + Environment.StackTrace);
-            button?.Hide();
-            Destroy(button);
+            button_?.Hide();
+            button_?.Destroy();
             base.OnDestroy();
         }
 
@@ -58,19 +65,13 @@ namespace PedestrianBridge.Tool {
         protected override void OnEnable() {
             ControlPanel.Instance?.Open();
             Log.Debug("PedBridgeTool.OnEnable");
-            button.Focus();
             base.OnEnable();
-            button.Focus();
-            button.Invalidate();
         }
 
         protected override void OnDisable() {
             ControlPanel.Instance?.Close();
             Log.Debug("PedBridgeTool.OnDisable");
-            button?.Unfocus();
             base.OnDisable();
-            button?.Unfocus();
-            button?.Invalidate();
         }
 
         protected override void OnToolUpdate() {

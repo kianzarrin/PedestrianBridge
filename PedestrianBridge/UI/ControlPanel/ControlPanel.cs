@@ -11,6 +11,16 @@ namespace PedestrianBridge.UI.ControlPanel {
         public static readonly SavedFloat SavedY = new SavedFloat(
             "PanelY", ModSettings.FILE_NAME, 58, true);
 
+        #region atlas
+        public const string ATLAS_NAME = "PedestrianBridgeSprite";
+        const string Icon = "Icon";
+        public static UITextureAtlas GetOrCreateSpriteAtlas() {
+            TextureUtil.EmbededResources = false;
+            return TextureUtil.GetAtlasOrNull(ATLAS_NAME) ??
+                TextureUtil.CreateTextureAtlas("sprite.png", ATLAS_NAME, 40, 40, new[] { Icon });
+        }
+        #endregion
+
         #region Instanciation
         public static ControlPanel Instance { get; private set; }
 
@@ -57,8 +67,9 @@ namespace PedestrianBridge.UI.ControlPanel {
                 var sprite = dragHandle_.AddUIComponent<UISprite>();
                 sprite.size = new Vector2(40, 40);
                 sprite.relativePosition = new Vector3(5, 2.5f, 0);
-                sprite.atlas = TextureUtil.GetAtlas(PedestrianBridgeButton.ATLAS_NAME);
-                sprite.spriteName = PedestrianBridgeButton.PedestrianBridgeIconPressed;
+
+                sprite.atlas = GetOrCreateSpriteAtlas();
+                sprite.spriteName = Icon;
             }
 
 
