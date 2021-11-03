@@ -12,12 +12,12 @@ namespace PedestrianBridge.Shapes {
     using KianCommons;
 
     /* TODO:
-     *  - fix distance convergance DONE!
+     *  - fix distance convergence DONE!
      *  - extend segment with angle>180 DONE!
      *  - fix Travel such that for straight line delta(input)=delta(output) DONE!
      *  - copy code to point 2 DONE1
-     *  - optimisation: Travel along side bezier.
-     *  - more optimisations
+     *  - optimization: Travel along side bezier.
+     *  - more optimizations
      */
 
     public class LWrapper {
@@ -41,7 +41,7 @@ namespace PedestrianBridge.Shapes {
 
             internal Calc(ushort segID1, ushort segID2, float HWpb) {
                 //Log.Debug($"LWrapper.Calc: {segID1}, {segID2}");
-                // Prepration:
+                // Preparation:
                 ref NetSegment seg1 = ref segID1.ToSegment();
                 ref NetSegment  seg2 = ref segID2.ToSegment();
                 float HW1 = seg1.Info.m_halfWidth;
