@@ -107,6 +107,11 @@
     <Compile Remove="KianCommons\KianCommons\UI\Helpers\UIDropDownExt.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="KianCommons\.git" />
+    <None Remove="KianCommons\.gitattributes" />
+    <None Remove="KianCommons\.gitignore" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="Resources\PreviewImage.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
