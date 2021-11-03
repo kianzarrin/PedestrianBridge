@@ -208,7 +208,7 @@ namespace PedestrianBridge.Shapes {
                     ushort nextSegmentId = ContinueToNextSegment(finalSegmentId, finalNodeId);
                     if (nextSegmentId != 0) {
                         finalSegmentId = nextSegmentId;
-                        bezier = CalculateSegmentBezier2(finalSegmentId, finalNodeId);
+                        bezier = CalculateSegmentBezier2(finalSegmentId, finalNodeId).Invert(); // invert for new KianCommons
                         finalNodeId = finalSegmentId.ToSegment().GetOtherNode(finalNodeId);
                         Log.Debug("    ContinueToNextSegment " + finalSegmentId);
                         Travel(
