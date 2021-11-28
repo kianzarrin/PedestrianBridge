@@ -12,9 +12,24 @@ namespace PedestrianBridge {
 
     public static class ControlCenter {
         public static NetInfo Info => PrefabUtil.SelectedPrefab;
-        public static NetInfo Info1 => Underground ? Info.GetSlope() : Info.GetElevated();
-        public static NetInfo Info2 => Underground ? Info.GetTunnel() : Info.GetElevated();
+        public static NetInfo Info1 {
+            get {
+                var ret = Underground ? Info.GetSlope() : Info.GetElevated();
+                ret ??= Underground ? PrefabUtil.defaultPrefab.GetSlope() : PrefabUtil.defaultPrefab.GetElevated();
+                return ret;
+            }
+        }
+
+        public static NetInfo Info2 {
+            get {
+                var ret = Underground ? Info.GetTunnel() : Info.GetElevated();
+                ret ??= Underground ? PrefabUtil.defaultPrefab.GetTunnel() : PrefabUtil.defaultPrefab.GetElevated();
+                return ret;
+            }
+        }
+        
         public static float HalfWidth => System.Math.Max(Info1.m_halfWidth, Info2.m_halfWidth);
+
 
         #region style
         static readonly SavedInt style_ = new SavedInt(
